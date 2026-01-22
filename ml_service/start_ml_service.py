@@ -23,14 +23,18 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
+    # Get port from environment variable (for Render/Railway deployment)
+    port = int(os.environ.get("PORT", 8000))
+    host = "0.0.0.0"  # Allow external connections
+    
     logger.info("Starting CourtEdge ML Service...")
-    logger.info("Server will be available at http://localhost:8000")
-    logger.info("API documentation at http://localhost:8000/docs")
+    logger.info(f"Server will be available at http://localhost:{port}")
+    logger.info(f"API documentation at http://localhost:{port}/docs")
     
     uvicorn.run(
         "api:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True,
+        host=host,
+        port=port,
+        reload=False,  # Disable reload in production
         log_level="info"
     )

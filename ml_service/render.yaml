@@ -1,12 +1,15 @@
-# CourtEdge ML Service - Render Deployment
-# https://render.com - FREE tier available
-
-# Build Command
-build:
-  - pip install -r requirements.txt
-
-# Start Command
-start: uvicorn src.api:app --host 0.0.0.0 --port $PORT
-
-# Environment
-python: "3.11"
+services:
+  - type: web
+    name: courtedge-ml-service
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install --upgrade pip && pip install -r requirements-prod.txt
+    startCommand: python start_ml_service.py
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: PORT
+        value: 8000
+      - key: PYTHON_VERSION
+        value: 3.11.9
