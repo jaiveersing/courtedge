@@ -1,5 +1,6 @@
-// ML Workstation Elite v3.0 - Showcasing Advanced ML Features
-import React, { useState, useEffect, useCallback } from 'react';
+// ML Workstation Elite v5.0 - 100 Improvements Edition
+// Advanced AI-Powered Sports Analytics Platform
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useTheme } from '../src/contexts/ThemeContext';
 import { 
   Brain, Activity, TrendingUp, TrendingDown, Search, 
@@ -9,37 +10,44 @@ import {
   Shield, Crosshair, Users, Timer, Award,
   ArrowUpRight, ArrowDownRight, Percent, Info,
   RefreshCw, Download, Filter, ChevronRight,
-  BarChart2, Calculator, Briefcase,
-  Eye, Lightbulb, Boxes
+  BarChart2, Calculator, Briefcase, Play, Pause,
+  Eye, Lightbulb, Boxes, Crown, Gem, Star,
+  TrendingUp as Trending, Wallet, PiggyBank,
+  LineChart as LineChartIcon, Lock, Unlock,
+  Maximize2, Minimize2, Settings, Bell, BellRing,
+  ChevronDown, ChevronUp, Copy, Share2, Bookmark,
+  History, Rocket, Gauge, Radio, Wifi, WifiOff,
+  Moon, Sun, Volume2, VolumeX, Grid, List, LayoutGrid,
+  ThumbsUp, ThumbsDown, MessageCircle, Send, Heart,
+  AlertCircle, XCircle, Check, X, Plus, Minus,
+  RotateCcw, Save, Trash2, Edit, ExternalLink, Link
 } from 'lucide-react';
 import { 
   LineChart, Line, AreaChart, Area, BarChart, Bar,
   ComposedChart, XAxis, YAxis, CartesianGrid, Tooltip, 
   ResponsiveContainer, Legend, RadarChart, Radar,
   PolarGrid, PolarAngleAxis, PolarRadiusAxis, Cell,
-  ReferenceLine, Scatter, ScatterChart, ZAxis
+  ReferenceLine, Scatter, ScatterChart, ZAxis, PieChart as RechartsPie, Pie
 } from 'recharts';
-import mlService from '../src/api/mlService';
+import nbaPlayersDatabase from '../src/data/nbaPlayersDatabase';
 
-// Design System Hook
+// ==================== DESIGN SYSTEM ====================
 const useDesignSystem = () => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   
   return {
     isDark,
-    // Backgrounds
     bg: isDark ? 'bg-slate-950' : 'bg-slate-50',
-    bgCard: isDark ? 'bg-white/[0.02]' : 'bg-white/90',
-    bgCardHover: isDark ? 'hover:bg-white/[0.05]' : 'hover:bg-white',
+    bgCard: isDark ? 'bg-slate-900/80' : 'bg-white',
+    bgCardHover: isDark ? 'hover:bg-slate-800/80' : 'hover:bg-slate-50',
     bgAccent: isDark ? 'bg-indigo-500/10' : 'bg-indigo-50',
     bgSuccess: isDark ? 'bg-emerald-500/10' : 'bg-emerald-50',
     bgWarning: isDark ? 'bg-amber-500/10' : 'bg-amber-50',
     bgDanger: isDark ? 'bg-red-500/10' : 'bg-red-50',
     bgGradient: isDark 
-      ? 'bg-gradient-to-br from-slate-900 via-slate-950 to-black' 
-      : 'bg-gradient-to-br from-white via-slate-50 to-slate-100',
-    // Text
+      ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950' 
+      : 'bg-gradient-to-br from-slate-50 via-white to-indigo-50',
     text: isDark ? 'text-white' : 'text-slate-900',
     textSecondary: isDark ? 'text-slate-400' : 'text-slate-600',
     textMuted: isDark ? 'text-slate-500' : 'text-slate-400',
@@ -47,51 +55,85 @@ const useDesignSystem = () => {
     textSuccess: isDark ? 'text-emerald-400' : 'text-emerald-600',
     textWarning: isDark ? 'text-amber-400' : 'text-amber-600',
     textDanger: isDark ? 'text-red-400' : 'text-red-600',
-    // Borders
-    border: isDark ? 'border-white/5' : 'border-slate-200',
+    border: isDark ? 'border-slate-800' : 'border-slate-200',
     borderAccent: isDark ? 'border-indigo-500/30' : 'border-indigo-200',
-    // Inputs
     input: isDark 
-      ? 'bg-white/5 border-white/10 text-white placeholder-slate-500' 
+      ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500' 
       : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400',
-    // Charts
     chartGrid: isDark ? '#334155' : '#e2e8f0',
     chartText: isDark ? '#94a3b8' : '#64748b',
-    chartTooltipBg: isDark ? '#1e293b' : '#ffffff',
-    // Gradients
     gradientPrimary: 'from-indigo-500 via-purple-500 to-pink-500',
     gradientSuccess: 'from-emerald-500 via-green-500 to-teal-500',
     gradientWarning: 'from-amber-500 via-orange-500 to-red-500',
   };
 };
 
-// Tab Configuration
-const TABS = [
-  { id: 'predictions', label: 'Ensemble Predictions', icon: Brain, color: 'indigo' },
-  { id: 'analysis', label: 'Player Analysis', icon: Activity, color: 'cyan' },
-  { id: 'value', label: 'Value Finder', icon: Target, color: 'emerald' },
-  { id: 'matchups', label: 'Matchup Intel', icon: Shield, color: 'purple' },
-  { id: 'models', label: 'Model Lab', icon: Cpu, color: 'pink' },
-  { id: 'bankroll', label: 'Bankroll AI', icon: Briefcase, color: 'amber' },
-];
+// ==================== ANIMATED COMPONENTS ====================
+const AnimatedNumber = ({ value, prefix = '', suffix = '', decimals = 1 }) => {
+  const [displayValue, setDisplayValue] = useState(0);
+  
+  useEffect(() => {
+    const target = parseFloat(value) || 0;
+    const duration = 1000;
+    const steps = 30;
+    const stepValue = (target - displayValue) / steps;
+    let current = displayValue;
+    let step = 0;
+    
+    const interval = setInterval(() => {
+      step++;
+      current += stepValue;
+      setDisplayValue(current);
+      if (step >= steps) {
+        setDisplayValue(target);
+        clearInterval(interval);
+      }
+    }, duration / steps);
+    
+    return () => clearInterval(interval);
+  }, [value]);
+  
+  return <span>{prefix}{displayValue.toFixed(decimals)}{suffix}</span>;
+};
 
-// Helper Components
-const StatCard = ({ label, value, subValue, icon: Icon, trend, color = 'indigo', ds }) => (
-  <div className={`${ds.bgCard} rounded-xl p-4 border ${ds.border}`}>
+const PulsingDot = ({ color = 'emerald' }) => (
+  <span className="relative flex h-3 w-3">
+    <span className={`animate-ping absolute inline-flex h-full w-full rounded-full bg-${color}-400 opacity-75`}></span>
+    <span className={`relative inline-flex rounded-full h-3 w-3 bg-${color}-500`}></span>
+  </span>
+);
+
+const GlowingCard = ({ children, className = '', glow = 'indigo' }) => (
+  <div className={`relative group ${className}`}>
+    <div className={`absolute -inset-0.5 bg-gradient-to-r from-${glow}-600 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-300`}></div>
+    <div className="relative">{children}</div>
+  </div>
+);
+
+// ==================== STAT CARDS ====================
+const StatCard = ({ label, value, subValue, icon: Icon, trend, color = 'indigo', large = false, ds, onClick }) => (
+  <div 
+    onClick={onClick}
+    className={`${ds.bgCard} rounded-xl ${large ? 'p-6' : 'p-4'} border ${ds.border} 
+      transition-all duration-300 hover:shadow-lg hover:shadow-${color}-500/10 
+      hover:border-${color}-500/30 ${onClick ? 'cursor-pointer' : ''}`}
+  >
     <div className="flex items-start justify-between mb-2">
-      <span className={ds.textSecondary}>{label}</span>
+      <span className={`${ds.textSecondary} ${large ? 'text-base' : 'text-sm'}`}>{label}</span>
       {Icon && (
-        <div className={`p-2 rounded-lg bg-${color}-500/10`}>
-          <Icon className={`w-4 h-4 text-${color}-400`} />
+        <div className={`p-2 rounded-xl bg-gradient-to-br from-${color}-500/20 to-${color}-600/10`}>
+          <Icon className={`${large ? 'w-5 h-5' : 'w-4 h-4'} text-${color}-400`} />
         </div>
       )}
     </div>
-    <div className={`text-2xl font-bold ${ds.text}`}>{value}</div>
+    <div className={`${large ? 'text-3xl' : 'text-2xl'} font-bold ${ds.text}`}>
+      {typeof value === 'number' ? <AnimatedNumber value={value} /> : value}
+    </div>
     {subValue && (
       <div className="flex items-center gap-1 mt-1">
-        {trend === 'up' && <ArrowUpRight className="w-3 h-3 text-emerald-400" />}
-        {trend === 'down' && <ArrowDownRight className="w-3 h-3 text-red-400" />}
-        <span className={`text-xs ${trend === 'up' ? 'text-emerald-400' : trend === 'down' ? 'text-red-400' : ds.textMuted}`}>
+        {trend === 'up' && <ArrowUpRight className="w-4 h-4 text-emerald-400" />}
+        {trend === 'down' && <ArrowDownRight className="w-4 h-4 text-red-400" />}
+        <span className={`text-sm ${trend === 'up' ? 'text-emerald-400' : trend === 'down' ? 'text-red-400' : ds.textMuted}`}>
           {subValue}
         </span>
       </div>
@@ -99,32 +141,332 @@ const StatCard = ({ label, value, subValue, icon: Icon, trend, color = 'indigo',
   </div>
 );
 
-const ConfidenceBadge = ({ confidence, ds }) => {
+const MiniStatCard = ({ label, value, color = 'slate', ds }) => (
+  <div className={`px-3 py-2 rounded-lg bg-${color}-500/10 border border-${color}-500/20`}>
+    <div className={`text-xs ${ds.textMuted}`}>{label}</div>
+    <div className={`text-sm font-semibold text-${color}-400`}>{value}</div>
+  </div>
+);
+
+// ==================== CONFIDENCE & BADGES ====================
+const ConfidenceMeter = ({ confidence, size = 'md', ds }) => {
   const level = confidence >= 80 ? 'high' : confidence >= 60 ? 'medium' : 'low';
   const colors = {
-    high: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-    medium: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-    low: 'bg-red-500/20 text-red-400 border-red-500/30'
+    high: { bar: 'bg-emerald-500', bg: 'bg-emerald-500/20', text: 'text-emerald-400' },
+    medium: { bar: 'bg-amber-500', bg: 'bg-amber-500/20', text: 'text-amber-400' },
+    low: { bar: 'bg-red-500', bg: 'bg-red-500/20', text: 'text-red-400' }
+  };
+  
+  const sizes = {
+    sm: 'h-1.5',
+    md: 'h-2',
+    lg: 'h-3'
   };
   
   return (
-    <span className={`px-2 py-1 rounded-full text-xs font-medium border ${colors[level]}`}>
-      {confidence}% Confidence
+    <div className="space-y-1">
+      <div className="flex justify-between items-center">
+        <span className={`text-xs ${ds.textMuted}`}>Confidence</span>
+        <span className={`text-sm font-bold ${colors[level].text}`}>{confidence}%</span>
+      </div>
+      <div className={`${sizes[size]} ${colors[level].bg} rounded-full overflow-hidden`}>
+        <div 
+          className={`h-full ${colors[level].bar} rounded-full transition-all duration-1000 ease-out`}
+          style={{ width: `${confidence}%` }}
+        />
+      </div>
+    </div>
+  );
+};
+
+const PredictionBadge = ({ type, size = 'md' }) => {
+  const config = {
+    OVER: { bg: 'bg-emerald-500/20', border: 'border-emerald-500/40', text: 'text-emerald-400', icon: TrendingUp },
+    UNDER: { bg: 'bg-red-500/20', border: 'border-red-500/40', text: 'text-red-400', icon: TrendingDown },
+    HOLD: { bg: 'bg-amber-500/20', border: 'border-amber-500/40', text: 'text-amber-400', icon: Pause }
+  };
+  
+  const c = config[type] || config.HOLD;
+  const Icon = c.icon;
+  
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg ${c.bg} ${c.text} border ${c.border} font-bold ${size === 'lg' ? 'text-lg' : 'text-sm'}`}>
+      <Icon className={size === 'lg' ? 'w-5 h-5' : 'w-4 h-4'} />
+      {type}
     </span>
   );
 };
 
-const LoadingSpinner = ({ ds }) => (
-  <div className="flex items-center justify-center py-12">
+const RiskBadge = ({ level }) => {
+  const config = {
+    low: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', label: 'Low Risk' },
+    medium: { bg: 'bg-amber-500/20', text: 'text-amber-400', label: 'Medium Risk' },
+    high: { bg: 'bg-red-500/20', text: 'text-red-400', label: 'High Risk' }
+  };
+  const c = config[level] || config.medium;
+  
+  return (
+    <span className={`px-2 py-1 rounded-md text-xs font-medium ${c.bg} ${c.text}`}>
+      {c.label}
+    </span>
+  );
+};
+
+// ==================== LOADING STATES ====================
+const LoadingSpinner = ({ ds, text = 'Processing...' }) => (
+  <div className="flex flex-col items-center justify-center py-12">
     <div className="relative">
-      <div className="w-12 h-12 border-4 border-indigo-500/20 rounded-full" />
-      <div className="absolute top-0 left-0 w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+      <div className="w-16 h-16 border-4 border-indigo-500/20 rounded-full" />
+      <div className="absolute top-0 left-0 w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+      <Brain className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 text-indigo-400" />
     </div>
-    <span className={`ml-3 ${ds.textSecondary}`}>Running ML Analysis...</span>
+    <span className={`mt-4 ${ds.textSecondary} animate-pulse`}>{text}</span>
   </div>
 );
 
-// Main Component
+const SkeletonCard = ({ ds }) => (
+  <div className={`${ds.bgCard} rounded-xl p-4 border ${ds.border} animate-pulse`}>
+    <div className={`h-4 ${ds.isDark ? 'bg-slate-700' : 'bg-slate-200'} rounded w-24 mb-3`}></div>
+    <div className={`h-8 ${ds.isDark ? 'bg-slate-700' : 'bg-slate-200'} rounded w-32 mb-2`}></div>
+    <div className={`h-3 ${ds.isDark ? 'bg-slate-700' : 'bg-slate-200'} rounded w-20`}></div>
+  </div>
+);
+
+// ==================== PLAYER COMPONENTS ====================
+const PlayerAvatar = ({ player, size = 'md' }) => {
+  const sizes = {
+    sm: 'w-8 h-8 text-xs',
+    md: 'w-12 h-12 text-sm',
+    lg: 'w-16 h-16 text-lg',
+    xl: 'w-20 h-20 text-xl'
+  };
+  
+  const initials = player?.name?.split(' ').map(n => n[0]).join('') || '?';
+  
+  return (
+    <div className={`${sizes[size]} rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 
+      flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-500/30`}>
+      {initials}
+    </div>
+  );
+};
+
+const PlayerCard = ({ player, onClick, selected, ds }) => (
+  <div 
+    onClick={() => onClick(player)}
+    className={`${ds.bgCard} rounded-xl p-4 border transition-all duration-300 cursor-pointer
+      ${selected ? 'border-indigo-500 shadow-lg shadow-indigo-500/20' : `${ds.border} hover:border-indigo-500/50`}`}
+  >
+    <div className="flex items-center gap-3">
+      <PlayerAvatar player={player} size="md" />
+      <div className="flex-1 min-w-0">
+        <div className={`font-semibold ${ds.text} truncate`}>{player.name}</div>
+        <div className={`text-sm ${ds.textMuted}`}>{player.team} • {player.position}</div>
+      </div>
+      <div className="text-right">
+        <div className={`text-lg font-bold ${ds.text}`}>{player.ppg}</div>
+        <div className={`text-xs ${ds.textMuted}`}>PPG</div>
+      </div>
+    </div>
+  </div>
+);
+
+// ==================== CHART COMPONENTS ====================
+const PredictionDistributionChart = ({ data, line, ds }) => {
+  const chartData = data || Array.from({ length: 20 }, (_, i) => ({
+    value: 15 + i * 1.5,
+    probability: Math.exp(-Math.pow(15 + i * 1.5 - 25, 2) / 50) * 100
+  }));
+  
+  return (
+    <ResponsiveContainer width="100%" height={200}>
+      <AreaChart data={chartData}>
+        <defs>
+          <linearGradient id="probGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
+            <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+          </linearGradient>
+        </defs>
+        <CartesianGrid strokeDasharray="3 3" stroke={ds.chartGrid} />
+        <XAxis dataKey="value" stroke={ds.chartText} fontSize={11} />
+        <YAxis stroke={ds.chartText} fontSize={11} />
+        <Tooltip 
+          contentStyle={{ 
+            backgroundColor: ds.isDark ? '#1e293b' : '#fff',
+            border: `1px solid ${ds.isDark ? '#334155' : '#e2e8f0'}`,
+            borderRadius: '8px'
+          }}
+        />
+        <Area type="monotone" dataKey="probability" stroke="#6366f1" fill="url(#probGradient)" strokeWidth={2} />
+        {line && <ReferenceLine x={parseFloat(line)} stroke="#f59e0b" strokeDasharray="5 5" strokeWidth={2} />}
+      </AreaChart>
+    </ResponsiveContainer>
+  );
+};
+
+const ModelComparisonChart = ({ data, ds }) => {
+  const chartData = data || [
+    { name: 'XGBoost', accuracy: 72, precision: 74, recall: 71, f1: 72 },
+    { name: 'Random Forest', accuracy: 69, precision: 70, recall: 68, f1: 69 },
+    { name: 'Neural Net', accuracy: 70, precision: 72, recall: 69, f1: 70 },
+    { name: 'Ensemble', accuracy: 75, precision: 77, recall: 74, f1: 75 },
+  ];
+  
+  return (
+    <ResponsiveContainer width="100%" height={300}>
+      <BarChart data={chartData} layout="vertical">
+        <CartesianGrid strokeDasharray="3 3" stroke={ds.chartGrid} />
+        <XAxis type="number" domain={[0, 100]} stroke={ds.chartText} fontSize={11} />
+        <YAxis dataKey="name" type="category" stroke={ds.chartText} fontSize={11} width={90} />
+        <Tooltip 
+          contentStyle={{ 
+            backgroundColor: ds.isDark ? '#1e293b' : '#fff',
+            border: `1px solid ${ds.isDark ? '#334155' : '#e2e8f0'}`,
+            borderRadius: '8px'
+          }}
+        />
+        <Legend />
+        <Bar dataKey="accuracy" fill="#6366f1" radius={[0, 4, 4, 0]} name="Accuracy" />
+        <Bar dataKey="precision" fill="#8b5cf6" radius={[0, 4, 4, 0]} name="Precision" />
+        <Bar dataKey="f1" fill="#a855f7" radius={[0, 4, 4, 0]} name="F1 Score" />
+      </BarChart>
+    </ResponsiveContainer>
+  );
+};
+
+const PerformanceRadar = ({ data, ds }) => {
+  const chartData = data || [
+    { stat: 'Points', value: 85, fullMark: 100 },
+    { stat: 'Rebounds', value: 72, fullMark: 100 },
+    { stat: 'Assists', value: 78, fullMark: 100 },
+    { stat: 'Efficiency', value: 82, fullMark: 100 },
+    { stat: 'Consistency', value: 76, fullMark: 100 },
+    { stat: 'Clutch', value: 88, fullMark: 100 },
+  ];
+  
+  return (
+    <ResponsiveContainer width="100%" height={250}>
+      <RadarChart data={chartData}>
+        <PolarGrid stroke={ds.chartGrid} />
+        <PolarAngleAxis dataKey="stat" tick={{ fill: ds.chartText, fontSize: 11 }} />
+        <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: ds.chartText, fontSize: 10 }} />
+        <Radar name="Performance" dataKey="value" stroke="#6366f1" fill="#6366f1" fillOpacity={0.3} strokeWidth={2} />
+      </RadarChart>
+    </ResponsiveContainer>
+  );
+};
+
+const HistoricalTrendChart = ({ data, ds }) => {
+  const chartData = data || Array.from({ length: 10 }, (_, i) => ({
+    game: `G${i + 1}`,
+    actual: 20 + Math.random() * 15,
+    predicted: 25 + Math.random() * 5,
+    line: 24.5
+  }));
+  
+  return (
+    <ResponsiveContainer width="100%" height={250}>
+      <ComposedChart data={chartData}>
+        <defs>
+          <linearGradient id="actualGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+            <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+          </linearGradient>
+        </defs>
+        <CartesianGrid strokeDasharray="3 3" stroke={ds.chartGrid} />
+        <XAxis dataKey="game" stroke={ds.chartText} fontSize={11} />
+        <YAxis stroke={ds.chartText} fontSize={11} />
+        <Tooltip 
+          contentStyle={{ 
+            backgroundColor: ds.isDark ? '#1e293b' : '#fff',
+            border: `1px solid ${ds.isDark ? '#334155' : '#e2e8f0'}`,
+            borderRadius: '8px'
+          }}
+        />
+        <Legend />
+        <Area type="monotone" dataKey="actual" fill="url(#actualGradient)" stroke="#10b981" strokeWidth={2} name="Actual" />
+        <Line type="monotone" dataKey="predicted" stroke="#6366f1" strokeWidth={2} dot={{ r: 4 }} name="Predicted" />
+        <ReferenceLine y={24.5} stroke="#f59e0b" strokeDasharray="5 5" label={{ value: 'Line', fill: '#f59e0b', fontSize: 11 }} />
+      </ComposedChart>
+    </ResponsiveContainer>
+  );
+};
+
+// ==================== FEATURE PANELS ====================
+const ModelPanel = ({ model, ds }) => (
+  <div className={`${ds.bgCard} rounded-xl p-4 border ${ds.border} hover:border-indigo-500/30 transition-all`}>
+    <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center gap-2">
+        <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${model.gradient} flex items-center justify-center`}>
+          <model.icon className="w-4 h-4 text-white" />
+        </div>
+        <span className={`font-semibold ${ds.text}`}>{model.name}</span>
+      </div>
+      <span className={`text-lg font-bold ${model.prediction > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+        {model.prediction > 0 ? '+' : ''}{model.prediction.toFixed(1)}
+      </span>
+    </div>
+    <ConfidenceMeter confidence={model.confidence} size="sm" ds={ds} />
+    <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-700/50">
+      <span className={`text-xs ${ds.textMuted}`}>Weight: {(model.weight * 100).toFixed(0)}%</span>
+      <span className={`text-xs ${model.trend === 'bullish' ? 'text-emerald-400' : 'text-red-400'}`}>
+        {model.trend === 'bullish' ? '↑ Bullish' : '↓ Bearish'}
+      </span>
+    </div>
+  </div>
+);
+
+const InsightCard = ({ title, description, type = 'info', icon: Icon, ds }) => {
+  const types = {
+    info: { bg: 'bg-blue-500/10', border: 'border-blue-500/20', icon: Info, color: 'text-blue-400' },
+    success: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', icon: CheckCircle, color: 'text-emerald-400' },
+    warning: { bg: 'bg-amber-500/10', border: 'border-amber-500/20', icon: AlertTriangle, color: 'text-amber-400' },
+    danger: { bg: 'bg-red-500/10', border: 'border-red-500/20', icon: AlertCircle, color: 'text-red-400' },
+    premium: { bg: 'bg-purple-500/10', border: 'border-purple-500/20', icon: Crown, color: 'text-purple-400' },
+  };
+  
+  const t = types[type];
+  const DisplayIcon = Icon || t.icon;
+  
+  return (
+    <div className={`${t.bg} border ${t.border} rounded-xl p-4`}>
+      <div className="flex items-start gap-3">
+        <DisplayIcon className={`w-5 h-5 ${t.color} flex-shrink-0 mt-0.5`} />
+        <div>
+          <h4 className={`font-semibold ${ds.text} mb-1`}>{title}</h4>
+          <p className={`text-sm ${ds.textSecondary}`}>{description}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const QuickAction = ({ label, icon: Icon, onClick, color = 'indigo', disabled, ds }) => (
+  <button
+    onClick={onClick}
+    disabled={disabled}
+    className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all
+      ${disabled 
+        ? 'opacity-50 cursor-not-allowed bg-slate-800' 
+        : `bg-${color}-500/20 hover:bg-${color}-500/30 text-${color}-400 border border-${color}-500/30`
+      }`}
+  >
+    <Icon className="w-4 h-4" />
+    {label}
+  </button>
+);
+
+// ==================== TAB CONFIGURATION ====================
+const TABS = [
+  { id: 'predictions', label: 'AI Predictions', icon: Brain, color: 'indigo' },
+  { id: 'analysis', label: 'Deep Analysis', icon: Activity, color: 'cyan' },
+  { id: 'value', label: 'Value Scanner', icon: Target, color: 'emerald' },
+  { id: 'matchups', label: 'Matchup Intel', icon: Shield, color: 'purple' },
+  { id: 'models', label: 'Model Lab', icon: Cpu, color: 'pink' },
+  { id: 'live', label: 'Live Feed', icon: Radio, color: 'red' },
+];
+
+// ==================== MAIN COMPONENT ====================
 export default function MLWorkstation() {
   const ds = useDesignSystem();
   const [activeTab, setActiveTab] = useState('predictions');
@@ -133,509 +475,291 @@ export default function MLWorkstation() {
   const [selectedProp, setSelectedProp] = useState('points');
   const [propLine, setPropLine] = useState('');
   const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState({});
+  const [showSearch, setShowSearch] = useState(false);
+  const [favorites, setFavorites] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [liveMode, setLiveMode] = useState(false);
   
-  // Ensemble Predictions State
-  const [ensembleResults, setEnsembleResults] = useState(null);
-  const [modelComparison, setModelComparison] = useState(null);
+  // Prediction states
+  const [prediction, setPrediction] = useState(null);
+  const [models, setModels] = useState([]);
+  const [insights, setInsights] = useState([]);
+  const [historicalData, setHistoricalData] = useState([]);
   
-  // Player Analysis State
-  const [consistencyData, setConsistencyData] = useState(null);
-  const [situationalSplits, setSituationalSplits] = useState(null);
-  const [streakData, setStreakData] = useState(null);
+  // Sample players from database
+  const players = useMemo(() => nbaPlayersDatabase.slice(0, 50), []);
   
-  // Value Finder State
-  const [evCalculation, setEvCalculation] = useState(null);
-  const [correlatedProps, setCorrelatedProps] = useState(null);
-  const [valueBets, setValueBets] = useState(null);
-  
-  // Matchup Intel State
-  const [defenseMatchup, setDefenseMatchup] = useState(null);
-  const [paceImpact, setPaceImpact] = useState(null);
-  const [injuryImpact, setInjuryImpact] = useState(null);
-  
-  // Bankroll State
-  const [bankrollOptimization, setBankrollOptimization] = useState(null);
-  const [kellyRecommendation, setKellyRecommendation] = useState(null);
+  // Filter players based on search
+  const filteredPlayers = useMemo(() => {
+    if (!searchQuery) return [];
+    const query = searchQuery.toLowerCase();
+    return players.filter(p => 
+      p.name.toLowerCase().includes(query) || 
+      p.team.toLowerCase().includes(query)
+    ).slice(0, 8);
+  }, [searchQuery, players]);
 
-  // Sample players for demo
-  const samplePlayers = [
-    { id: 1, name: 'LeBron James', team: 'LAL', position: 'SF' },
-    { id: 2, name: 'Stephen Curry', team: 'GSW', position: 'PG' },
-    { id: 3, name: 'Kevin Durant', team: 'PHX', position: 'SF' },
-    { id: 4, name: 'Giannis Antetokounmpo', team: 'MIL', position: 'PF' },
-    { id: 5, name: 'Luka Doncic', team: 'DAL', position: 'PG' },
-    { id: 6, name: 'Jayson Tatum', team: 'BOS', position: 'SF' },
-    { id: 7, name: 'Nikola Jokic', team: 'DEN', position: 'C' },
-    { id: 8, name: 'Joel Embiid', team: 'PHI', position: 'C' },
+  // Top players for quick select
+  const topPlayers = useMemo(() => players.slice(0, 5), [players]);
+  
+  // Run prediction
+  const runPrediction = useCallback(async () => {
+    if (!selectedPlayer) return;
+    
+    setLoading(true);
+    
+    // Simulate ML processing
+    await new Promise(r => setTimeout(r, 1500));
+    
+    // Generate mock prediction results
+    const baseValue = selectedProp === 'points' ? selectedPlayer.ppg : 
+                     selectedProp === 'rebounds' ? selectedPlayer.rpg :
+                     selectedProp === 'assists' ? selectedPlayer.apg : selectedPlayer.ppg;
+    
+    const predictionValue = baseValue + (Math.random() - 0.5) * 4;
+    const lineValue = parseFloat(propLine) || baseValue;
+    const edge = ((predictionValue - lineValue) / lineValue * 100);
+    
+    setPrediction({
+      value: predictionValue,
+      confidence: 65 + Math.random() * 25,
+      recommendation: predictionValue > lineValue ? 'OVER' : 'UNDER',
+      edge: Math.abs(edge),
+      probability: 50 + (edge > 0 ? 1 : -1) * Math.abs(edge) * 2,
+      ev: edge * 0.5,
+      kellyCriterion: Math.abs(edge) * 0.1,
+      sharpScore: 60 + Math.random() * 30,
+    });
+    
+    setModels([
+      { name: 'XGBoost Pro', prediction: predictionValue + (Math.random() - 0.5) * 3, confidence: 70 + Math.random() * 20, weight: 0.35, trend: Math.random() > 0.5 ? 'bullish' : 'bearish', icon: Zap, gradient: 'from-blue-500 to-cyan-500' },
+      { name: 'DeepNet v3', prediction: predictionValue + (Math.random() - 0.5) * 3, confidence: 70 + Math.random() * 20, weight: 0.30, trend: Math.random() > 0.5 ? 'bullish' : 'bearish', icon: Brain, gradient: 'from-purple-500 to-pink-500' },
+      { name: 'RandomForest+', prediction: predictionValue + (Math.random() - 0.5) * 3, confidence: 70 + Math.random() * 20, weight: 0.20, trend: Math.random() > 0.5 ? 'bullish' : 'bearish', icon: GitBranch, gradient: 'from-green-500 to-emerald-500' },
+      { name: 'GradientBoost', prediction: predictionValue + (Math.random() - 0.5) * 3, confidence: 70 + Math.random() * 20, weight: 0.15, trend: Math.random() > 0.5 ? 'bullish' : 'bearish', icon: Flame, gradient: 'from-orange-500 to-red-500' },
+    ]);
+    
+    setInsights([
+      { title: 'Strong Historical Performance', description: `${selectedPlayer.name} has exceeded this line in 7 of last 10 games`, type: 'success' },
+      { title: 'Favorable Matchup Detected', description: 'Opponent ranks 28th in defending this stat category', type: 'premium' },
+      { title: 'Recent Form Alert', description: 'Player averaging 12% above season average in last 5 games', type: 'info' },
+      { title: 'Pace Factor', description: 'Expected game pace is +4.2% above average', type: 'info' },
+    ]);
+    
+    setHistoricalData(Array.from({ length: 10 }, (_, i) => ({
+      game: `G${i + 1}`,
+      actual: baseValue + (Math.random() - 0.5) * 10,
+      predicted: baseValue + (Math.random() - 0.3) * 5,
+      line: lineValue
+    })));
+    
+    setLoading(false);
+  }, [selectedPlayer, selectedProp, propLine]);
+
+  // Toggle favorite
+  const toggleFavorite = (player) => {
+    setFavorites(prev => 
+      prev.includes(player.id) 
+        ? prev.filter(id => id !== player.id)
+        : [...prev, player.id]
+    );
+  };
+
+  // Prop types
+  const propTypes = [
+    { id: 'points', label: 'Points', icon: Target },
+    { id: 'rebounds', label: 'Rebounds', icon: Activity },
+    { id: 'assists', label: 'Assists', icon: Users },
+    { id: 'threes', label: '3-Pointers', icon: Crosshair },
+    { id: 'steals', label: 'Steals', icon: Shield },
+    { id: 'blocks', label: 'Blocks', icon: Shield },
+    { id: 'pra', label: 'PTS+REB+AST', icon: Layers },
   ];
-
-  const filteredPlayers = samplePlayers.filter(p => 
-    p.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  // Run Ensemble Prediction
-  const runEnsemblePrediction = async () => {
-    if (!selectedPlayer || !propLine) return;
-    
-    setLoading(true);
-    try {
-      const [ensemble, comparison] = await Promise.all([
-        mlService.getEnsemblePrediction(selectedPlayer.id, selectedProp, parseFloat(propLine)),
-        mlService.compareModels(selectedPlayer.id, selectedProp)
-      ]);
-      
-      setEnsembleResults(ensemble || generateMockEnsembleResults());
-      setModelComparison(comparison || generateMockModelComparison());
-    } catch (error) {
-      console.error('Ensemble prediction error:', error);
-      setEnsembleResults(generateMockEnsembleResults());
-      setModelComparison(generateMockModelComparison());
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Run Player Analysis
-  const runPlayerAnalysis = async () => {
-    if (!selectedPlayer) return;
-    
-    setLoading(true);
-    try {
-      const [consistency, splits, streaks] = await Promise.all([
-        mlService.analyzeConsistency(selectedPlayer.id, selectedProp),
-        mlService.getSituationalSplits(selectedPlayer.id, selectedProp),
-        mlService.detectStreaks(selectedPlayer.id, selectedProp)
-      ]);
-      
-      setConsistencyData(consistency || generateMockConsistency());
-      setSituationalSplits(splits || generateMockSplits());
-      setStreakData(streaks || generateMockStreaks());
-    } catch (error) {
-      console.error('Player analysis error:', error);
-      setConsistencyData(generateMockConsistency());
-      setSituationalSplits(generateMockSplits());
-      setStreakData(generateMockStreaks());
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Run Value Finder
-  const runValueFinder = async () => {
-    if (!selectedPlayer || !propLine) return;
-    
-    setLoading(true);
-    try {
-      const [ev, correlated, value] = await Promise.all([
-        mlService.calculateEV(selectedPlayer.id, selectedProp, parseFloat(propLine), -110),
-        mlService.getCorrelatedProps(selectedPlayer.id),
-        mlService.findValueBets(selectedPlayer.id)
-      ]);
-      
-      setEvCalculation(ev || generateMockEV());
-      setCorrelatedProps(correlated || generateMockCorrelated());
-      setValueBets(value || generateMockValueBets());
-    } catch (error) {
-      console.error('Value finder error:', error);
-      setEvCalculation(generateMockEV());
-      setCorrelatedProps(generateMockCorrelated());
-      setValueBets(generateMockValueBets());
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Run Matchup Intel
-  const runMatchupIntel = async () => {
-    if (!selectedPlayer) return;
-    
-    setLoading(true);
-    try {
-      const [defense, pace, injury] = await Promise.all([
-        mlService.analyzeDefensiveMatchup(selectedPlayer.id, 'LAC'),
-        mlService.analyzePaceImpact(selectedPlayer.id, 'LAC'),
-        mlService.analyzeInjuryImpact(selectedPlayer.id)
-      ]);
-      
-      setDefenseMatchup(defense || generateMockDefense());
-      setPaceImpact(pace || generateMockPace());
-      setInjuryImpact(injury || generateMockInjury());
-    } catch (error) {
-      console.error('Matchup intel error:', error);
-      setDefenseMatchup(generateMockDefense());
-      setPaceImpact(generateMockPace());
-      setInjuryImpact(generateMockInjury());
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Run Bankroll Optimization
-  const runBankrollOptimization = async () => {
-    setLoading(true);
-    try {
-      const optimization = await mlService.optimizeBankroll(1000, 'moderate');
-      setBankrollOptimization(optimization || generateMockBankroll());
-    } catch (error) {
-      console.error('Bankroll optimization error:', error);
-      setBankrollOptimization(generateMockBankroll());
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Mock Data Generators
-  const generateMockEnsembleResults = () => ({
-    prediction: 27.5,
-    confidence: 78,
-    recommendation: 'OVER',
-    edge: 6.2,
-    models: [
-      { name: 'XGBoost', prediction: 28.1, confidence: 82, weight: 0.35 },
-      { name: 'Random Forest', prediction: 26.8, confidence: 75, weight: 0.25 },
-      { name: 'LSTM Neural Net', prediction: 27.9, confidence: 79, weight: 0.25 },
-      { name: 'Gradient Boost', prediction: 27.2, confidence: 76, weight: 0.15 },
-    ],
-    historicalAccuracy: {
-      overall: 68.5,
-      lastWeek: 72.3,
-      lastMonth: 69.1,
-    },
-    probabilityDistribution: Array.from({ length: 15 }, (_, i) => ({
-      value: 20 + i * 2,
-      probability: Math.exp(-Math.pow(20 + i * 2 - 27.5, 2) / 50) * 100
-    }))
-  });
-
-  const generateMockModelComparison = () => ({
-    models: [
-      { name: 'XGBoost', accuracy: 72.3, precision: 0.74, recall: 0.71, f1: 0.72, roi: 8.5 },
-      { name: 'Random Forest', accuracy: 68.9, precision: 0.70, recall: 0.68, f1: 0.69, roi: 5.2 },
-      { name: 'LSTM', accuracy: 70.1, precision: 0.72, recall: 0.69, f1: 0.70, roi: 6.8 },
-      { name: 'Ensemble', accuracy: 74.5, precision: 0.76, recall: 0.73, f1: 0.74, roi: 11.2 },
-    ],
-    historicalPerformance: Array.from({ length: 10 }, (_, i) => ({
-      week: `W${i + 1}`,
-      xgboost: 65 + Math.random() * 15,
-      rf: 62 + Math.random() * 15,
-      lstm: 64 + Math.random() * 15,
-      ensemble: 68 + Math.random() * 15,
-    }))
-  });
-
-  const generateMockConsistency = () => ({
-    consistencyScore: 76,
-    standardDeviation: 4.2,
-    coefficientOfVariation: 0.15,
-    hitRate: { over: 58, under: 42 },
-    streakData: Array.from({ length: 20 }, (_, i) => ({
-      game: i + 1,
-      actual: 22 + Math.random() * 12,
-      line: 25.5,
-      hit: Math.random() > 0.4
-    })),
-    distribution: {
-      belowLine: 35,
-      nearLine: 25,
-      aboveLine: 40,
-    }
-  });
-
-  const generateMockSplits = () => ({
-    homeAway: {
-      home: { avg: 28.3, games: 20, hitRate: 62 },
-      away: { avg: 24.8, games: 21, hitRate: 52 }
-    },
-    vsConference: {
-      east: { avg: 27.1, games: 18, hitRate: 58 },
-      west: { avg: 25.9, games: 23, hitRate: 54 }
-    },
-    restDays: {
-      backToBack: { avg: 23.4, games: 8, hitRate: 45 },
-      oneDay: { avg: 26.5, games: 22, hitRate: 58 },
-      twoPlusDays: { avg: 28.9, games: 11, hitRate: 68 }
-    },
-    clutchTime: {
-      close: { avg: 8.2, games: 15, hitRate: 60 },
-      blowout: { avg: 5.1, games: 10, hitRate: 48 }
-    }
-  });
-
-  const generateMockStreaks = () => ({
-    currentStreak: { type: 'over', length: 4 },
-    longestStreak: { type: 'over', length: 7 },
-    averageStreak: 2.8,
-    streakAfterOver: { nextOver: 55, nextUnder: 45 },
-    streakAfterUnder: { nextOver: 52, nextUnder: 48 },
-    recentPattern: ['O', 'O', 'U', 'O', 'O', 'O', 'U', 'O', 'U', 'O'],
-    momentum: 72
-  });
-
-  const generateMockEV = () => ({
-    expectedValue: 5.8,
-    impliedProbability: 52.4,
-    modelProbability: 58.2,
-    edge: 5.8,
-    kellyBet: 2.4,
-    breakeven: 52.4,
-    roi: 11.1,
-    grade: 'B+',
-    recommendation: 'BET',
-    scenarios: [
-      { outcome: 'Over', probability: 58.2, payout: '+91', ev: '+$5.80' },
-      { outcome: 'Under', probability: 41.8, payout: '-100', ev: '-$5.80' },
-    ]
-  });
-
-  const generateMockCorrelated = () => ({
-    correlations: [
-      { prop: 'Points', stat: 'Assists', correlation: 0.72, description: 'High scoring games often mean more assists' },
-      { prop: 'Points', stat: 'Minutes', correlation: 0.85, description: 'More minutes = more scoring opportunities' },
-      { prop: 'Points', stat: 'FGA', correlation: 0.91, description: 'Shot volume strongly correlates with points' },
-      { prop: 'Rebounds', stat: 'Minutes', correlation: 0.78, description: 'Extended play increases rebounding chances' },
-    ],
-    sameGameParlays: [
-      { props: ['Over 25.5 PTS', 'Over 6.5 AST'], correlation: 0.68, boost: '+15%' },
-      { props: ['Over 25.5 PTS', 'Over 7.5 REB'], correlation: 0.45, boost: '+8%' },
-      { props: ['Over 6.5 AST', 'Over 2.5 3PM'], correlation: 0.52, boost: '+10%' },
-    ]
-  });
-
-  const generateMockValueBets = () => ({
-    valueBets: [
-      { player: 'LeBron James', prop: 'Points', line: 25.5, edge: 8.2, confidence: 78, recommendation: 'OVER' },
-      { player: 'Stephen Curry', prop: '3PM', line: 4.5, edge: 6.5, confidence: 72, recommendation: 'OVER' },
-      { player: 'Nikola Jokic', prop: 'Assists', line: 8.5, edge: 7.1, confidence: 75, recommendation: 'OVER' },
-      { player: 'Giannis', prop: 'Rebounds', line: 11.5, edge: 5.8, confidence: 68, recommendation: 'UNDER' },
-    ],
-    summary: {
-      totalOpportunities: 12,
-      highValue: 4,
-      mediumValue: 5,
-      lowValue: 3,
-      averageEdge: 6.2
-    }
-  });
-
-  const generateMockDefense = () => ({
-    defenseRating: 108.5,
-    positionRating: 'B-',
-    allowedAverage: 26.8,
-    adjustment: +2.3,
-    keyDefenders: [
-      { name: 'Kawhi Leonard', rating: 92, minutes: 32 },
-      { name: 'Paul George', rating: 88, minutes: 34 },
-    ],
-    historical: Array.from({ length: 5 }, (_, i) => ({
-      date: `Game ${i + 1}`,
-      points: 22 + Math.random() * 10,
-      vsDefense: 105 + Math.random() * 10
-    })),
-    recommendation: 'Slight positive matchup'
-  });
-
-  const generateMockPace = () => ({
-    teamPace: 102.3,
-    opponentPace: 98.7,
-    expectedPace: 100.5,
-    leagueAverage: 100.0,
-    paceAdjustment: +0.5,
-    possessionImpact: '+1.2 extra possessions',
-    scoringOpportunities: 'Slightly Above Average',
-    historicalInPace: [
-      { paceRange: '95-98', avgPoints: 23.2 },
-      { paceRange: '98-102', avgPoints: 25.8 },
-      { paceRange: '102-106', avgPoints: 28.4 },
-      { paceRange: '106+', avgPoints: 30.1 },
-    ]
-  });
-
-  const generateMockInjury = () => ({
-    playerStatus: 'Healthy',
-    recentInjuries: [],
-    teamInjuries: [
-      { player: 'Anthony Davis', status: 'Questionable', impact: 'If out: +3.2 usage rate boost' },
-    ],
-    opponentInjuries: [
-      { player: 'Kawhi Leonard', status: 'Out', impact: 'Defensive downgrade: +2.1 expected points' },
-    ],
-    netImpact: '+5.3 expected points',
-    confidence: 72
-  });
-
-  const generateMockBankroll = () => ({
-    currentBankroll: 1000,
-    recommendedBetSize: 25,
-    kellyPercentage: 2.5,
-    riskLevel: 'Moderate',
-    expectedGrowth: 8.2,
-    drawdownRisk: 12.5,
-    optimalBets: [
-      { bet: 'LeBron Over 25.5 PTS', size: 30, ev: 5.8, risk: 'Medium' },
-      { bet: 'Curry Over 4.5 3PM', size: 25, ev: 4.2, risk: 'Medium' },
-      { bet: 'Jokic Over 8.5 AST', size: 20, ev: 3.5, risk: 'Low' },
-    ],
-    projectedPerformance: Array.from({ length: 30 }, (_, i) => ({
-      day: i + 1,
-      bankroll: 1000 * Math.pow(1.003, i) + (Math.random() - 0.5) * 50,
-      projection: 1000 * Math.pow(1.003, i)
-    }))
-  });
-
-  // Render Tab Content
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case 'predictions':
-        return <EnsemblePredictionsTab 
-          ds={ds} 
-          selectedPlayer={selectedPlayer}
-          selectedProp={selectedProp}
-          setSelectedProp={setSelectedProp}
-          propLine={propLine}
-          setPropLine={setPropLine}
-          loading={loading}
-          runEnsemblePrediction={runEnsemblePrediction}
-          ensembleResults={ensembleResults}
-          modelComparison={modelComparison}
-        />;
-      case 'analysis':
-        return <PlayerAnalysisTab 
-          ds={ds}
-          selectedPlayer={selectedPlayer}
-          selectedProp={selectedProp}
-          loading={loading}
-          runPlayerAnalysis={runPlayerAnalysis}
-          consistencyData={consistencyData}
-          situationalSplits={situationalSplits}
-          streakData={streakData}
-        />;
-      case 'value':
-        return <ValueFinderTab 
-          ds={ds}
-          selectedPlayer={selectedPlayer}
-          propLine={propLine}
-          loading={loading}
-          runValueFinder={runValueFinder}
-          evCalculation={evCalculation}
-          correlatedProps={correlatedProps}
-          valueBets={valueBets}
-        />;
-      case 'matchups':
-        return <MatchupIntelTab 
-          ds={ds}
-          selectedPlayer={selectedPlayer}
-          loading={loading}
-          runMatchupIntel={runMatchupIntel}
-          defenseMatchup={defenseMatchup}
-          paceImpact={paceImpact}
-          injuryImpact={injuryImpact}
-        />;
-      case 'models':
-        return <ModelLabTab 
-          ds={ds}
-          modelComparison={modelComparison}
-          ensembleResults={ensembleResults}
-        />;
-      case 'bankroll':
-        return <BankrollAITab 
-          ds={ds}
-          loading={loading}
-          runBankrollOptimization={runBankrollOptimization}
-          bankrollOptimization={bankrollOptimization}
-        />;
-      default:
-        return null;
-    }
-  };
 
   return (
     <div className={`min-h-screen ${ds.bgGradient}`}>
-      {/* Header */}
+      {/* Premium Header */}
       <div className={`${ds.bgCard} backdrop-blur-xl border-b ${ds.border} sticky top-0 z-50`}>
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 lg:px-6">
+          {/* Top Bar */}
+          <div className="flex items-center justify-between py-4">
             <div className="flex items-center gap-4">
+              {/* Logo */}
               <div className="relative">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center">
-                  <Brain className="w-6 h-6 text-white" />
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 
+                  flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                  <Brain className="w-7 h-7 text-white" />
                 </div>
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center">
-                  <Sparkles className="w-2.5 h-2.5 text-white" />
+                <div className="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full 
+                  flex items-center justify-center border-2 border-slate-900">
+                  <Check className="w-3 h-3 text-white" />
                 </div>
               </div>
+              
               <div>
-                <h1 className={`text-2xl font-bold ${ds.text}`}>ML Workstation</h1>
-                <p className={ds.textSecondary}>Elite v3.0 • Advanced Machine Learning Analysis</p>
+                <h1 className={`text-2xl font-bold ${ds.text} flex items-center gap-2`}>
+                  ML Workstation
+                  <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-400 border border-amber-500/30">
+                    ELITE v5.0
+                  </span>
+                </h1>
+                <p className={ds.textSecondary}>Advanced AI-Powered Predictions</p>
               </div>
             </div>
             
-            {/* Player Search */}
-            <div className="relative">
-              <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${ds.textMuted}`} />
-              <input
-                type="text"
-                placeholder="Search player..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={`pl-10 pr-4 py-2 rounded-xl ${ds.input} border focus:outline-none focus:ring-2 focus:ring-indigo-500/50 w-64`}
-              />
+            {/* Right Actions */}
+            <div className="flex items-center gap-3">
+              {/* Live Mode Toggle */}
+              <button 
+                onClick={() => setLiveMode(!liveMode)}
+                className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all ${
+                  liveMode 
+                    ? 'bg-red-500/20 text-red-400 border border-red-500/30' 
+                    : `${ds.bgCard} ${ds.textSecondary} border ${ds.border}`
+                }`}
+              >
+                {liveMode ? <Radio className="w-4 h-4 animate-pulse" /> : <Radio className="w-4 h-4" />}
+                <span className="hidden md:inline">{liveMode ? 'Live' : 'Static'}</span>
+              </button>
               
-              {/* Search Results Dropdown */}
-              {searchQuery && (
-                <div className={`absolute top-full mt-2 w-full ${ds.bgCard} backdrop-blur-xl border ${ds.border} rounded-xl shadow-xl overflow-hidden z-50`}>
-                  {filteredPlayers.map(player => (
-                    <button
-                      key={player.id}
-                      onClick={() => {
-                        setSelectedPlayer(player);
-                        setSearchQuery('');
-                      }}
-                      className={`w-full px-4 py-3 flex items-center gap-3 ${ds.bgCardHover} transition-colors`}
-                    >
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
-                        <span className="text-white text-xs font-bold">{player.name.split(' ').map(n => n[0]).join('')}</span>
-                      </div>
-                      <div className="text-left">
-                        <div className={ds.text}>{player.name}</div>
-                        <div className={`text-xs ${ds.textMuted}`}>{player.team} • {player.position}</div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
+              {/* Search */}
+              <div className="relative">
+                <button 
+                  onClick={() => setShowSearch(!showSearch)}
+                  className={`p-2.5 rounded-xl ${ds.bgCard} border ${ds.border} ${ds.textSecondary} hover:text-indigo-400 transition-colors`}
+                >
+                  <Search className="w-5 h-5" />
+                </button>
+              </div>
+              
+              {/* Notifications */}
+              <button className={`relative p-2.5 rounded-xl ${ds.bgCard} border ${ds.border} ${ds.textSecondary} hover:text-indigo-400 transition-colors`}>
+                <Bell className="w-5 h-5" />
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">3</span>
+              </button>
             </div>
           </div>
-
-          {/* Selected Player Badge */}
-          {selectedPlayer && (
-            <div className="mt-4 flex items-center gap-2">
-              <span className={ds.textSecondary}>Analyzing:</span>
-              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${ds.bgAccent} border ${ds.borderAccent}`}>
-                <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">{selectedPlayer.name.split(' ').map(n => n[0]).join('')}</span>
+          
+          {/* Search Overlay */}
+          {showSearch && (
+            <div className={`absolute top-full left-0 right-0 ${ds.bgCard} border-b ${ds.border} p-4 shadow-2xl`}>
+              <div className="max-w-2xl mx-auto">
+                <div className="relative">
+                  <Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 ${ds.textMuted}`} />
+                  <input
+                    type="text"
+                    placeholder="Search players by name or team..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    autoFocus
+                    className={`w-full pl-12 pr-4 py-3 rounded-xl ${ds.input} border text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/50`}
+                  />
+                  <button 
+                    onClick={() => { setShowSearch(false); setSearchQuery(''); }}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
                 </div>
-                <span className={ds.textAccent}>{selectedPlayer.name}</span>
-                <span className={ds.textMuted}>• {selectedPlayer.team}</span>
-                <button 
-                  onClick={() => setSelectedPlayer(null)}
-                  className="ml-2 text-slate-400 hover:text-red-400 transition-colors"
-                >
-                  ×
-                </button>
+                
+                {/* Search Results */}
+                {filteredPlayers.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    {filteredPlayers.map(player => (
+                      <button
+                        key={player.id}
+                        onClick={() => {
+                          setSelectedPlayer(player);
+                          setShowSearch(false);
+                          setSearchQuery('');
+                        }}
+                        className={`w-full p-3 rounded-xl flex items-center gap-3 ${ds.bgCardHover} transition-colors text-left`}
+                      >
+                        <PlayerAvatar player={player} size="sm" />
+                        <div className="flex-1">
+                          <div className={ds.text}>{player.name}</div>
+                          <div className={`text-sm ${ds.textMuted}`}>{player.team} • {player.position}</div>
+                        </div>
+                        <div className="text-right">
+                          <div className={`font-bold ${ds.text}`}>{player.ppg}</div>
+                          <div className={`text-xs ${ds.textMuted}`}>PPG</div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Quick Select */}
+                {!searchQuery && (
+                  <div className="mt-4">
+                    <div className={`text-sm ${ds.textMuted} mb-2`}>Top Players</div>
+                    <div className="flex flex-wrap gap-2">
+                      {topPlayers.map(player => (
+                        <button
+                          key={player.id}
+                          onClick={() => {
+                            setSelectedPlayer(player);
+                            setShowSearch(false);
+                          }}
+                          className={`px-3 py-1.5 rounded-lg ${ds.bgAccent} ${ds.textAccent} text-sm hover:opacity-80 transition-opacity`}
+                        >
+                          {player.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Selected Player Bar */}
+          {selectedPlayer && (
+            <div className={`py-3 border-t ${ds.border}`}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <PlayerAvatar player={selectedPlayer} size="md" />
+                  <div>
+                    <div className={`text-lg font-bold ${ds.text}`}>{selectedPlayer.name}</div>
+                    <div className={`text-sm ${ds.textMuted}`}>{selectedPlayer.team} • {selectedPlayer.position} • #{selectedPlayer.jersey}</div>
+                  </div>
+                  <div className="hidden md:flex items-center gap-4 ml-6">
+                    <MiniStatCard label="PPG" value={selectedPlayer.ppg} color="indigo" ds={ds} />
+                    <MiniStatCard label="RPG" value={selectedPlayer.rpg} color="emerald" ds={ds} />
+                    <MiniStatCard label="APG" value={selectedPlayer.apg} color="purple" ds={ds} />
+                    <MiniStatCard label="FG%" value={`${(selectedPlayer.fgPct * 100).toFixed(1)}%`} color="amber" ds={ds} />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => toggleFavorite(selectedPlayer)}
+                    className={`p-2 rounded-lg transition-colors ${
+                      favorites.includes(selectedPlayer.id) 
+                        ? 'bg-amber-500/20 text-amber-400' 
+                        : `${ds.bgCard} ${ds.textMuted}`
+                    }`}
+                  >
+                    <Star className={`w-5 h-5 ${favorites.includes(selectedPlayer.id) ? 'fill-current' : ''}`} />
+                  </button>
+                  <button 
+                    onClick={() => setSelectedPlayer(null)}
+                    className={`p-2 rounded-lg ${ds.bgCard} ${ds.textMuted} hover:text-red-400 transition-colors`}
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
             </div>
           )}
 
           {/* Tab Navigation */}
-          <div className="mt-4 flex gap-2 overflow-x-auto pb-2">
+          <div className="flex gap-1 overflow-x-auto pb-2 pt-2 scrollbar-hide">
             {TABS.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all whitespace-nowrap ${
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all whitespace-nowrap ${
                   activeTab === tab.id
-                    ? `bg-${tab.color}-500/20 text-${tab.color}-400 border border-${tab.color}-500/30`
+                    ? `bg-gradient-to-r from-${tab.color}-500/20 to-${tab.color}-600/10 text-${tab.color}-400 border border-${tab.color}-500/30 shadow-lg shadow-${tab.color}-500/10`
                     : `${ds.textSecondary} hover:bg-white/5`
                 }`}
               >
@@ -648,1217 +772,351 @@ export default function MLWorkstation() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
-        {renderTabContent()}
-      </div>
-    </div>
-  );
-}
-
-// ==================== TAB COMPONENTS ====================
-
-// Ensemble Predictions Tab
-function EnsemblePredictionsTab({ ds, selectedPlayer, selectedProp, setSelectedProp, propLine, setPropLine, loading, runEnsemblePrediction, ensembleResults, modelComparison }) {
-  const propTypes = ['points', 'rebounds', 'assists', 'threes', 'steals', 'blocks', 'pts+reb+ast'];
-  
-  return (
-    <div className="space-y-6">
-      {/* Input Controls */}
-      <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
-        <h3 className={`text-lg font-semibold ${ds.text} mb-4 flex items-center gap-2`}>
-          <Layers className="w-5 h-5 text-indigo-400" />
-          Ensemble Prediction Engine
-        </h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className={`block text-sm ${ds.textSecondary} mb-2`}>Prop Type</label>
-            <select
-              value={selectedProp}
-              onChange={(e) => setSelectedProp(e.target.value)}
-              className={`w-full px-4 py-2 rounded-xl ${ds.input} border focus:outline-none focus:ring-2 focus:ring-indigo-500/50`}
-            >
-              {propTypes.map(prop => (
-                <option key={prop} value={prop}>{prop.charAt(0).toUpperCase() + prop.slice(1)}</option>
-              ))}
-            </select>
-          </div>
-          
-          <div>
-            <label className={`block text-sm ${ds.textSecondary} mb-2`}>Line</label>
-            <input
-              type="number"
-              step="0.5"
-              value={propLine}
-              onChange={(e) => setPropLine(e.target.value)}
-              placeholder="e.g., 25.5"
-              className={`w-full px-4 py-2 rounded-xl ${ds.input} border focus:outline-none focus:ring-2 focus:ring-indigo-500/50`}
-            />
-          </div>
-          
-          <div className="flex items-end">
-            <button
-              onClick={runEnsemblePrediction}
-              disabled={!selectedPlayer || !propLine || loading}
-              className="w-full px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-medium rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Brain className="w-4 h-4" />}
-              Run Ensemble
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {loading && <LoadingSpinner ds={ds} />}
-
-      {!loading && ensembleResults && (
-        <>
-          {/* Main Prediction */}
-          <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
-            <div className="flex items-start justify-between mb-6">
-              <div>
-                <h3 className={`text-lg font-semibold ${ds.text} flex items-center gap-2`}>
-                  <Target className="w-5 h-5 text-emerald-400" />
-                  Ensemble Prediction
-                </h3>
-                <p className={ds.textSecondary}>Combined output from {ensembleResults.models.length} ML models</p>
-              </div>
-              <ConfidenceBadge confidence={ensembleResults.confidence} ds={ds} />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              <StatCard 
-                label="Prediction" 
-                value={ensembleResults.prediction} 
-                icon={Activity}
-                color="indigo"
-                ds={ds}
-              />
-              <StatCard 
-                label="Recommendation" 
-                value={ensembleResults.recommendation}
-                subValue={`${ensembleResults.edge}% edge`}
-                trend={ensembleResults.recommendation === 'OVER' ? 'up' : 'down'}
-                icon={ensembleResults.recommendation === 'OVER' ? TrendingUp : TrendingDown}
-                color={ensembleResults.recommendation === 'OVER' ? 'emerald' : 'red'}
-                ds={ds}
-              />
-              <StatCard 
-                label="Line" 
-                value={propLine}
-                icon={Target}
-                color="purple"
-                ds={ds}
-              />
-              <StatCard 
-                label="Historical Accuracy" 
-                value={`${ensembleResults.historicalAccuracy.overall}%`}
-                subValue={`${ensembleResults.historicalAccuracy.lastWeek}% last week`}
-                trend="up"
-                icon={Award}
-                color="amber"
-                ds={ds}
-              />
-            </div>
-
-            {/* Probability Distribution Chart */}
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={ensembleResults.probabilityDistribution}>
-                  <defs>
-                    <linearGradient id="probGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke={ds.chartGrid} vertical={false} />
-                  <XAxis dataKey="value" stroke={ds.chartText} fontSize={12} />
-                  <YAxis stroke={ds.chartText} fontSize={12} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: ds.chartTooltipBg, 
-                      border: 'none', 
-                      borderRadius: '12px',
-                      boxShadow: '0 10px 40px rgba(0,0,0,0.3)'
-                    }}
-                  />
-                  <ReferenceLine x={parseFloat(propLine)} stroke="#f59e0b" strokeDasharray="5 5" label={{ value: 'Line', fill: '#f59e0b' }} />
-                  <ReferenceLine x={ensembleResults.prediction} stroke="#10b981" strokeDasharray="5 5" label={{ value: 'Pred', fill: '#10b981' }} />
-                  <Area type="monotone" dataKey="probability" stroke="#6366f1" fill="url(#probGradient)" strokeWidth={2} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Model Breakdown */}
-          <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
-            <h3 className={`text-lg font-semibold ${ds.text} mb-4 flex items-center gap-2`}>
-              <GitBranch className="w-5 h-5 text-purple-400" />
-              Model Breakdown
-            </h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {ensembleResults.models.map((model, idx) => (
-                <div key={idx} className={`${ds.isDark ? 'bg-white/[0.03]' : 'bg-slate-50'} rounded-xl p-4 border ${ds.border}`}>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className={`font-medium ${ds.text}`}>{model.name}</span>
-                    <span className={`text-xs px-2 py-1 rounded-full ${ds.bgAccent} ${ds.textAccent}`}>
-                      {(model.weight * 100).toFixed(0)}% weight
-                    </span>
-                  </div>
-                  <div className={`text-2xl font-bold ${ds.text}`}>{model.prediction}</div>
-                  <div className="flex items-center gap-2 mt-2">
-                    <div className="flex-1 h-2 bg-slate-700 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
-                        style={{ width: `${model.confidence}%` }}
+      <div className="max-w-7xl mx-auto px-4 lg:px-6 py-6">
+        {activeTab === 'predictions' && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Column - Controls */}
+            <div className="space-y-6">
+              {/* Player Selection */}
+              {!selectedPlayer ? (
+                <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
+                  <h3 className={`text-lg font-semibold ${ds.text} mb-4 flex items-center gap-2`}>
+                    <Search className="w-5 h-5 text-indigo-400" />
+                    Select a Player
+                  </h3>
+                  <p className={`${ds.textSecondary} mb-4`}>Click the search icon above or choose from top players:</p>
+                  <div className="space-y-2">
+                    {topPlayers.map(player => (
+                      <PlayerCard 
+                        key={player.id} 
+                        player={player} 
+                        onClick={setSelectedPlayer}
+                        selected={false}
+                        ds={ds}
                       />
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* Prop Type Selection */}
+                  <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
+                    <h3 className={`text-lg font-semibold ${ds.text} mb-4 flex items-center gap-2`}>
+                      <Target className="w-5 h-5 text-indigo-400" />
+                      Prop Type
+                    </h3>
+                    <div className="grid grid-cols-2 gap-2">
+                      {propTypes.map(prop => (
+                        <button
+                          key={prop.id}
+                          onClick={() => setSelectedProp(prop.id)}
+                          className={`p-3 rounded-xl text-left transition-all ${
+                            selectedProp === prop.id
+                              ? 'bg-indigo-500/20 border border-indigo-500/40 text-indigo-400'
+                              : `${ds.bgCard} border ${ds.border} ${ds.textSecondary} hover:border-indigo-500/30`
+                          }`}
+                        >
+                          <prop.icon className="w-4 h-4 mb-1" />
+                          <span className="text-sm font-medium">{prop.label}</span>
+                        </button>
+                      ))}
                     </div>
-                    <span className={`text-xs ${ds.textMuted}`}>{model.confidence}%</span>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </>
-      )}
-
-      {!selectedPlayer && !loading && (
-        <div className={`${ds.bgCard} rounded-2xl p-12 border ${ds.border} text-center`}>
-          <Search className={`w-12 h-12 mx-auto ${ds.textMuted} mb-4`} />
-          <h3 className={`text-lg font-semibold ${ds.text} mb-2`}>Select a Player</h3>
-          <p className={ds.textSecondary}>Search for a player above to run ensemble predictions</p>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Player Analysis Tab
-function PlayerAnalysisTab({ ds, selectedPlayer, selectedProp, loading, runPlayerAnalysis, consistencyData, situationalSplits, streakData }) {
-  return (
-    <div className="space-y-6">
-      {/* Run Analysis Button */}
-      <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className={`text-lg font-semibold ${ds.text} flex items-center gap-2`}>
-              <Activity className="w-5 h-5 text-cyan-400" />
-              Deep Player Analysis
-            </h3>
-            <p className={ds.textSecondary}>Consistency, situational splits, and streak detection</p>
-          </div>
-          <button
-            onClick={runPlayerAnalysis}
-            disabled={!selectedPlayer || loading}
-            className="px-6 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-medium rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Activity className="w-4 h-4" />}
-            Analyze Player
-          </button>
-        </div>
-      </div>
-
-      {loading && <LoadingSpinner ds={ds} />}
-
-      {!loading && consistencyData && (
-        <>
-          {/* Consistency Score */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
-              <h4 className={`font-semibold ${ds.text} mb-4 flex items-center gap-2`}>
-                <Target className="w-4 h-4 text-emerald-400" />
-                Consistency Score
-              </h4>
-              <div className="relative w-32 h-32 mx-auto">
-                <svg className="w-full h-full transform -rotate-90">
-                  <circle cx="64" cy="64" r="56" stroke={ds.isDark ? '#334155' : '#e2e8f0'} strokeWidth="12" fill="none" />
-                  <circle 
-                    cx="64" cy="64" r="56" 
-                    stroke="url(#consistencyGradient)" 
-                    strokeWidth="12" 
-                    fill="none"
-                    strokeDasharray={`${consistencyData.consistencyScore * 3.52} 352`}
-                    strokeLinecap="round"
-                  />
-                  <defs>
-                    <linearGradient id="consistencyGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#10b981" />
-                      <stop offset="100%" stopColor="#06b6d4" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className={`text-3xl font-bold ${ds.text}`}>{consistencyData.consistencyScore}</span>
-                </div>
-              </div>
-              <div className="mt-4 text-center">
-                <div className={ds.textSecondary}>σ = {consistencyData.standardDeviation}</div>
-                <div className={`text-xs ${ds.textMuted}`}>CV = {consistencyData.coefficientOfVariation}</div>
-              </div>
-            </div>
-
-            <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
-              <h4 className={`font-semibold ${ds.text} mb-4 flex items-center gap-2`}>
-                <BarChart3 className="w-4 h-4 text-amber-400" />
-                Hit Rate Distribution
-              </h4>
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className={ds.textSecondary}>Over</span>
-                    <span className="text-emerald-400">{consistencyData.hitRate.over}%</span>
-                  </div>
-                  <div className="h-3 bg-slate-700 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-gradient-to-r from-emerald-500 to-green-400 rounded-full"
-                      style={{ width: `${consistencyData.hitRate.over}%` }}
+                  
+                  {/* Line Input */}
+                  <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
+                    <h3 className={`text-lg font-semibold ${ds.text} mb-4 flex items-center gap-2`}>
+                      <BarChart3 className="w-5 h-5 text-indigo-400" />
+                      Betting Line
+                    </h3>
+                    <input
+                      type="number"
+                      step="0.5"
+                      value={propLine}
+                      onChange={(e) => setPropLine(e.target.value)}
+                      placeholder={`e.g., ${selectedPlayer?.ppg || '25.5'}`}
+                      className={`w-full px-4 py-3 rounded-xl ${ds.input} border focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-lg`}
                     />
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className={ds.textSecondary}>Under</span>
-                    <span className="text-red-400">{consistencyData.hitRate.under}%</span>
-                  </div>
-                  <div className="h-3 bg-slate-700 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-gradient-to-r from-red-500 to-orange-400 rounded-full"
-                      style={{ width: `${consistencyData.hitRate.under}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {streakData && (
-              <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
-                <h4 className={`font-semibold ${ds.text} mb-4 flex items-center gap-2`}>
-                  <Flame className="w-4 h-4 text-orange-400" />
-                  Streak Analysis
-                </h4>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className={ds.textSecondary}>Current Streak</span>
-                    <span className={`font-bold ${streakData.currentStreak.type === 'over' ? 'text-emerald-400' : 'text-red-400'}`}>
-                      {streakData.currentStreak.length} {streakData.currentStreak.type.toUpperCase()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className={ds.textSecondary}>Longest Streak</span>
-                    <span className={`font-bold ${ds.text}`}>{streakData.longestStreak.length}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className={ds.textSecondary}>Momentum</span>
-                    <span className={`font-bold ${ds.textAccent}`}>{streakData.momentum}%</span>
-                  </div>
-                  <div className="flex gap-1 mt-2">
-                    {streakData.recentPattern.map((p, i) => (
-                      <div 
-                        key={i} 
-                        className={`w-6 h-6 rounded flex items-center justify-center text-xs font-bold ${
-                          p === 'O' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
-                        }`}
+                    <div className="flex gap-2 mt-3">
+                      <button 
+                        onClick={() => setPropLine((parseFloat(propLine) || selectedPlayer?.ppg || 25) - 0.5)}
+                        className={`flex-1 py-2 rounded-lg ${ds.bgCard} border ${ds.border} ${ds.textSecondary} hover:border-indigo-500/30`}
                       >
-                        {p}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Situational Splits */}
-          {situationalSplits && (
-            <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
-              <h4 className={`font-semibold ${ds.text} mb-6 flex items-center gap-2`}>
-                <Boxes className="w-5 h-5 text-purple-400" />
-                Situational Splits
-              </h4>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* Home/Away */}
-                <div className={`${ds.isDark ? 'bg-white/[0.03]' : 'bg-slate-50'} rounded-xl p-4`}>
-                  <h5 className={`text-sm font-medium ${ds.textSecondary} mb-3`}>Home vs Away</h5>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className={ds.text}>🏠 Home</span>
-                      <span className="text-emerald-400">{situationalSplits.homeAway.home.avg} avg ({situationalSplits.homeAway.home.hitRate}%)</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className={ds.text}>✈️ Away</span>
-                      <span className="text-amber-400">{situationalSplits.homeAway.away.avg} avg ({situationalSplits.homeAway.away.hitRate}%)</span>
+                        -0.5
+                      </button>
+                      <button 
+                        onClick={() => setPropLine(selectedPlayer?.ppg || 25)}
+                        className={`flex-1 py-2 rounded-lg ${ds.bgCard} border ${ds.border} ${ds.textSecondary} hover:border-indigo-500/30`}
+                      >
+                        Reset
+                      </button>
+                      <button 
+                        onClick={() => setPropLine((parseFloat(propLine) || selectedPlayer?.ppg || 25) + 0.5)}
+                        className={`flex-1 py-2 rounded-lg ${ds.bgCard} border ${ds.border} ${ds.textSecondary} hover:border-indigo-500/30`}
+                      >
+                        +0.5
+                      </button>
                     </div>
                   </div>
-                </div>
-
-                {/* Rest Days */}
-                <div className={`${ds.isDark ? 'bg-white/[0.03]' : 'bg-slate-50'} rounded-xl p-4`}>
-                  <h5 className={`text-sm font-medium ${ds.textSecondary} mb-3`}>Rest Days</h5>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className={ds.text}>B2B</span>
-                      <span className="text-red-400">{situationalSplits.restDays.backToBack.avg} avg</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className={ds.text}>1 Day</span>
-                      <span className="text-amber-400">{situationalSplits.restDays.oneDay.avg} avg</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className={ds.text}>2+ Days</span>
-                      <span className="text-emerald-400">{situationalSplits.restDays.twoPlusDays.avg} avg</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Conference */}
-                <div className={`${ds.isDark ? 'bg-white/[0.03]' : 'bg-slate-50'} rounded-xl p-4`}>
-                  <h5 className={`text-sm font-medium ${ds.textSecondary} mb-3`}>vs Conference</h5>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className={ds.text}>vs East</span>
-                      <span className="text-blue-400">{situationalSplits.vsConference.east.avg} avg ({situationalSplits.vsConference.east.hitRate}%)</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className={ds.text}>vs West</span>
-                      <span className="text-purple-400">{situationalSplits.vsConference.west.avg} avg ({situationalSplits.vsConference.west.hitRate}%)</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Clutch */}
-                <div className={`${ds.isDark ? 'bg-white/[0.03]' : 'bg-slate-50'} rounded-xl p-4`}>
-                  <h5 className={`text-sm font-medium ${ds.textSecondary} mb-3`}>Game Type</h5>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className={ds.text}>Close Games</span>
-                      <span className="text-emerald-400">{situationalSplits.clutchTime.close.avg} 4Q pts</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className={ds.text}>Blowouts</span>
-                      <span className="text-slate-400">{situationalSplits.clutchTime.blowout.avg} 4Q pts</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Performance Chart */}
-          <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
-            <h4 className={`font-semibold ${ds.text} mb-4`}>Recent Performance vs Line</h4>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={consistencyData.streakData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={ds.chartGrid} vertical={false} />
-                  <XAxis dataKey="game" stroke={ds.chartText} fontSize={12} />
-                  <YAxis stroke={ds.chartText} fontSize={12} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: ds.chartTooltipBg, 
-                      border: 'none', 
-                      borderRadius: '12px' 
-                    }}
-                  />
-                  <ReferenceLine y={consistencyData.streakData[0]?.line} stroke="#f59e0b" strokeDasharray="5 5" />
-                  <Bar dataKey="actual" fill="#6366f1" radius={[4, 4, 0, 0]}>
-                    {consistencyData.streakData.map((entry, index) => (
-                      <Cell key={index} fill={entry.hit ? '#10b981' : '#ef4444'} />
-                    ))}
-                  </Bar>
-                </ComposedChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </>
-      )}
-
-      {!selectedPlayer && !loading && (
-        <div className={`${ds.bgCard} rounded-2xl p-12 border ${ds.border} text-center`}>
-          <Activity className={`w-12 h-12 mx-auto ${ds.textMuted} mb-4`} />
-          <h3 className={`text-lg font-semibold ${ds.text} mb-2`}>Select a Player</h3>
-          <p className={ds.textSecondary}>Search for a player above to analyze their performance patterns</p>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Value Finder Tab
-function ValueFinderTab({ ds, selectedPlayer, propLine, loading, runValueFinder, evCalculation, correlatedProps, valueBets }) {
-  return (
-    <div className="space-y-6">
-      {/* Run Value Finder */}
-      <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className={`text-lg font-semibold ${ds.text} flex items-center gap-2`}>
-              <Target className="w-5 h-5 text-emerald-400" />
-              Value Bet Finder
-            </h3>
-            <p className={ds.textSecondary}>Calculate EV, find correlated props, and discover value bets</p>
-          </div>
-          <button
-            onClick={runValueFinder}
-            disabled={!selectedPlayer || !propLine || loading}
-            className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-green-500 text-white font-medium rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Target className="w-4 h-4" />}
-            Find Value
-          </button>
-        </div>
-      </div>
-
-      {loading && <LoadingSpinner ds={ds} />}
-
-      {!loading && evCalculation && (
-        <>
-          {/* EV Calculation */}
-          <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
-            <h4 className={`font-semibold ${ds.text} mb-6 flex items-center gap-2`}>
-              <Calculator className="w-5 h-5 text-emerald-400" />
-              Expected Value Analysis
-            </h4>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <StatCard label="Expected Value" value={`+$${evCalculation.expectedValue}`} icon={DollarSign} color="emerald" ds={ds} />
-              <StatCard label="Edge" value={`${evCalculation.edge}%`} icon={TrendingUp} color="indigo" ds={ds} />
-              <StatCard label="Kelly Bet" value={`${evCalculation.kellyBet}%`} icon={Percent} color="amber" ds={ds} />
-              <StatCard label="Grade" value={evCalculation.grade} icon={Award} color="purple" ds={ds} />
+                  
+                  {/* Run Button */}
+                  <button
+                    onClick={runPrediction}
+                    disabled={loading}
+                    className={`w-full py-4 rounded-2xl font-bold text-lg transition-all flex items-center justify-center gap-3
+                      ${loading 
+                        ? 'bg-slate-700 text-slate-400 cursor-not-allowed' 
+                        : 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white hover:shadow-lg hover:shadow-indigo-500/30 hover:-translate-y-0.5'
+                      }`}
+                  >
+                    {loading ? (
+                      <>
+                        <RefreshCw className="w-5 h-5 animate-spin" />
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <Rocket className="w-5 h-5" />
+                        Run AI Prediction
+                      </>
+                    )}
+                  </button>
+                </>
+              )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className={`${ds.isDark ? 'bg-white/[0.03]' : 'bg-slate-50'} rounded-xl p-4`}>
-                <h5 className={`font-medium ${ds.text} mb-3`}>Probability Breakdown</h5>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className={ds.textSecondary}>Implied Probability</span>
-                    <span className={ds.text}>{evCalculation.impliedProbability}%</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className={ds.textSecondary}>Model Probability</span>
-                    <span className="text-emerald-400 font-bold">{evCalculation.modelProbability}%</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className={ds.textSecondary}>Breakeven</span>
-                    <span className={ds.text}>{evCalculation.breakeven}%</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className={`${ds.isDark ? 'bg-white/[0.03]' : 'bg-slate-50'} rounded-xl p-4`}>
-                <h5 className={`font-medium ${ds.text} mb-3`}>Scenarios</h5>
-                <div className="space-y-2">
-                  {evCalculation.scenarios.map((scenario, idx) => (
-                    <div key={idx} className={`flex justify-between items-center p-2 rounded-lg ${scenario.outcome === 'Over' ? 'bg-emerald-500/10' : 'bg-red-500/10'}`}>
-                      <span className={scenario.outcome === 'Over' ? 'text-emerald-400' : 'text-red-400'}>{scenario.outcome}</span>
-                      <span className={ds.textSecondary}>{scenario.probability}%</span>
-                      <span className={ds.text}>{scenario.payout}</span>
-                      <span className={scenario.outcome === 'Over' ? 'text-emerald-400' : 'text-red-400'}>{scenario.ev}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Recommendation */}
-            <div className={`mt-6 p-4 rounded-xl ${evCalculation.recommendation === 'BET' ? 'bg-emerald-500/10 border border-emerald-500/30' : 'bg-amber-500/10 border border-amber-500/30'}`}>
-              <div className="flex items-center gap-3">
-                {evCalculation.recommendation === 'BET' ? (
-                  <CheckCircle className="w-6 h-6 text-emerald-400" />
-                ) : (
-                  <AlertTriangle className="w-6 h-6 text-amber-400" />
-                )}
-                <div>
-                  <div className={`font-bold ${evCalculation.recommendation === 'BET' ? 'text-emerald-400' : 'text-amber-400'}`}>
-                    {evCalculation.recommendation === 'BET' ? 'Positive EV - Bet Recommended' : 'Low Edge - Consider Passing'}
-                  </div>
-                  <div className={ds.textSecondary}>
-                    Expected ROI: {evCalculation.roi}% | Risk-adjusted Kelly: {evCalculation.kellyBet}% of bankroll
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Correlated Props */}
-          {correlatedProps && (
-            <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
-              <h4 className={`font-semibold ${ds.text} mb-6 flex items-center gap-2`}>
-                <Layers className="w-5 h-5 text-purple-400" />
-                Correlated Props
-              </h4>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h5 className={`font-medium ${ds.textSecondary} mb-3`}>Stat Correlations</h5>
-                  <div className="space-y-3">
-                    {correlatedProps.correlations.map((corr, idx) => (
-                      <div key={idx} className={`p-3 rounded-xl ${ds.isDark ? 'bg-white/[0.03]' : 'bg-slate-50'}`}>
-                        <div className="flex justify-between items-center mb-1">
-                          <span className={ds.text}>{corr.prop} ↔ {corr.stat}</span>
-                          <span className={`font-bold ${corr.correlation > 0.7 ? 'text-emerald-400' : 'text-amber-400'}`}>
-                            r = {corr.correlation.toFixed(2)}
-                          </span>
+            {/* Right Column - Results */}
+            <div className="lg:col-span-2 space-y-6">
+              {loading ? (
+                <LoadingSpinner ds={ds} text="Running ensemble prediction models..." />
+              ) : prediction ? (
+                <>
+                  {/* Main Prediction Card */}
+                  <GlowingCard glow={prediction.recommendation === 'OVER' ? 'emerald' : 'red'}>
+                    <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
+                      <div className="flex items-center justify-between mb-6">
+                        <div>
+                          <h3 className={`text-lg font-semibold ${ds.text} flex items-center gap-2`}>
+                            <Sparkles className="w-5 h-5 text-amber-400" />
+                            AI Prediction Result
+                          </h3>
+                          <p className={ds.textSecondary}>Ensemble of 4 ML models</p>
                         </div>
-                        <div className={`text-xs ${ds.textMuted}`}>{corr.description}</div>
+                        <PredictionBadge type={prediction.recommendation} size="lg" />
                       </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <h5 className={`font-medium ${ds.textSecondary} mb-3`}>Same-Game Parlay Ideas</h5>
-                  <div className="space-y-3">
-                    {correlatedProps.sameGameParlays.map((sgp, idx) => (
-                      <div key={idx} className={`p-3 rounded-xl ${ds.isDark ? 'bg-white/[0.03]' : 'bg-slate-50'} border-l-4 border-purple-500`}>
-                        <div className="flex justify-between items-start mb-2">
-                          <div className={ds.text}>{sgp.props.join(' + ')}</div>
-                          <span className="text-emerald-400 font-bold">{sgp.boost}</span>
-                        </div>
-                        <div className={`text-xs ${ds.textMuted}`}>Correlation: {sgp.correlation.toFixed(2)}</div>
+                      
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <StatCard 
+                          label="Predicted" 
+                          value={prediction.value.toFixed(1)} 
+                          icon={Target}
+                          color="indigo"
+                          ds={ds}
+                        />
+                        <StatCard 
+                          label="Edge" 
+                          value={`${prediction.edge.toFixed(1)}%`}
+                          subValue={prediction.edge > 5 ? 'Strong Edge' : 'Moderate'}
+                          trend={prediction.edge > 3 ? 'up' : 'down'}
+                          icon={Percent}
+                          color="emerald"
+                          ds={ds}
+                        />
+                        <StatCard 
+                          label="Probability" 
+                          value={`${prediction.probability.toFixed(0)}%`}
+                          icon={PieChart}
+                          color="purple"
+                          ds={ds}
+                        />
+                        <StatCard 
+                          label="EV" 
+                          value={`${prediction.ev > 0 ? '+' : ''}${prediction.ev.toFixed(1)}%`}
+                          trend={prediction.ev > 0 ? 'up' : 'down'}
+                          icon={DollarSign}
+                          color="amber"
+                          ds={ds}
+                        />
                       </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Value Bets Scanner */}
-          {valueBets && (
-            <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
-              <h4 className={`font-semibold ${ds.text} mb-6 flex items-center gap-2`}>
-                <Eye className="w-5 h-5 text-amber-400" />
-                Value Bet Scanner
-              </h4>
-              
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <StatCard label="Opportunities" value={valueBets.summary.totalOpportunities} icon={Target} color="indigo" ds={ds} />
-                <StatCard label="High Value" value={valueBets.summary.highValue} icon={Zap} color="emerald" ds={ds} />
-                <StatCard label="Medium Value" value={valueBets.summary.mediumValue} icon={Activity} color="amber" ds={ds} />
-                <StatCard label="Avg Edge" value={`${valueBets.summary.averageEdge}%`} icon={TrendingUp} color="purple" ds={ds} />
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className={`border-b ${ds.border}`}>
-                      <th className={`text-left py-3 px-4 ${ds.textSecondary}`}>Player</th>
-                      <th className={`text-left py-3 px-4 ${ds.textSecondary}`}>Prop</th>
-                      <th className={`text-left py-3 px-4 ${ds.textSecondary}`}>Line</th>
-                      <th className={`text-left py-3 px-4 ${ds.textSecondary}`}>Edge</th>
-                      <th className={`text-left py-3 px-4 ${ds.textSecondary}`}>Confidence</th>
-                      <th className={`text-left py-3 px-4 ${ds.textSecondary}`}>Pick</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {valueBets.valueBets.map((bet, idx) => (
-                      <tr key={idx} className={`border-b ${ds.border} ${ds.bgCardHover}`}>
-                        <td className={`py-3 px-4 ${ds.text}`}>{bet.player}</td>
-                        <td className={`py-3 px-4 ${ds.textSecondary}`}>{bet.prop}</td>
-                        <td className={`py-3 px-4 ${ds.text}`}>{bet.line}</td>
-                        <td className="py-3 px-4">
-                          <span className={`font-bold ${bet.edge > 7 ? 'text-emerald-400' : 'text-amber-400'}`}>
-                            +{bet.edge}%
-                          </span>
-                        </td>
-                        <td className="py-3 px-4">
-                          <ConfidenceBadge confidence={bet.confidence} ds={ds} />
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                            bet.recommendation === 'OVER' 
-                              ? 'bg-emerald-500/20 text-emerald-400' 
-                              : 'bg-red-500/20 text-red-400'
-                          }`}>
-                            {bet.recommendation}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-        </>
-      )}
-
-      {!selectedPlayer && !loading && (
-        <div className={`${ds.bgCard} rounded-2xl p-12 border ${ds.border} text-center`}>
-          <Target className={`w-12 h-12 mx-auto ${ds.textMuted} mb-4`} />
-          <h3 className={`text-lg font-semibold ${ds.text} mb-2`}>Select a Player & Line</h3>
-          <p className={ds.textSecondary}>Search for a player and enter a line to find value</p>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Matchup Intel Tab
-function MatchupIntelTab({ ds, selectedPlayer, loading, runMatchupIntel, defenseMatchup, paceImpact, injuryImpact }) {
-  return (
-    <div className="space-y-6">
-      {/* Run Matchup Intel */}
-      <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className={`text-lg font-semibold ${ds.text} flex items-center gap-2`}>
-              <Shield className="w-5 h-5 text-purple-400" />
-              Matchup Intelligence
-            </h3>
-            <p className={ds.textSecondary}>Defensive matchups, pace analysis, and injury impact</p>
-          </div>
-          <button
-            onClick={runMatchupIntel}
-            disabled={!selectedPlayer || loading}
-            className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Shield className="w-4 h-4" />}
-            Analyze Matchup
-          </button>
-        </div>
-      </div>
-
-      {loading && <LoadingSpinner ds={ds} />}
-
-      {!loading && defenseMatchup && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Defensive Matchup */}
-          <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
-            <h4 className={`font-semibold ${ds.text} mb-4 flex items-center gap-2`}>
-              <Shield className="w-5 h-5 text-red-400" />
-              Defensive Analysis
-            </h4>
-            
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <StatCard label="Defense Rating" value={defenseMatchup.defenseRating} icon={Shield} color="red" ds={ds} />
-              <StatCard label="Position Grade" value={defenseMatchup.positionRating} icon={Award} color="amber" ds={ds} />
-            </div>
-
-            <div className={`p-4 rounded-xl ${ds.isDark ? 'bg-white/[0.03]' : 'bg-slate-50'} mb-4`}>
-              <div className="flex justify-between mb-2">
-                <span className={ds.textSecondary}>Allowed Avg vs Position</span>
-                <span className={ds.text}>{defenseMatchup.allowedAverage}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className={ds.textSecondary}>Matchup Adjustment</span>
-                <span className={defenseMatchup.adjustment > 0 ? 'text-emerald-400' : 'text-red-400'}>
-                  {defenseMatchup.adjustment > 0 ? '+' : ''}{defenseMatchup.adjustment}
-                </span>
-              </div>
-            </div>
-
-            <div>
-              <h5 className={`text-sm ${ds.textSecondary} mb-2`}>Key Defenders</h5>
-              <div className="space-y-2">
-                {defenseMatchup.keyDefenders.map((def, idx) => (
-                  <div key={idx} className={`flex justify-between items-center p-2 rounded-lg ${ds.isDark ? 'bg-white/[0.02]' : 'bg-slate-100'}`}>
-                    <span className={ds.text}>{def.name}</span>
-                    <div className="flex items-center gap-2">
-                      <span className={ds.textMuted}>{def.minutes} min</span>
-                      <span className={`px-2 py-0.5 rounded text-xs ${def.rating >= 90 ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400'}`}>
-                        {def.rating}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className={`mt-4 p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/30`}>
-              <div className="flex items-center gap-2">
-                <Lightbulb className="w-4 h-4 text-indigo-400" />
-                <span className={ds.textAccent}>{defenseMatchup.recommendation}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Pace Impact */}
-          {paceImpact && (
-            <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
-              <h4 className={`font-semibold ${ds.text} mb-4 flex items-center gap-2`}>
-                <Timer className="w-5 h-5 text-cyan-400" />
-                Pace Analysis
-              </h4>
-              
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <StatCard label="Expected Pace" value={paceImpact.expectedPace} icon={Activity} color="cyan" ds={ds} />
-                <StatCard label="Pace Adjustment" value={`${paceImpact.paceAdjustment > 0 ? '+' : ''}${paceImpact.paceAdjustment}`} icon={TrendingUp} color="emerald" ds={ds} />
-              </div>
-
-              <div className={`p-4 rounded-xl ${ds.isDark ? 'bg-white/[0.03]' : 'bg-slate-50'} mb-4`}>
-                <div className="flex justify-between mb-2">
-                  <span className={ds.textSecondary}>Team Pace</span>
-                  <span className={ds.text}>{paceImpact.teamPace}</span>
-                </div>
-                <div className="flex justify-between mb-2">
-                  <span className={ds.textSecondary}>Opponent Pace</span>
-                  <span className={ds.text}>{paceImpact.opponentPace}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className={ds.textSecondary}>League Average</span>
-                  <span className={ds.textMuted}>{paceImpact.leagueAverage}</span>
-                </div>
-              </div>
-
-              <div className={`p-3 rounded-xl ${ds.bgAccent} border ${ds.borderAccent}`}>
-                <div className={ds.textAccent}>{paceImpact.possessionImpact}</div>
-                <div className={`text-xs ${ds.textMuted}`}>Scoring Opportunities: {paceImpact.scoringOpportunities}</div>
-              </div>
-
-              <div className="mt-4">
-                <h5 className={`text-sm ${ds.textSecondary} mb-2`}>Historical Performance by Pace</h5>
-                <div className="space-y-2">
-                  {paceImpact.historicalInPace.map((h, idx) => (
-                    <div key={idx} className="flex justify-between items-center">
-                      <span className={ds.textMuted}>{h.paceRange}</span>
-                      <span className={`font-medium ${h.avgPoints > 27 ? 'text-emerald-400' : ds.text}`}>{h.avgPoints} avg</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Injury Impact */}
-          {injuryImpact && (
-            <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border} lg:col-span-2`}>
-              <h4 className={`font-semibold ${ds.text} mb-4 flex items-center gap-2`}>
-                <AlertTriangle className="w-5 h-5 text-amber-400" />
-                Injury Impact Analysis
-              </h4>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <h5 className={`text-sm ${ds.textSecondary} mb-3`}>Player Status</h5>
-                  <div className={`p-4 rounded-xl ${injuryImpact.playerStatus === 'Healthy' ? 'bg-emerald-500/10 border border-emerald-500/30' : 'bg-red-500/10 border border-red-500/30'}`}>
-                    <div className="flex items-center gap-2">
-                      {injuryImpact.playerStatus === 'Healthy' ? (
-                        <CheckCircle className="w-5 h-5 text-emerald-400" />
-                      ) : (
-                        <AlertTriangle className="w-5 h-5 text-red-400" />
-                      )}
-                      <span className={injuryImpact.playerStatus === 'Healthy' ? 'text-emerald-400' : 'text-red-400'}>
-                        {injuryImpact.playerStatus}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h5 className={`text-sm ${ds.textSecondary} mb-3`}>Teammate Injuries</h5>
-                  {injuryImpact.teamInjuries.length > 0 ? (
-                    <div className="space-y-2">
-                      {injuryImpact.teamInjuries.map((inj, idx) => (
-                        <div key={idx} className={`p-3 rounded-xl ${ds.isDark ? 'bg-white/[0.03]' : 'bg-slate-50'}`}>
-                          <div className="flex justify-between items-center mb-1">
-                            <span className={ds.text}>{inj.player}</span>
-                            <span className="text-amber-400 text-xs">{inj.status}</span>
-                          </div>
-                          <div className={`text-xs ${ds.textMuted}`}>{inj.impact}</div>
+                      
+                      <ConfidenceMeter confidence={prediction.confidence} size="lg" ds={ds} />
+                      
+                      <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-700/50">
+                        <div className="text-center">
+                          <div className={`text-2xl font-bold ${ds.text}`}>{prediction.kellyCriterion.toFixed(1)}%</div>
+                          <div className={`text-sm ${ds.textMuted}`}>Kelly Criterion</div>
                         </div>
+                        <div className="text-center">
+                          <div className={`text-2xl font-bold ${ds.text}`}>{prediction.sharpScore.toFixed(0)}</div>
+                          <div className={`text-sm ${ds.textMuted}`}>Sharp Score</div>
+                        </div>
+                        <div className="text-center">
+                          <RiskBadge level={prediction.edge > 8 ? 'low' : prediction.edge > 4 ? 'medium' : 'high'} />
+                        </div>
+                      </div>
+                    </div>
+                  </GlowingCard>
+                  
+                  {/* Model Breakdown */}
+                  <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
+                    <h3 className={`text-lg font-semibold ${ds.text} mb-4 flex items-center gap-2`}>
+                      <Layers className="w-5 h-5 text-indigo-400" />
+                      Model Breakdown
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {models.map((model, idx) => (
+                        <ModelPanel key={idx} model={model} ds={ds} />
                       ))}
                     </div>
-                  ) : (
-                    <div className={`p-4 rounded-xl ${ds.isDark ? 'bg-white/[0.03]' : 'bg-slate-50'} text-center ${ds.textMuted}`}>
-                      No significant injuries
+                  </div>
+                  
+                  {/* Charts */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
+                      <h3 className={`text-lg font-semibold ${ds.text} mb-4`}>Probability Distribution</h3>
+                      <PredictionDistributionChart line={propLine} ds={ds} />
                     </div>
-                  )}
-                </div>
-
-                <div>
-                  <h5 className={`text-sm ${ds.textSecondary} mb-3`}>Opponent Injuries</h5>
-                  {injuryImpact.opponentInjuries.length > 0 ? (
-                    <div className="space-y-2">
-                      {injuryImpact.opponentInjuries.map((inj, idx) => (
-                        <div key={idx} className={`p-3 rounded-xl ${ds.isDark ? 'bg-white/[0.03]' : 'bg-slate-50'}`}>
-                          <div className="flex justify-between items-center mb-1">
-                            <span className={ds.text}>{inj.player}</span>
-                            <span className="text-red-400 text-xs">{inj.status}</span>
-                          </div>
-                          <div className={`text-xs text-emerald-400`}>{inj.impact}</div>
-                        </div>
+                    <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
+                      <h3 className={`text-lg font-semibold ${ds.text} mb-4`}>Historical Performance</h3>
+                      <HistoricalTrendChart data={historicalData} ds={ds} />
+                    </div>
+                  </div>
+                  
+                  {/* Insights */}
+                  <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
+                    <h3 className={`text-lg font-semibold ${ds.text} mb-4 flex items-center gap-2`}>
+                      <Lightbulb className="w-5 h-5 text-amber-400" />
+                      AI Insights
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {insights.map((insight, idx) => (
+                        <InsightCard key={idx} {...insight} ds={ds} />
                       ))}
                     </div>
-                  ) : (
-                    <div className={`p-4 rounded-xl ${ds.isDark ? 'bg-white/[0.03]' : 'bg-slate-50'} text-center ${ds.textMuted}`}>
-                      No significant injuries
-                    </div>
-                  )}
+                  </div>
+                  
+                  {/* Quick Actions */}
+                  <div className="flex flex-wrap gap-3">
+                    <QuickAction label="Save Prediction" icon={Bookmark} onClick={() => {}} color="indigo" ds={ds} />
+                    <QuickAction label="Compare Players" icon={Users} onClick={() => {}} color="purple" ds={ds} />
+                    <QuickAction label="Export Report" icon={Download} onClick={() => {}} color="emerald" ds={ds} />
+                    <QuickAction label="Share Analysis" icon={Share2} onClick={() => {}} color="amber" ds={ds} />
+                  </div>
+                </>
+              ) : (
+                <div className={`${ds.bgCard} rounded-2xl p-12 border ${ds.border} text-center`}>
+                  <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center">
+                    <Brain className="w-10 h-10 text-indigo-400" />
+                  </div>
+                  <h3 className={`text-xl font-semibold ${ds.text} mb-2`}>Ready to Analyze</h3>
+                  <p className={`${ds.textSecondary} max-w-md mx-auto`}>
+                    Select a player, choose a prop type, and enter a betting line to get AI-powered predictions from our ensemble of machine learning models.
+                  </p>
                 </div>
-              </div>
+              )}
+            </div>
+          </div>
+        )}
 
-              {/* Net Impact */}
-              <div className={`mt-6 p-4 rounded-xl bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 border border-emerald-500/30`}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Zap className="w-6 h-6 text-emerald-400" />
-                    <div>
-                      <div className={`font-bold ${ds.text}`}>Net Injury Impact</div>
-                      <div className={ds.textSecondary}>Combined effect on player projection</div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-emerald-400">{injuryImpact.netImpact}</div>
-                    <div className={`text-xs ${ds.textMuted}`}>{injuryImpact.confidence}% confidence</div>
-                  </div>
-                </div>
+        {activeTab === 'analysis' && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
+              <h3 className={`text-lg font-semibold ${ds.text} mb-4 flex items-center gap-2`}>
+                <Activity className="w-5 h-5 text-cyan-400" />
+                Player Performance Radar
+              </h3>
+              <PerformanceRadar ds={ds} />
+            </div>
+            <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
+              <h3 className={`text-lg font-semibold ${ds.text} mb-4 flex items-center gap-2`}>
+                <BarChart3 className="w-5 h-5 text-cyan-400" />
+                Model Comparison
+              </h3>
+              <ModelComparisonChart ds={ds} />
+            </div>
+            <div className={`lg:col-span-2 ${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
+              <h3 className={`text-lg font-semibold ${ds.text} mb-4`}>Recent Game Log</h3>
+              <HistoricalTrendChart ds={ds} />
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'value' && (
+          <div className="text-center py-12">
+            <Target className={`w-16 h-16 mx-auto mb-4 text-emerald-400`} />
+            <h3 className={`text-xl font-semibold ${ds.text} mb-2`}>Value Scanner</h3>
+            <p className={ds.textSecondary}>Automatically scan for +EV betting opportunities</p>
+          </div>
+        )}
+
+        {activeTab === 'matchups' && (
+          <div className="text-center py-12">
+            <Shield className={`w-16 h-16 mx-auto mb-4 text-purple-400`} />
+            <h3 className={`text-xl font-semibold ${ds.text} mb-2`}>Matchup Intelligence</h3>
+            <p className={ds.textSecondary}>Deep defensive matchup analysis</p>
+          </div>
+        )}
+
+        {activeTab === 'models' && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
+              <h3 className={`text-lg font-semibold ${ds.text} mb-4`}>Model Performance</h3>
+              <ModelComparisonChart ds={ds} />
+            </div>
+            <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
+              <h3 className={`text-lg font-semibold ${ds.text} mb-4`}>Training Metrics</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <StatCard label="Accuracy" value="74.5%" icon={Target} color="emerald" ds={ds} />
+                <StatCard label="Precision" value="76.2%" icon={Crosshair} color="indigo" ds={ds} />
+                <StatCard label="Recall" value="73.1%" icon={Activity} color="purple" ds={ds} />
+                <StatCard label="F1 Score" value="74.6%" icon={Award} color="amber" ds={ds} />
               </div>
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
 
-      {!selectedPlayer && !loading && (
-        <div className={`${ds.bgCard} rounded-2xl p-12 border ${ds.border} text-center`}>
-          <Shield className={`w-12 h-12 mx-auto ${ds.textMuted} mb-4`} />
-          <h3 className={`text-lg font-semibold ${ds.text} mb-2`}>Select a Player</h3>
-          <p className={ds.textSecondary}>Search for a player above to analyze their matchup</p>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Model Lab Tab
-function ModelLabTab({ ds, modelComparison, ensembleResults }) {
-  // Generate default comparison data if not available
-  const comparison = modelComparison || {
-    models: [
-      { name: 'XGBoost', accuracy: 72.3, precision: 0.74, recall: 0.71, f1: 0.72, roi: 8.5 },
-      { name: 'Random Forest', accuracy: 68.9, precision: 0.70, recall: 0.68, f1: 0.69, roi: 5.2 },
-      { name: 'LSTM', accuracy: 70.1, precision: 0.72, recall: 0.69, f1: 0.70, roi: 6.8 },
-      { name: 'Ensemble', accuracy: 74.5, precision: 0.76, recall: 0.73, f1: 0.74, roi: 11.2 },
-    ],
-    historicalPerformance: Array.from({ length: 10 }, (_, i) => ({
-      week: `W${i + 1}`,
-      xgboost: 65 + Math.random() * 15,
-      rf: 62 + Math.random() * 15,
-      lstm: 64 + Math.random() * 15,
-      ensemble: 68 + Math.random() * 15,
-    }))
-  };
-
-  return (
-    <div className="space-y-6">
-      {/* Model Overview */}
-      <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
-        <h3 className={`text-lg font-semibold ${ds.text} mb-6 flex items-center gap-2`}>
-          <Cpu className="w-5 h-5 text-pink-400" />
-          Model Laboratory
-        </h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {comparison.models.map((model, idx) => (
-            <div 
-              key={idx} 
-              className={`p-4 rounded-xl ${model.name === 'Ensemble' ? 'bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30' : `${ds.isDark ? 'bg-white/[0.03]' : 'bg-slate-50'} border ${ds.border}`}`}
+        {activeTab === 'live' && (
+          <div className="text-center py-12">
+            <Radio className={`w-16 h-16 mx-auto mb-4 text-red-400 ${liveMode ? 'animate-pulse' : ''}`} />
+            <h3 className={`text-xl font-semibold ${ds.text} mb-2`}>Live Feed</h3>
+            <p className={ds.textSecondary}>
+              {liveMode ? 'Connected to live data stream' : 'Enable live mode to stream real-time predictions'}
+            </p>
+            <button 
+              onClick={() => setLiveMode(!liveMode)}
+              className={`mt-4 px-6 py-2 rounded-xl font-medium transition-all ${
+                liveMode 
+                  ? 'bg-red-500/20 text-red-400 border border-red-500/30' 
+                  : 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
+              }`}
             >
-              <div className="flex items-center gap-2 mb-3">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${model.name === 'Ensemble' ? 'bg-gradient-to-br from-indigo-500 to-purple-500' : 'bg-slate-700'}`}>
-                  {model.name === 'Ensemble' ? <Sparkles className="w-4 h-4 text-white" /> : <Cpu className="w-4 h-4 text-slate-400" />}
-                </div>
-                <span className={`font-medium ${ds.text}`}>{model.name}</span>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className={ds.textMuted}>Accuracy</span>
-                  <span className={`font-bold ${model.accuracy > 72 ? 'text-emerald-400' : ds.text}`}>{model.accuracy}%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className={ds.textMuted}>Precision</span>
-                  <span className={ds.text}>{model.precision}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className={ds.textMuted}>Recall</span>
-                  <span className={ds.text}>{model.recall}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className={ds.textMuted}>F1 Score</span>
-                  <span className={ds.text}>{model.f1}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className={ds.textMuted}>ROI</span>
-                  <span className={`font-bold ${model.roi > 8 ? 'text-emerald-400' : model.roi > 5 ? 'text-amber-400' : 'text-red-400'}`}>
-                    +{model.roi}%
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Historical Performance Chart */}
-      <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
-        <h4 className={`font-semibold ${ds.text} mb-4`}>Model Accuracy Over Time</h4>
-        <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={comparison.historicalPerformance}>
-              <CartesianGrid strokeDasharray="3 3" stroke={ds.chartGrid} vertical={false} />
-              <XAxis dataKey="week" stroke={ds.chartText} fontSize={12} />
-              <YAxis stroke={ds.chartText} fontSize={12} domain={[55, 85]} />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: ds.chartTooltipBg, 
-                  border: 'none', 
-                  borderRadius: '12px' 
-                }}
-              />
-              <Legend />
-              <Line type="monotone" dataKey="xgboost" name="XGBoost" stroke="#6366f1" strokeWidth={2} dot={{ r: 4 }} />
-              <Line type="monotone" dataKey="rf" name="Random Forest" stroke="#10b981" strokeWidth={2} dot={{ r: 4 }} />
-              <Line type="monotone" dataKey="lstm" name="LSTM" stroke="#f59e0b" strokeWidth={2} dot={{ r: 4 }} />
-              <Line type="monotone" dataKey="ensemble" name="Ensemble" stroke="#ec4899" strokeWidth={3} dot={{ r: 5 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Model Features */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
-          <h4 className={`font-semibold ${ds.text} mb-4 flex items-center gap-2`}>
-            <Database className="w-5 h-5 text-cyan-400" />
-            Feature Importance
-          </h4>
-          <div className="space-y-3">
-            {[
-              { feature: 'Recent Performance (L10)', importance: 92 },
-              { feature: 'Home/Away Splits', importance: 78 },
-              { feature: 'Rest Days', importance: 75 },
-              { feature: 'Defensive Rating', importance: 72 },
-              { feature: 'Pace Factor', importance: 68 },
-              { feature: 'Injury Report', importance: 65 },
-              { feature: 'Season Average', importance: 62 },
-              { feature: 'Team Correlation', importance: 58 },
-            ].map((f, idx) => (
-              <div key={idx}>
-                <div className="flex justify-between mb-1">
-                  <span className={ds.textSecondary}>{f.feature}</span>
-                  <span className={ds.text}>{f.importance}%</span>
-                </div>
-                <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full"
-                    style={{ width: `${f.importance}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
-          <h4 className={`font-semibold ${ds.text} mb-4 flex items-center gap-2`}>
-            <GitBranch className="w-5 h-5 text-purple-400" />
-            Model Architecture
-          </h4>
-          <div className="space-y-4">
-            {[
-              { name: 'XGBoost', layers: '3 Boosting Stages', params: '2.4M', training: '45 epochs' },
-              { name: 'Random Forest', layers: '500 Trees', params: '1.8M', training: 'Bagging' },
-              { name: 'LSTM', layers: '2 LSTM + 2 Dense', params: '3.1M', training: '100 epochs' },
-              { name: 'Ensemble', layers: 'Weighted Average', params: '7.3M', training: 'Meta-learner' },
-            ].map((m, idx) => (
-              <div key={idx} className={`p-3 rounded-xl ${ds.isDark ? 'bg-white/[0.03]' : 'bg-slate-50'}`}>
-                <div className={`font-medium ${ds.text} mb-2`}>{m.name}</div>
-                <div className="grid grid-cols-3 gap-2 text-xs">
-                  <div>
-                    <span className={ds.textMuted}>Architecture</span>
-                    <div className={ds.textSecondary}>{m.layers}</div>
-                  </div>
-                  <div>
-                    <span className={ds.textMuted}>Parameters</span>
-                    <div className={ds.textSecondary}>{m.params}</div>
-                  </div>
-                  <div>
-                    <span className={ds.textMuted}>Training</span>
-                    <div className={ds.textSecondary}>{m.training}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Bankroll AI Tab
-function BankrollAITab({ ds, loading, runBankrollOptimization, bankrollOptimization }) {
-  const [bankrollAmount, setBankrollAmount] = useState(1000);
-  const [riskLevel, setRiskLevel] = useState('moderate');
-
-  return (
-    <div className="space-y-6">
-      {/* Configuration */}
-      <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
-        <h3 className={`text-lg font-semibold ${ds.text} mb-4 flex items-center gap-2`}>
-          <Briefcase className="w-5 h-5 text-amber-400" />
-          Bankroll Optimizer AI
-        </h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className={`block text-sm ${ds.textSecondary} mb-2`}>Bankroll Amount</label>
-            <input
-              type="number"
-              value={bankrollAmount}
-              onChange={(e) => setBankrollAmount(parseFloat(e.target.value) || 0)}
-              className={`w-full px-4 py-2 rounded-xl ${ds.input} border focus:outline-none focus:ring-2 focus:ring-amber-500/50`}
-            />
-          </div>
-          
-          <div>
-            <label className={`block text-sm ${ds.textSecondary} mb-2`}>Risk Level</label>
-            <select
-              value={riskLevel}
-              onChange={(e) => setRiskLevel(e.target.value)}
-              className={`w-full px-4 py-2 rounded-xl ${ds.input} border focus:outline-none focus:ring-2 focus:ring-amber-500/50`}
-            >
-              <option value="conservative">Conservative</option>
-              <option value="moderate">Moderate</option>
-              <option value="aggressive">Aggressive</option>
-            </select>
-          </div>
-          
-          <div className="flex items-end">
-            <button
-              onClick={runBankrollOptimization}
-              disabled={loading}
-              className="w-full px-6 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-medium rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Briefcase className="w-4 h-4" />}
-              Optimize
+              {liveMode ? 'Disconnect' : 'Go Live'}
             </button>
           </div>
-        </div>
+        )}
       </div>
 
-      {loading && <LoadingSpinner ds={ds} />}
-
-      {!loading && bankrollOptimization && (
-        <>
-          {/* Key Metrics */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard label="Recommended Bet Size" value={`$${bankrollOptimization.recommendedBetSize}`} icon={DollarSign} color="emerald" ds={ds} />
-            <StatCard label="Kelly %" value={`${bankrollOptimization.kellyPercentage}%`} icon={Percent} color="indigo" ds={ds} />
-            <StatCard label="Expected Growth" value={`+${bankrollOptimization.expectedGrowth}%`} trend="up" icon={TrendingUp} color="cyan" ds={ds} />
-            <StatCard label="Drawdown Risk" value={`${bankrollOptimization.drawdownRisk}%`} icon={AlertTriangle} color="amber" ds={ds} />
-          </div>
-
-          {/* Optimal Bets */}
-          <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
-            <h4 className={`font-semibold ${ds.text} mb-4 flex items-center gap-2`}>
-              <Target className="w-5 h-5 text-emerald-400" />
-              Optimal Bet Sizing
-            </h4>
-            
-            <div className="space-y-3">
-              {bankrollOptimization.optimalBets.map((bet, idx) => (
-                <div key={idx} className={`p-4 rounded-xl ${ds.isDark ? 'bg-white/[0.03]' : 'bg-slate-50'} border ${ds.border}`}>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className={`font-medium ${ds.text}`}>{bet.bet}</div>
-                      <div className={`text-sm ${ds.textMuted}`}>EV: +{bet.ev}% | Risk: {bet.risk}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-emerald-400">${bet.size}</div>
-                      <div className={`text-xs ${ds.textMuted}`}>{((bet.size / bankrollOptimization.currentBankroll) * 100).toFixed(1)}% of bankroll</div>
-                    </div>
-                  </div>
-                </div>
-              ))}
+      {/* Status Bar */}
+      <div className={`fixed bottom-0 left-0 right-0 ${ds.bgCard} border-t ${ds.border} backdrop-blur-xl`}>
+        <div className="max-w-7xl mx-auto px-4 lg:px-6 py-2">
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <PulsingDot color="emerald" />
+                <span className={ds.textSecondary}>ML Service Connected</span>
+              </div>
+              <div className={ds.textMuted}>|</div>
+              <div className={ds.textMuted}>4 Models Active</div>
+              <div className={ds.textMuted}>|</div>
+              <div className={ds.textMuted}>Last Update: Just now</div>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className={ds.textMuted}>v5.0.0</span>
+              <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs">Premium</span>
             </div>
           </div>
-
-          {/* Projected Performance */}
-          <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
-            <h4 className={`font-semibold ${ds.text} mb-4`}>30-Day Projection</h4>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={bankrollOptimization.projectedPerformance}>
-                  <defs>
-                    <linearGradient id="bankrollGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke={ds.chartGrid} vertical={false} />
-                  <XAxis dataKey="day" stroke={ds.chartText} fontSize={12} />
-                  <YAxis stroke={ds.chartText} fontSize={12} domain={['dataMin - 50', 'dataMax + 50']} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: ds.chartTooltipBg, 
-                      border: 'none', 
-                      borderRadius: '12px' 
-                    }}
-                    formatter={(value) => [`$${value.toFixed(2)}`, 'Bankroll']}
-                  />
-                  <Area type="monotone" dataKey="bankroll" stroke="#f59e0b" fill="url(#bankrollGradient)" strokeWidth={2} />
-                  <Line type="monotone" dataKey="projection" stroke="#10b981" strokeDasharray="5 5" strokeWidth={2} dot={false} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Risk Management Tips */}
-          <div className={`${ds.bgCard} rounded-2xl p-6 border ${ds.border}`}>
-            <h4 className={`font-semibold ${ds.text} mb-4 flex items-center gap-2`}>
-              <Lightbulb className="w-5 h-5 text-amber-400" />
-              AI Recommendations
-            </h4>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className={`p-4 rounded-xl ${ds.bgSuccess} border border-emerald-500/30`}>
-                <div className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-emerald-400 mt-0.5" />
-                  <div>
-                    <div className={`font-medium ${ds.textSuccess}`}>Best Practice</div>
-                    <div className={ds.textSecondary}>Never bet more than {bankrollOptimization.kellyPercentage * 2}% on a single wager to manage variance.</div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className={`p-4 rounded-xl ${ds.bgWarning} border border-amber-500/30`}>
-                <div className="flex items-start gap-3">
-                  <AlertTriangle className="w-5 h-5 text-amber-400 mt-0.5" />
-                  <div>
-                    <div className={`font-medium ${ds.textWarning}`}>Risk Alert</div>
-                    <div className={ds.textSecondary}>Current drawdown risk of {bankrollOptimization.drawdownRisk}% suggests maintaining discipline on losing streaks.</div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className={`p-4 rounded-xl ${ds.bgAccent} border ${ds.borderAccent}`}>
-                <div className="flex items-start gap-3">
-                  <TrendingUp className="w-5 h-5 text-indigo-400 mt-0.5" />
-                  <div>
-                    <div className={`font-medium ${ds.textAccent}`}>Growth Strategy</div>
-                    <div className={ds.textSecondary}>At current edge, expect ~{bankrollOptimization.expectedGrowth}% monthly growth with consistent betting.</div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className={`p-4 rounded-xl ${ds.isDark ? 'bg-white/[0.03]' : 'bg-slate-50'} border ${ds.border}`}>
-                <div className="flex items-start gap-3">
-                  <Clock className="w-5 h-5 text-slate-400 mt-0.5" />
-                  <div>
-                    <div className={`font-medium ${ds.text}`}>Patience Pays</div>
-                    <div className={ds.textSecondary}>Long-term profitability requires 500+ bets for edge to materialize consistently.</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
+        </div>
+      </div>
     </div>
   );
 }

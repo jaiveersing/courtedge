@@ -1,8 +1,8 @@
-import WebSocket from 'ws';
+import { WebSocketServer } from 'ws';
 
 class MLWebSocketServer {
   constructor(port = 8080) {
-    this.wss = new WebSocket.Server({ port });
+    this.wss = new WebSocketServer({ port });
     this.clients = new Set();
     this.mlServiceUrl = process.env.ML_SERVICE_URL || 'http://localhost:8000';
     
