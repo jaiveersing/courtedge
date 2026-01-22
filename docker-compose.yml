@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  # Express Backend
+  backend:
+    build: ./server
+    ports:
+      - "3000:3000"
+    environment:
+      - ML_SERVICE_URL=http://ml_service:8000
+      - NODE_ENV=production
+      - SERVER_BASE44_BASE_URL=${SERVER_BASE44_BASE_URL}
+      - SERVER_BASE44_APP_ID=${SERVER_BASE44_APP_ID}
+      - SERVER_BASE44_API_KEY=${SERVER_BASE44_API_KEY}
+    depends_on:
+      - ml_service
+      - redis
+    networks:
+      - courtedge-network
+
+  # Python ML Service
+  ml_service:
+    build: ./ml_service
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    volumes:
+      - ./ml_service/models:/app/models
+      - ./ml_service/data:/app/data
+    depends_on:
+      - redis
+    networks:
+      - courtedge-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - courtedge-network
+    command: redis-server --save 60 1 --loglevel warning
+
+  # React Frontend
+  frontend:
+    build: .
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    networks:
+      - courtedge-network
+    environment:
+      - VITE_API_URL=http://backend:3000
+
+networks:
+  courtedge-network:
+    driver: bridge
+
+volumes:
+  redis-data:

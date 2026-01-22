@@ -1,0 +1,102 @@
+{
+  "name": "Bet",
+  "type": "object",
+  "properties": {
+    "game_id": {
+      "type": "string",
+      "description": "Unique identifier for the NBA game"
+    },
+    "home_team": {
+      "type": "string",
+      "description": "Home team abbreviation"
+    },
+    "away_team": {
+      "type": "string",
+      "description": "Away team abbreviation"
+    },
+    "game_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of the game"
+    },
+    "bet_type": {
+      "type": "string",
+      "enum": [
+        "spread",
+        "moneyline",
+        "total",
+        "player_prop"
+      ],
+      "description": "Type of bet placed"
+    },
+    "bet_description": {
+      "type": "string",
+      "description": "Detailed description of the bet"
+    },
+    "odds": {
+      "type": "number",
+      "description": "Decimal odds for the bet"
+    },
+    "stake": {
+      "type": "number",
+      "description": "Amount wagered"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "won",
+        "lost",
+        "void",
+        "cash_out"
+      ],
+      "default": "pending",
+      "description": "Current status of the bet"
+    },
+    "payout": {
+      "type": "number",
+      "description": "Payout amount if bet wins"
+    },
+    "actual_payout": {
+      "type": "number",
+      "description": "Actual payout received (for settled bets)"
+    },
+    "sportsbook": {
+      "type": "string",
+      "enum": [
+        "draftkings",
+        "fanduel",
+        "betmgm",
+        "caesars",
+        "pointsbet",
+        "other"
+      ],
+      "description": "Sportsbook where bet was placed"
+    },
+    "confidence": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "User confidence level (1-5 stars)"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Personal notes about the bet"
+    },
+    "is_public": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this bet is shared publicly"
+    }
+  },
+  "required": [
+    "home_team",
+    "away_team",
+    "game_date",
+    "bet_type",
+    "bet_description",
+    "odds",
+    "stake",
+    "sportsbook"
+  ]
+}

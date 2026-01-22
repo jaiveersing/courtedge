@@ -1,0 +1,21 @@
+# Build commands for Render
+build.sh:
+  #!/bin/bash
+  pip install -r requirements-prod.txt
+
+# Or use this render.yaml for Blueprint deployment
+services:
+  - type: web
+    name: courtedge-ml-api
+    runtime: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements-prod.txt
+    startCommand: uvicorn src.api:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: CORS_ORIGINS
+        value: https://courtedge-app.vercel.app,https://courtedge-a079kfhg4-jaiveers-projects-6579b14c.vercel.app
+      - key: PYTHON_VERSION
+        value: 3.11.0

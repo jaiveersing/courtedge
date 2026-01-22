@@ -1,0 +1,53 @@
+{
+  "name": "PlayerGameLog",
+  "type": "object",
+  "properties": {
+    "player_id": {
+      "type": "string"
+    },
+    "player_name": {
+      "type": "string"
+    },
+    "season": {
+      "type": "string",
+      "description": "Season year (e.g., 2023-24, 2022-23)"
+    },
+    "game_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "opponent_team": {
+      "type": "string"
+    },
+    "is_home_game": {
+      "type": "boolean"
+    },
+    "points": {
+      "type": "integer"
+    },
+    "rebounds": {
+      "type": "integer"
+    },
+    "assists": {
+      "type": "integer"
+    },
+    "steals": {
+      "type": "integer"
+    },
+    "blocks": {
+      "type": "integer"
+    },
+    "minutes_played": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "player_id",
+    "player_name",
+    "game_date",
+    "points",
+    "rebounds",
+    "assists",
+    "season"
+  ]
+}

@@ -1,0 +1,22 @@
+# CourtEdge ML Service - Production Requirements (Lightweight)
+# For Render/Railway free tier deployment
+
+# FastAPI & Server
+fastapi==0.104.1
+uvicorn==0.24.0
+pydantic==2.5.0
+
+# ML Core (lightweight alternatives)
+scikit-learn==1.3.2
+numpy==1.26.2
+pandas==2.1.3
+joblib==1.3.2
+
+# API & Network
+requests==2.31.0
+httpx==0.25.2
+aiohttp==3.9.1
+
+# Utilities
+python-dotenv==1.0.0
+python-dateutil==2.8.2

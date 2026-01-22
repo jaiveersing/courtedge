@@ -1,0 +1,98 @@
+{
+  "name": "Prediction",
+  "type": "object",
+  "properties": {
+    "game_id": {
+      "type": "string",
+      "description": "Unique identifier for the NBA game"
+    },
+    "home_team": {
+      "type": "string",
+      "description": "Home team abbreviation"
+    },
+    "away_team": {
+      "type": "string",
+      "description": "Away team abbreviation"
+    },
+    "game_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of the game"
+    },
+    "home_score_prediction": {
+      "type": "number",
+      "description": "Predicted home team score"
+    },
+    "away_score_prediction": {
+      "type": "number",
+      "description": "Predicted away team score"
+    },
+    "spread_prediction": {
+      "type": "number",
+      "description": "Predicted point spread"
+    },
+    "total_prediction": {
+      "type": "number",
+      "description": "Predicted total points"
+    },
+    "win_probability": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Home team win probability (0-1)"
+    },
+    "confidence_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Model confidence percentage"
+    },
+    "confidence_interval_low": {
+      "type": "number",
+      "description": "Lower bound of 95% confidence interval"
+    },
+    "confidence_interval_high": {
+      "type": "number",
+      "description": "Upper bound of 95% confidence interval"
+    },
+    "prediction_uncertainty": {
+      "type": "number",
+      "description": "Standard deviation of prediction"
+    },
+    "value_bets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "bet_type": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "predicted_odds": {
+            "type": "number"
+          },
+          "best_available_odds": {
+            "type": "number"
+          },
+          "edge_percentage": {
+            "type": "number"
+          },
+          "sportsbook": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Identified value betting opportunities"
+    }
+  },
+  "required": [
+    "game_id",
+    "home_team",
+    "away_team",
+    "game_date",
+    "win_probability",
+    "confidence_score"
+  ]
+}

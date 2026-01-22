@@ -1,0 +1,754 @@
+openapi: 3.0.3
+info:
+  title: CourtEdge API
+  description: Sports betting platform with AI predictions, line shopping, and bankroll management
+  version: 1.0.0
+  contact:
+    email: support@courtedge.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.courtedge.com/v1
+    description: Production server
+  - url: http://localhost:3000/api
+    description: Development server
+
+tags:
+  - name: Authentication
+    description: User authentication operations
+  - name: Predictions
+    description: Game and player prop predictions
+  - name: Odds
+    description: Live odds and line shopping
+  - name: Bets
+    description: Bet tracking and management
+  - name: Bankroll
+    description: Bankroll management tools
+  - name: Social
+    description: Social features and community
+  - name: Injuries
+    description: Player injury reports
+  - name: Notifications
+    description: Push notifications
+  - name: Players
+    description: Player stats and analytics
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        username:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        role:
+          type: string
+          enum: [user, pro, admin]
+        bankroll:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+
+    Prediction:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        gameId:
+          type: string
+        sport:
+          type: string
+        gameDate:
+          type: string
+          format: date-time
+        homeTeam:
+          type: string
+        awayTeam:
+          type: string
+        predictedWinner:
+          type: string
+        winProbability:
+          type: number
+        predictedSpread:
+          type: number
+        spreadConfidence:
+          type: number
+        predictedTotal:
+          type: number
+        totalConfidence:
+          type: number
+        modelVersion:
+          type: string
+
+    Bet:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        sport:
+          type: string
+        league:
+          type: string
+        gameId:
+          type: string
+        gameDate:
+          type: string
+          format: date-time
+        homeTeam:
+          type: string
+        awayTeam:
+          type: string
+        betType:
+          type: string
+          enum: [single, parlay, teaser, round_robin]
+        market:
+          type: string
+          enum: [spread, moneyline, total, prop]
+        selection:
+          type: string
+        line:
+          type: number
+        odds:
+          type: number
+        stakeAmount:
+          type: number
+        units:
+          type: number
+        toWin:
+          type: number
+        bookmaker:
+          type: string
+        status:
+          type: string
+          enum: [pending, won, lost, push, cancelled]
+        payout:
+          type: number
+        profitLoss:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+        settledAt:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+        details:
+          type: object
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - username
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                username:
+                  type: string
+                  minLength: 3
+                password:
+                  type: string
+                  minLength: 8
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+                  tokens:
+                    type: object
+                    properties:
+                      accessToken:
+                        type: string
+                      refreshToken:
+                        type: string
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  tokens:
+                    type: object
+                    properties:
+                      accessToken:
+                        type: string
+                      refreshToken:
+                        type: string
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /predictions:
+    get:
+      tags:
+        - Predictions
+      summary: Get game predictions
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sport
+          in: query
+          schema:
+            type: string
+            default: basketball_nba
+        - name: date
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: team
+          in: query
+          schema:
+            type: string
+        - name: confidence
+          in: query
+          schema:
+            type: number
+            minimum: 0
+            maximum: 100
+      responses:
+        '200':
+          description: Predictions retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  predictions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Prediction'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /predictions/props:
+    get:
+      tags:
+        - Predictions
+      summary: Get player prop predictions
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: playerId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: gameId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Player prop predictions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  playerName:
+                    type: string
+                  predictions:
+                    type: object
+
+  /odds:
+    get:
+      tags:
+        - Odds
+      summary: Get current odds
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sport
+          in: query
+          schema:
+            type: string
+            default: basketball_nba
+        - name: regions
+          in: query
+          schema:
+            type: string
+            default: us
+        - name: markets
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Current odds
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sport:
+                    type: string
+                  games:
+                    type: array
+                    items:
+                      type: object
+
+  /odds/arbitrage:
+    get:
+      tags:
+        - Odds
+      summary: Get arbitrage opportunities
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: minProfit
+          in: query
+          schema:
+            type: number
+            default: 0.5
+        - name: sport
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Arbitrage opportunities
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  opportunities:
+                    type: array
+                    items:
+                      type: object
+
+  /bets:
+    get:
+      tags:
+        - Bets
+      summary: Get user bets
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, won, lost, push]
+        - name: sport
+          in: query
+          schema:
+            type: string
+        - name: dateFrom
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: dateTo
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: User bets
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bets:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Bet'
+                  pagination:
+                    type: object
+
+    post:
+      tags:
+        - Bets
+      summary: Create new bet
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - sport
+                - gameId
+                - betType
+                - market
+                - selection
+                - odds
+                - stakeAmount
+              properties:
+                sport:
+                  type: string
+                league:
+                  type: string
+                gameId:
+                  type: string
+                gameDate:
+                  type: string
+                  format: date-time
+                homeTeam:
+                  type: string
+                awayTeam:
+                  type: string
+                betType:
+                  type: string
+                  enum: [single, parlay, teaser, round_robin]
+                market:
+                  type: string
+                selection:
+                  type: string
+                line:
+                  type: number
+                odds:
+                  type: number
+                stakeAmount:
+                  type: number
+                units:
+                  type: number
+                bookmaker:
+                  type: string
+      responses:
+        '201':
+          description: Bet created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bet:
+                    $ref: '#/components/schemas/Bet'
+
+  /bets/{betId}:
+    patch:
+      tags:
+        - Bets
+      summary: Update bet status
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: betId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [won, lost, push, cancelled]
+                payout:
+                  type: number
+      responses:
+        '200':
+          description: Bet updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bet:
+                    $ref: '#/components/schemas/Bet'
+
+  /bets/stats:
+    get:
+      tags:
+        - Bets
+      summary: Get bet statistics
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [week, month, year, all]
+            default: month
+      responses:
+        '200':
+          description: Bet statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalBets:
+                    type: integer
+                  wins:
+                    type: integer
+                  losses:
+                    type: integer
+                  winRate:
+                    type: number
+                  totalStaked:
+                    type: number
+                  profitLoss:
+                    type: number
+                  roi:
+                    type: number
+
+  /bankroll:
+    get:
+      tags:
+        - Bankroll
+      summary: Get bankroll information
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Bankroll data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  current:
+                    type: number
+                  starting:
+                    type: number
+                  peak:
+                    type: number
+                  profitLoss:
+                    type: number
+                  roi:
+                    type: number
+
+  /bankroll/kelly:
+    post:
+      tags:
+        - Bankroll
+      summary: Calculate Kelly Criterion
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - odds
+                - winProbability
+              properties:
+                odds:
+                  type: number
+                winProbability:
+                  type: number
+                  minimum: 0
+                  maximum: 100
+                kellyFraction:
+                  type: number
+                  default: 0.25
+      responses:
+        '200':
+          description: Kelly calculation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  kellyPercent:
+                    type: number
+                  stakeAmount:
+                    type: number
+                  units:
+                    type: number
+
+  /social/leaderboard:
+    get:
+      tags:
+        - Social
+      summary: Get leaderboard
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [day, week, month, all]
+            default: month
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: Leaderboard data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  leaderboard:
+                    type: array
+                    items:
+                      type: object
+
+  /injuries:
+    get:
+      tags:
+        - Injuries
+      summary: Get injury reports
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: team
+          in: query
+          schema:
+            type: string
+        - name: severity
+          in: query
+          schema:
+            type: string
+            enum: [low, medium, high, critical]
+      responses:
+        '200':
+          description: Injury reports
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  injuries:
+                    type: array
+                    items:
+                      type: object
+
+  /notifications:
+    get:
+      tags:
+        - Notifications
+      summary: Get notifications
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: filter
+          in: query
+          schema:
+            type: string
+            enum: [all, unread]
+            default: all
+      responses:
+        '200':
+          description: Notifications
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  notifications:
+                    type: array
+                    items:
+                      type: object

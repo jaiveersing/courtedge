@@ -1,0 +1,61 @@
+{
+  "name": "PlayerSeasonStats",
+  "type": "object",
+  "properties": {
+    "player_name": {
+      "type": "string"
+    },
+    "player_image_url": {
+      "type": "string"
+    },
+    "team_abbreviation": {
+      "type": "string"
+    },
+    "position": {
+      "type": "string"
+    },
+    "season": {
+      "type": "string",
+      "description": "Season year (e.g., 2023-24, 2022-23)"
+    },
+    "games_played": {
+      "type": "integer"
+    },
+    "minutes_per_game": {
+      "type": "number"
+    },
+    "points_per_game": {
+      "type": "number"
+    },
+    "rebounds_per_game": {
+      "type": "number"
+    },
+    "assists_per_game": {
+      "type": "number"
+    },
+    "steals_per_game": {
+      "type": "number"
+    },
+    "blocks_per_game": {
+      "type": "number"
+    },
+    "turnovers_per_game": {
+      "type": "number"
+    },
+    "field_goal_percentage": {
+      "type": "number"
+    },
+    "three_point_percentage": {
+      "type": "number"
+    },
+    "free_throw_percentage": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "player_name",
+    "team_abbreviation",
+    "points_per_game",
+    "season"
+  ]
+}

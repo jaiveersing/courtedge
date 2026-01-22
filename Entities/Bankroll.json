@@ -1,0 +1,75 @@
+{
+  "name": "Bankroll",
+  "type": "object",
+  "properties": {
+    "current_balance": {
+      "type": "number",
+      "description": "Current bankroll balance"
+    },
+    "starting_balance": {
+      "type": "number",
+      "description": "Initial bankroll amount"
+    },
+    "unit_size": {
+      "type": "number",
+      "description": "Base unit size for flat betting"
+    },
+    "unit_strategy": {
+      "type": "string",
+      "enum": [
+        "flat",
+        "percentage",
+        "kelly"
+      ],
+      "default": "flat",
+      "description": "Unit sizing strategy"
+    },
+    "percentage_unit": {
+      "type": "number",
+      "default": 2,
+      "description": "Percentage of bankroll per unit when using percentage strategy"
+    },
+    "goal_amount": {
+      "type": "number",
+      "description": "Target bankroll goal"
+    },
+    "goal_deadline": {
+      "type": "string",
+      "format": "date",
+      "description": "Deadline for reaching bankroll goal"
+    },
+    "daily_limit": {
+      "type": "number",
+      "description": "Maximum daily betting limit"
+    },
+    "weekly_limit": {
+      "type": "number",
+      "description": "Maximum weekly betting limit"
+    },
+    "monthly_limit": {
+      "type": "number",
+      "description": "Maximum monthly betting limit"
+    },
+    "max_bet_percentage": {
+      "type": "number",
+      "default": 5,
+      "description": "Maximum bet as percentage of bankroll"
+    },
+    "risk_tolerance": {
+      "type": "string",
+      "enum": [
+        "conservative",
+        "moderate",
+        "aggressive"
+      ],
+      "default": "moderate",
+      "description": "Risk tolerance level"
+    }
+  },
+  "required": [
+    "current_balance",
+    "starting_balance",
+    "unit_size",
+    "unit_strategy"
+  ]
+}
