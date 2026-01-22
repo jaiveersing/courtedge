@@ -3,7 +3,7 @@ Minimal test API to verify Render deployment works
 """
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 import os
 
 app = FastAPI(title="CourtEdge ML Test")
@@ -20,12 +20,12 @@ app.add_middleware(
 
 # Pydantic models for auth
 class RegisterRequest(BaseModel):
-    email: EmailStr
+    email: str
     password: str
     name: str
 
 class LoginRequest(BaseModel):
-    email: EmailStr
+    email: str
     password: str
 
 class AuthResponse(BaseModel):
