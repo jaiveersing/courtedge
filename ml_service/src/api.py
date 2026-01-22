@@ -33,7 +33,7 @@ except ImportError:
 
 # Import validation models (make optional for deployment)
 try:
-    from models import (
+    from src.models import (
         PlayerPropRequest, PlayerPropResponse,
         GameOutcomeRequest, GameOutcomeResponse,
         LiveGameRequest, LiveGameResponse,
@@ -42,25 +42,58 @@ try:
         BetAllocation, HealthResponse, ModelPerformanceMetrics,
         StatType, RiskTolerance, BetType
     )
-    logger.info("✓ Models imported successfully")
+    logger.info("✓ Models imported successfully from src.models")
 except ImportError as e:
-    logger.warning(f"Could not import models: {e}. Using fallback models.")
-    # Define minimal fallback models
-    from enum import Enum
-    
-    class StatType(str, Enum):
-        POINTS = "points"
-        REBOUNDS = "rebounds"
-        ASSISTS = "assists"
-    
-    class PlayerPropRequest(BaseModel):
-        player_name: str
-        stat_type: str
-        line: float
-    
-    class HealthResponse(BaseModel):
-        status: str
-        environment: str
+    logger.warning(f"Could not import from src.models: {e}")
+    try:
+        # Try without src prefix (if running from src directory)
+        from models import (
+            PlayerPropRequest, PlayerPropResponse,
+            GameOutcomeRequest, GameOutcomeResponse,
+            LiveGameRequest, LiveGameResponse,
+            SharpMoneyResponse, SharpMoneyAlert,
+            BankrollOptimizationRequest, BankrollOptimizationResponse,
+            BetAllocation, HealthResponse, ModelPerformanceMetrics,
+            StatType, RiskTolerance, BetType
+        )
+        logger.info("✓ Models imported successfully from models")
+    except ImportError as e2:
+        logger.warning(f"Could not import models: {e2}. Using fallback models.")
+        # Define minimal fallback models
+        from enum import Enum
+        
+        class StatType(str, Enum):
+            POINTS = "points"
+            REBOUNDS = "rebounds"
+            ASSISTS = "assists"
+        
+        class RiskTolerance(str, Enum):
+            CONSERVATIVE = "conservative"
+            MEDIUM = "medium"
+            AGGRESSIVE = "aggressive"
+        
+        class PlayerPropRequest(BaseModel):
+            player_name: str
+            stat_type: str
+            line: float
+        
+        class HealthResponse(BaseModel):
+            status: str
+            environment: str
+        
+        # Stub out other classes
+        PlayerPropResponse = dict
+        GameOutcomeRequest = dict
+        GameOutcomeResponse = dict
+        LiveGameRequest = dict
+        LiveGameResponse = dict
+        SharpMoneyResponse = dict
+        SharpMoneyAlert = dict
+        BankrollOptimizationRequest = dict
+        BankrollOptimizationResponse = dict
+        BetAllocation = dict
+        ModelPerformanceMetrics = dict
+        BetType = str
 
 # Startup time for uptime tracking
 START_TIME = time.time()
