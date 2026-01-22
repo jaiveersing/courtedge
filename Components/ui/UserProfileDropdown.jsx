@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react';
-import { useAuth } from '../../src/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { 
   User, 
@@ -12,7 +11,12 @@ import {
 } from 'lucide-react';
 
 export default function UserProfileDropdown() {
-  const { user, logout } = useAuth();
+  // Mock user data - no auth required
+  const user = { 
+    name: 'Demo User', 
+    email: 'demo@courtedge.com', 
+    subscription: 'pro' 
+  };
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -29,8 +33,8 @@ export default function UserProfileDropdown() {
   }, []);
 
   const handleLogout = () => {
-    logout();
-    navigate('/login');
+    // No logout needed - just refresh page
+    window.location.reload();
   };
 
   const getSubscriptionBadge = () => {
