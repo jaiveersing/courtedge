@@ -16,7 +16,7 @@ import GameProps from '../Pages/GameProps';
 import PlayerPropDetail from '../Pages/PlayerPropDetail';
 import PlayerPropBetting from '../Pages/PlayerPropBetting';
 import PlayerTrends from '../Pages/PlayerTrends';
-import Workstation from '../Pages/Workstation';
+import WorkstationNew from '../Pages/WorkstationNew';
 import MLWorkstation from '../Pages/MLWorkstation';
 import PlayerDatabase from '../Components/player/PlayerDatabase';
 
@@ -101,7 +101,7 @@ export default function App(){
               } />
               <Route path="/workstation" element={
                 <Layout>
-                  <Workstation />
+                  <WorkstationNew />
                 </Layout>
               } />
               <Route path="/ml-workstation" element={
