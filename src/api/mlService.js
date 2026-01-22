@@ -225,7 +225,12 @@
  * 200. Regression to mean predictions
  */
 
-const ML_SERVICE_URL = import.meta.env.VITE_ML_SERVICE_URL || 'http://localhost:8000';
+const ML_SERVICE_URL = import.meta.env.VITE_ML_SERVICE_URL || '';
+const ENABLE_ML_FEATURES = import.meta.env.VITE_ENABLE_ML_FEATURES !== 'false';
+const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true' || !ML_SERVICE_URL;
+
+// Check if ML service is configured
+const ML_SERVICE_AVAILABLE = ML_SERVICE_URL && ML_SERVICE_URL.length > 0;
 
 // ============================================================
 // CACHING SYSTEM
@@ -410,6 +415,11 @@ class MLServiceClient {
   }
 
   async requestWithRetry(endpoint, options = {}, retryCount = 0) {
+    // If ML service is not configured, return mock data immediately
+    if (!ML_SERVICE_AVAILABLE || USE_MOCK_DATA) {
+      return this.getMockResponse(endpoint);
+    }
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
@@ -445,16 +455,30 @@ class MLServiceClient {
         return this.requestWithRetry(endpoint, options, retryCount + 1);
       }
 
-      if (error.name === 'AbortError') {
-        throw new Error('Request timeout - ML service is taking too long');
-      }
-
-      if (error.message.includes('Failed to fetch')) {
-        throw new Error('Cannot connect to ML service - is it running on port 8000?');
-      }
-
-      throw error;
+      // Return mock data as fallback
+      console.warn('ML Service unavailable, using mock data:', error.message);
+      return this.getMockResponse(endpoint);
     }
+  }
+
+  getMockResponse(endpoint) {
+    // Return mock data based on endpoint
+    if (endpoint === '/health') {
+      return {
+        status: 'mock',
+        version: '1.0.0-mock',
+        message: 'Using mock data - ML service not configured',
+        models_loaded: { mock: true }
+      };
+    }
+    
+    // Default mock response
+    return {
+      success: true,
+      data: null,
+      message: 'Mock data - ML service not available',
+      using_fallback: true
+    };
   }
 
   shouldRetry(error) {
@@ -477,10 +501,25 @@ class MLServiceClient {
 
   async healthCheck() {
     try {
+      // If ML service is not configured, return mock status
+      if (!ML_SERVICE_AVAILABLE) {
+        return { 
+          success: false, 
+          status: 'not_configured',
+          message: 'ML service URL not configured. Set VITE_ML_SERVICE_URL in environment variables.',
+          using_mock_data: true
+        };
+      }
+
       const data = await this.request('/health', {}, 'health', 1);
       return { success: true, ...data };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { 
+        success: false, 
+        error: error.message,
+        message: 'ML service unavailable. App will use fallback data.',
+        using_mock_data: true
+      };
     }
   }
 

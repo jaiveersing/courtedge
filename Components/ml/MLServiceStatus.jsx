@@ -103,7 +103,7 @@ const MLServiceStatus = () => {
           </div>
 
           {/* Error Message */}
-          {status.error && (
+          {status.error && !status.metrics?.using_mock_data && (
             <div className="flex items-start gap-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
               <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
@@ -111,6 +111,22 @@ const MLServiceStatus = () => {
                 <div className="text-sm text-foreground">{status.error}</div>
                 <div className="text-xs text-muted-foreground mt-2">
                   Make sure the ML service is running on port 8000
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Mock Data Warning */}
+          {status.metrics?.using_mock_data && (
+            <div className="flex items-start gap-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+              <AlertTriangle className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <div className="font-medium text-yellow-500 mb-1">ML Service Not Configured</div>
+                <div className="text-sm text-foreground">
+                  {status.metrics?.message || 'App is using fallback data. ML predictions are not available.'}
+                </div>
+                <div className="text-xs text-muted-foreground mt-2">
+                  To enable ML features, deploy the ML service and set VITE_ML_SERVICE_URL in Vercel environment variables.
                 </div>
               </div>
             </div>
