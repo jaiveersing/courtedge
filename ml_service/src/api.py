@@ -20,16 +20,38 @@ except ImportError:
     redis = None
     print("Warning: Redis not available, caching disabled")
 
-# Import validation models
-from models import (
-    PlayerPropRequest, PlayerPropResponse,
-    GameOutcomeRequest, GameOutcomeResponse,
-    LiveGameRequest, LiveGameResponse,
-    SharpMoneyResponse, SharpMoneyAlert,
-    BankrollOptimizationRequest, BankrollOptimizationResponse,
-    BetAllocation, HealthResponse, ModelPerformanceMetrics,
-    StatType, RiskTolerance, BetType
-)
+# Import validation models (make optional for deployment)
+try:
+    from models import (
+        PlayerPropRequest, PlayerPropResponse,
+        GameOutcomeRequest, GameOutcomeResponse,
+        LiveGameRequest, LiveGameResponse,
+        SharpMoneyResponse, SharpMoneyAlert,
+        BankrollOptimizationRequest, BankrollOptimizationResponse,
+        BetAllocation, HealthResponse, ModelPerformanceMetrics,
+        StatType, RiskTolerance, BetType
+    )
+    logger.info("✓ Models imported successfully")
+except ImportError as e:
+    logger.warning(f"Could not import models: {e}. Using fallback models.")
+    # Define minimal fallback models
+    from pydantic import BaseModel
+    from typing import Optional, List, Dict
+    from enum import Enum
+    
+    class StatType(str, Enum):
+        POINTS = "points"
+        REBOUNDS = "rebounds"
+        ASSISTS = "assists"
+    
+    class PlayerPropRequest(BaseModel):
+        player_name: str
+        stat_type: str
+        line: float
+    
+    class HealthResponse(BaseModel):
+        status: str
+        environment: str
 
 # Configure comprehensive logging
 logging.basicConfig(
