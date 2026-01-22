@@ -12,13 +12,24 @@ from pathlib import Path
 import logging
 import time
 import traceback
+import os
+
+# Configure comprehensive logging FIRST
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s',
+    handlers=[
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
 
 # Optional Redis import
 try:
     import redis
 except ImportError:
     redis = None
-    print("Warning: Redis not available, caching disabled")
+    logger.warning("Redis not available, caching disabled")
 
 # Import validation models (make optional for deployment)
 try:
@@ -35,8 +46,6 @@ try:
 except ImportError as e:
     logger.warning(f"Could not import models: {e}. Using fallback models.")
     # Define minimal fallback models
-    from pydantic import BaseModel
-    from typing import Optional, List, Dict
     from enum import Enum
     
     class StatType(str, Enum):
@@ -53,22 +62,10 @@ except ImportError as e:
         status: str
         environment: str
 
-# Configure comprehensive logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s',
-    handlers=[
-        logging.FileHandler('ml_service.log'),
-        logging.StreamHandler()
-    ]
-)
-logger = logging.getLogger(__name__)
-
 # Startup time for uptime tracking
 START_TIME = time.time()
 
 # Environment configuration
-import os
 ENVIRONMENT = os.getenv('ENVIRONMENT', 'development')
 
 # CORS allowed origins - SECURITY: Configure for production
