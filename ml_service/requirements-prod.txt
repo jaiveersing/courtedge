@@ -6,10 +6,10 @@ fastapi==0.104.1
 uvicorn==0.24.0
 pydantic==2.5.0
 
-# ML Core (lightweight alternatives)
+# ML Core (pre-built binaries only - no Cython compilation)
 scikit-learn==1.3.2
-numpy==1.26.2
-pandas==2.1.3
+numpy==1.24.4
+pandas==2.0.3
 joblib==1.3.2
 
 # API & Network
