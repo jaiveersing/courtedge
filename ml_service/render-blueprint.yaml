@@ -10,12 +10,12 @@ services:
     runtime: python
     region: oregon
     plan: free
-    buildCommand: pip install -r requirements-prod.txt
+    pythonVersion: 3.11.9
+    rootDir: ml_service
+    buildCommand: pip install --upgrade pip && pip install -r requirements-prod.txt
     startCommand: uvicorn src.api:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: ENVIRONMENT
         value: production
       - key: CORS_ORIGINS
-        value: https://courtedge-app.vercel.app,https://courtedge-a079kfhg4-jaiveers-projects-6579b14c.vercel.app
-      - key: PYTHON_VERSION
-        value: 3.11.0
+        value: https://courtedge-app.vercel.app
