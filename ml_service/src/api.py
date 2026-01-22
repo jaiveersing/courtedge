@@ -12,7 +12,13 @@ from pathlib import Path
 import logging
 import time
 import traceback
-import redis
+
+# Optional Redis import
+try:
+    import redis
+except ImportError:
+    redis = None
+    print("Warning: Redis not available, caching disabled")
 
 # Import validation models
 from models import (
@@ -116,9 +122,12 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 # Redis cache (optional - configured but not connected yet)
 cache = None
 try:
-    cache = redis.Redis(host='localhost', port=6379, decode_responses=True, db=0, socket_timeout=1, socket_connect_timeout=1)
-    # Test connection lazily - don't block startup
-    logger.info("Redis configured (will connect on first use)")
+    if redis is not None:
+        cache = redis.Redis(host='localhost', port=6379, decode_responses=True, db=0, socket_timeout=1, socket_connect_timeout=1)
+        # Test connection lazily - don't block startup
+        logger.info("Redis configured (will connect on first use)")
+    else:
+        logger.info("Redis module not available (service will work without caching)")
 except Exception as e:
     logger.info("Redis not configured (service will work without caching)")
     cache = None
