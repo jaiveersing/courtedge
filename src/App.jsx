@@ -3,8 +3,6 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from '../Layout.jsx';
 import DataInitializer from '../Components/ui/DataInitializer';
 import { ThemeProvider } from './contexts/ThemeContext';
-import { AuthProvider } from './contexts/AuthContext';
-import ProtectedRoute from '../Components/auth/ProtectedRoute';
 
 import Dashboard from '../Pages/DashboardNew';
 import DevDemo from './DevDemo';
@@ -21,8 +19,6 @@ import PlayerTrends from '../Pages/PlayerTrends';
 import Workstation from '../Pages/Workstation';
 import MLWorkstation from '../Pages/MLWorkstation';
 import PlayerDatabase from '../Components/player/PlayerDatabase';
-import LoginForm from '../Components/auth/LoginForm';
-import SignupForm from '../Components/auth/SignupForm';
 
 export default function App(){
   console.log('App component rendering...');
@@ -30,138 +26,92 @@ export default function App(){
     return (
       <BrowserRouter>
         <ThemeProvider defaultTheme="dark">
-          <AuthProvider>
           <DataInitializer>
             <Routes>
-              {/* Public routes */}
-              <Route path="/login" element={
-                <ProtectedRoute requireAuth={false}>
-                  <LoginForm />
-                </ProtectedRoute>
-              } />
-              <Route path="/signup" element={
-                <ProtectedRoute requireAuth={false}>
-                  <SignupForm />
-                </ProtectedRoute>
-              } />
-              
-              {/* Protected routes */}
+              {/* All routes now public - no authentication required */}
               <Route path="/" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Dashboard />
-                  </Layout>
-                </ProtectedRoute>
+                <Layout>
+                  <Dashboard />
+                </Layout>
               } />
               <Route path="/dashboard" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Dashboard />
-                  </Layout>
-                </ProtectedRoute>
+                <Layout>
+                  <Dashboard />
+                </Layout>
               } />
               <Route path="/bets" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Bets />
-                  </Layout>
-                </ProtectedRoute>
+                <Layout>
+                  <Bets />
+                </Layout>
               } />
               <Route path="/analytics" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Analytics />
-                  </Layout>
-                </ProtectedRoute>
+                <Layout>
+                  <Analytics />
+                </Layout>
               } />
               <Route path="/player/:id" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <PlayerProfile />
-                  </Layout>
-                </ProtectedRoute>
+                <Layout>
+                  <PlayerProfile />
+                </Layout>
               } />
               <Route path="/settings" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Settings />
-                  </Layout>
-                </ProtectedRoute>
+                <Layout>
+                  <Settings />
+                </Layout>
               } />
               <Route path="/players" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <PlayerDatabase />
-                  </Layout>
-                </ProtectedRoute>
+                <Layout>
+                  <PlayerDatabase />
+                </Layout>
               } />
               <Route path="/portfolio" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Portfolio />
-                  </Layout>
-                </ProtectedRoute>
+                <Layout>
+                  <Portfolio />
+                </Layout>
               } />
               <Route path="/bankroll" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <BankrollManagement />
-                  </Layout>
-                </ProtectedRoute>
+                <Layout>
+                  <BankrollManagement />
+                </Layout>
               } />
               <Route path="/game/:id/props" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <GameProps />
-                  </Layout>
-                </ProtectedRoute>
+                <Layout>
+                  <GameProps />
+                </Layout>
               } />
               <Route path="/prop/:id" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <PlayerPropDetail />
-                  </Layout>
-                </ProtectedRoute>
+                <Layout>
+                  <PlayerPropDetail />
+                </Layout>
               } />
               <Route path="/dev" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <DevDemo />
-                  </Layout>
-                </ProtectedRoute>
+                <Layout>
+                  <DevDemo />
+                </Layout>
               } />
               <Route path="/player-prop/:playerId" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <PlayerPropBetting />
-                  </Layout>
-                </ProtectedRoute>
+                <Layout>
+                  <PlayerPropBetting />
+                </Layout>
               } />
               <Route path="/player-trends" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <PlayerTrends />
-                  </Layout>
-                </ProtectedRoute>
+                <Layout>
+                  <PlayerTrends />
+                </Layout>
               } />
               <Route path="/workstation" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Workstation />
-                  </Layout>
-                </ProtectedRoute>
+                <Layout>
+                  <Workstation />
+                </Layout>
               } />
               <Route path="/ml-workstation" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <MLWorkstation />
-                  </Layout>
-                </ProtectedRoute>
+                <Layout>
+                  <MLWorkstation />
+                </Layout>
               } />
             </Routes>
           </DataInitializer>
-        </AuthProvider>
-      </ThemeProvider>
+        </ThemeProvider>
     </BrowserRouter>
     );
   } catch (error) {
