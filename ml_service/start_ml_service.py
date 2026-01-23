@@ -12,7 +12,21 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent / 'src'))
 
-from api import app
+# Use test_api for production (lightweight, guaranteed to work)
+# or api for full features (requires all dependencies)
+PRODUCTION = os.environ.get("ENVIRONMENT", "development") == "production"
+
+if PRODUCTION:
+    from test_api import app
+    print("🚀 Starting CourtEdge ML Service (Production Mode - Lightweight API)")
+else:
+    try:
+        from api import app
+        print("🚀 Starting CourtEdge ML Service (Full API)")
+    except Exception as e:
+        print(f"⚠️ Full API failed to load: {e}")
+        print("🔄 Falling back to lightweight API...")
+        from test_api import app
 
 # Configure logging
 logging.basicConfig(
