@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -10,10 +11,13 @@ import {
   Database, Server, Cpu, Lock, Fingerprint, CloudLightning,
   AlertTriangle, CheckCircle2, XCircle, Info, ExternalLink,
   Layers, Settings, Filter, Search, Plus, Minus,
-  Volume2, VolumeX, Sun, Moon, Maximize2, Minimize2, Copy, Download
+  Volume2, VolumeX, Sun, Moon, Maximize2, Minimize2, Copy, Download,
+  Mic
 } from "lucide-react";
 import MLServiceStatus from "@/Components/ml/MLServiceStatus";
 import { useTheme } from "@/src/contexts/ThemeContext";
+import RayAssistant from "@/Components/ray/RayAssistant";
+import { RayContextProvider } from "@/Components/ray/RayContext";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // 🎨 DASHBOARD ULTRA v7.0 - FUTURISTIC COMMAND CENTER
@@ -528,6 +532,7 @@ export default function Dashboard() {
   const ds = useDesignSystem();
   const [isLive, setIsLive] = useState(true);
   const [lastUpdate, setLastUpdate] = useState(new Date());
+  const [isRayOpen, setIsRayOpen] = useState(false);
 
   const [stats, setStats] = useState({
     liveGames: 8,
@@ -857,6 +862,59 @@ export default function Dashboard() {
 
         {/* Spacer for bottom bar */}
         <div className="h-20" />
+        
+        {/* ═══════════════════════════════════════════════════════════════════
+            RAY AI ASSISTANT - Voice-First Intelligence Engine
+        ═══════════════════════════════════════════════════════════════════ */}
+        
+        {/* Ray Floating Button */}
+        {!isRayOpen && (
+          <button
+            onClick={() => setIsRayOpen(true)}
+            className={`fixed bottom-24 right-6 z-50 group`}
+          >
+            <div className={`
+              relative w-14 h-14 rounded-2xl 
+              bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500
+              shadow-xl shadow-emerald-500/30
+              flex items-center justify-center
+              transition-all duration-300 hover:scale-110 hover:shadow-2xl hover:shadow-emerald-500/40
+              before:absolute before:inset-0 before:rounded-2xl before:bg-white/20 before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-100
+            `}>
+              <Brain className="w-7 h-7 text-white relative z-10" />
+              
+              {/* Pulse ring */}
+              <div className="absolute inset-0 rounded-2xl bg-emerald-400 animate-ping opacity-20" />
+              
+              {/* Glow effect */}
+              <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 opacity-50 blur-lg group-hover:opacity-70 transition-opacity" />
+            </div>
+            
+            {/* Tooltip */}
+            <div className={`
+              absolute right-full mr-3 top-1/2 -translate-y-1/2
+              px-3 py-1.5 rounded-lg
+              ${ds.isDark ? 'bg-slate-800' : 'bg-gray-800'} text-white text-sm font-medium
+              opacity-0 group-hover:opacity-100 transition-opacity duration-200
+              whitespace-nowrap pointer-events-none
+            `}>
+              <span className="flex items-center gap-2">
+                <Mic className="w-3.5 h-3.5" />
+                Ask Ray
+              </span>
+              <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1 w-2 h-2 bg-slate-800 rotate-45" />
+            </div>
+          </button>
+        )}
+        
+        {/* Ray Assistant Panel */}
+        <RayContextProvider>
+          <RayAssistant 
+            isOpen={isRayOpen}
+            onClose={() => setIsRayOpen(false)}
+            onToggle={() => setIsRayOpen(!isRayOpen)}
+          />
+        </RayContextProvider>
       </div>
     </div>
   );
