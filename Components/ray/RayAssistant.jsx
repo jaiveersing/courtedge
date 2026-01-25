@@ -38,6 +38,8 @@ import { useTheme } from '../../src/contexts/ThemeContext';
 import { useRayContext } from './RayContext';
 import { useRayAnalysis } from './RayAnalysisEngine';
 import { useRayIntent } from './RayIntentSystem';
+import DataService from './RayDataService';
+import PlayerAnalysisEngine from './PlayerAnalysisEngine';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // RAY CONFIGURATION - COMPLETE SPECIFICATION
@@ -958,7 +960,7 @@ const RayAssistant = ({ isOpen, onClose, onToggle }) => {
     // ─────────────────────────────────────────────────────────────────────────
     const playerMatch = lowerInput.match(/lebron|curry|steph|giannis|jokic|luka|tatum|durant|kd|embiid|joel|edwards|ant|brunson|morant|ja|mitchell|booker|lillard|dame|harden|butler|jimmy|sabonis|fox|maxey|haliburton|lamelo|wemby/i);
     if (playerMatch) {
-      return generatePlayerResponse(playerMatch[0]);
+      return await generatePlayerResponse(playerMatch[0]);
     }
     
     // ─────────────────────────────────────────────────────────────────────────
@@ -1055,64 +1057,102 @@ const RayAssistant = ({ isOpen, onClose, onToggle }) => {
     };
   };
   
-  const generatePlayerResponse = (playerAlias) => {
-    const playerData = {
-      'curry': { name: 'Stephen Curry', market: 'points', line: 26.5, avg: 28.4, hitRate: 60, variance: 'high', stdDev: 6.2 },
-      'steph': { name: 'Stephen Curry', market: 'points', line: 26.5, avg: 28.4, hitRate: 60, variance: 'high', stdDev: 6.2 },
-      'lebron': { name: 'LeBron James', market: 'points', line: 25.5, avg: 26.2, hitRate: 70, variance: 'moderate', stdDev: 4.1 },
-      'jokic': { name: 'Nikola Jokic', market: 'points', line: 26.5, avg: 27.8, hitRate: 75, variance: 'low', stdDev: 3.2 },
-      'luka': { name: 'Luka Doncic', market: 'points', line: 32.5, avg: 34.1, hitRate: 65, variance: 'high', stdDev: 7.5 },
-      'tatum': { name: 'Jayson Tatum', market: 'points', line: 27.5, avg: 29.3, hitRate: 70, variance: 'moderate', stdDev: 4.8 },
-      'durant': { name: 'Kevin Durant', market: 'points', line: 28.5, avg: 29.5, hitRate: 58, variance: 'moderate', stdDev: 5.1 },
-      'kd': { name: 'Kevin Durant', market: 'points', line: 28.5, avg: 29.5, hitRate: 58, variance: 'moderate', stdDev: 5.1 },
-      'embiid': { name: 'Joel Embiid', market: 'points', line: 32.5, avg: 34.2, hitRate: 72, variance: 'high', stdDev: 8.2 },
-      'joel': { name: 'Joel Embiid', market: 'points', line: 32.5, avg: 34.2, hitRate: 72, variance: 'high', stdDev: 8.2 },
-      'edwards': { name: 'Anthony Edwards', market: 'points', line: 26.5, avg: 28.1, hitRate: 68, variance: 'high', stdDev: 6.8 },
-      'ant': { name: 'Anthony Edwards', market: 'points', line: 26.5, avg: 28.1, hitRate: 68, variance: 'high', stdDev: 6.8 },
-      'brunson': { name: 'Jalen Brunson', market: 'points', line: 26.5, avg: 27.8, hitRate: 65, variance: 'moderate', stdDev: 4.5 },
-      'morant': { name: 'Ja Morant', market: 'points', line: 25.5, avg: 26.9, hitRate: 62, variance: 'high', stdDev: 7.1 },
-      'ja': { name: 'Ja Morant', market: 'points', line: 25.5, avg: 26.9, hitRate: 62, variance: 'high', stdDev: 7.1 },
-      'giannis': { name: 'Giannis Antetokounmpo', market: 'points', line: 31.5, avg: 32.8, hitRate: 68, variance: 'moderate', stdDev: 5.4 },
-      'booker': { name: 'Devin Booker', market: 'points', line: 26.5, avg: 27.5, hitRate: 58, variance: 'high', stdDev: 6.9 },
-      'lillard': { name: 'Damian Lillard', market: 'points', line: 25.5, avg: 26.8, hitRate: 62, variance: 'high', stdDev: 6.5 },
-      'dame': { name: 'Damian Lillard', market: 'points', line: 25.5, avg: 26.8, hitRate: 62, variance: 'high', stdDev: 6.5 },
-      'mitchell': { name: 'Donovan Mitchell', market: 'points', line: 26.5, avg: 28.2, hitRate: 72, variance: 'high', stdDev: 7.2 },
-      'harden': { name: 'James Harden', market: 'assists', line: 8.5, avg: 9.2, hitRate: 70, variance: 'moderate', stdDev: 2.8 },
-      'butler': { name: 'Jimmy Butler', market: 'points', line: 21.5, avg: 22.8, hitRate: 65, variance: 'moderate', stdDev: 4.2 },
-      'jimmy': { name: 'Jimmy Butler', market: 'points', line: 21.5, avg: 22.8, hitRate: 65, variance: 'moderate', stdDev: 4.2 },
-      'sabonis': { name: 'Domantas Sabonis', market: 'rebounds', line: 12.5, avg: 13.8, hitRate: 90, variance: 'low', stdDev: 1.8 },
-      'fox': { name: "De'Aaron Fox", market: 'points', line: 26.5, avg: 27.5, hitRate: 58, variance: 'moderate', stdDev: 5.2 },
-      'maxey': { name: 'Tyrese Maxey', market: 'points', line: 26.5, avg: 27.2, hitRate: 72, variance: 'low', stdDev: 3.1 },
-      'haliburton': { name: 'Tyrese Haliburton', market: 'assists', line: 9.5, avg: 10.8, hitRate: 82, variance: 'low', stdDev: 2.1 },
-      'lamelo': { name: 'LaMelo Ball', market: 'points', line: 22.5, avg: 23.8, hitRate: 58, variance: 'high', stdDev: 6.8 },
-      'wemby': { name: 'Victor Wembanyama', market: 'blocks', line: 3.5, avg: 4.2, hitRate: 75, variance: 'moderate', stdDev: 1.4 }
+  const generatePlayerResponse = async (playerAlias) => {
+    // Map common aliases to full names
+    const nameMap = {
+      'curry': 'Stephen Curry', 'steph': 'Stephen Curry',
+      'lebron': 'LeBron James',
+      'jokic': 'Nikola Jokic',
+      'luka': 'Luka Doncic',
+      'tatum': 'Jayson Tatum',
+      'durant': 'Kevin Durant', 'kd': 'Kevin Durant',
+      'embiid': 'Joel Embiid', 'joel': 'Joel Embiid',
+      'edwards': 'Anthony Edwards', 'ant': 'Anthony Edwards',
+      'brunson': 'Jalen Brunson',
+      'morant': 'Ja Morant', 'ja': 'Ja Morant',
+      'giannis': 'Giannis Antetokounmpo',
+      'booker': 'Devin Booker',
+      'lillard': 'Damian Lillard', 'dame': 'Damian Lillard',
+      'mitchell': 'Donovan Mitchell',
+      'harden': 'James Harden',
+      'butler': 'Jimmy Butler', 'jimmy': 'Jimmy Butler',
+      'sabonis': 'Domantas Sabonis',
+      'fox': "De'Aaron Fox",
+      'maxey': 'Tyrese Maxey',
+      'haliburton': 'Tyrese Haliburton',
+      'lamelo': 'LaMelo Ball',
+      'wemby': 'Victor Wembanyama'
     };
     
-    const player = playerData[playerAlias.toLowerCase()] || {
-      name: playerAlias.charAt(0).toUpperCase() + playerAlias.slice(1),
-      market: 'points', line: 25.5, avg: 26.2, hitRate: 65, variance: 'moderate', stdDev: 4.5
-    };
+    const fullName = nameMap[playerAlias.toLowerCase()] || playerAlias;
+    const market = rayContext.currentMarket || 'points';
     
-    const varianceText = player.variance === 'low' 
+    // Run comprehensive analysis with real data
+    const analysis = await PlayerAnalysisEngine.analyzePlayerProp(fullName, market);
+    
+    // Extract key metrics
+    const { performance, lineInteraction, confidence, recommendation, edge } = analysis;
+    const { last10, volatility, trendDirection, consistency } = performance;
+    const { hitRate, margin } = lineInteraction;
+    const line = analysis.lineData?.line || last10.mean;
+    
+    // Generate variance description
+    const varianceText = volatility === 'low' 
       ? 'tight variance—consistent, predictable output'
-      : player.variance === 'moderate'
+      : volatility === 'moderate'
         ? 'moderate variance—acceptable with proper sizing'
         : 'elevated variance—boom-bust profile warrants caution';
     
-    const recommendation = player.hitRate >= 70 
+    // Generate recommendation text
+    const recommendationText = recommendation === 'over' && edge >= 15
       ? 'The data supports the over here.'
-      : player.hitRate >= 55
-        ? 'Marginal edge detected. Position size accordingly.'
-        : 'No clear edge presents—consider passing.';
+      : recommendation === 'over'
+        ? 'Marginal edge on the over. Position size accordingly.'
+        : recommendation === 'under' && edge >= 15
+          ? 'Strong under signal detected.'
+          : recommendation === 'under'
+            ? 'The analysis leans under.'
+            : 'No clear edge presents—consider passing or exploring alternative markets.';
+    
+    // Generate trend text
+    const trendText = trendDirection === 'improving'
+      ? `Recent form is trending up—last 5 averaging ${performance.last5.mean}, above the extended baseline.`
+      : trendDirection === 'declining'
+        ? `Recent performance has dipped—last 5 averaging ${performance.last5.mean}, below the extended window.`
+        : `Performance has been remarkably stable with minimal deviation from baseline.`;
     
     return {
-      text: `${player.name}'s ${player.market} prop at ${player.line} presents an interesting setup. Last 10 games show a ${player.hitRate}% hit rate, averaging ${player.avg} with ${varianceText}. Standard deviation sits at ${player.stdDev}, which places this in the ${player.variance} volatility tier. ${recommendation}`,
-      confidence: Math.min(85, player.hitRate + 10),
+      text: `${analysis.playerInfo.name}'s ${market} prop at ${line.toFixed(1)} presents an interesting setup. Last 10 games show a ${hitRate.last10}% hit rate, averaging ${last10.mean} with ${varianceText}. Standard deviation sits at ${last10.stdDev}, which places this in the ${volatility} volatility tier. ${trendText} ${recommendationText}`,
+      confidence: confidence,
       analysis: [
-        { type: 'hitRate', label: `${player.market.charAt(0).toUpperCase() + player.market.slice(1)} L10`, value: `${player.hitRate}%`, subtext: `vs ${player.line}`, trend: player.hitRate >= 65 ? 'up' : 'stable' },
-        { type: 'variance', label: 'Variance', value: player.variance.charAt(0).toUpperCase() + player.variance.slice(1), subtext: `SD: ${player.stdDev}` }
+        { 
+          type: 'hitRate', 
+          label: `${market.charAt(0).toUpperCase() + market.slice(1)} L10`, 
+          value: `${hitRate.last10}%`, 
+          subtext: `vs ${line.toFixed(1)}`, 
+          trend: hitRate.last10 >= 65 ? 'up' : hitRate.last10 <= 35 ? 'down' : 'stable' 
+        },
+        { 
+          type: 'variance', 
+          label: 'Volatility', 
+          value: volatility.charAt(0).toUpperCase() + volatility.slice(1), 
+          subtext: `SD: ${last10.stdDev}` 
+        },
+        { 
+          type: 'trend', 
+          label: 'Trend', 
+          value: trendDirection.charAt(0).toUpperCase() + trendDirection.slice(1), 
+          trend: trendDirection 
+        },
+        {
+          type: 'confidence',
+          label: 'Confidence',
+          value: `${confidence}%`,
+          subtext: `Grade: ${analysis.grade}`
+        }
       ],
-      actions: ['Check rebounds', 'Check assists', 'Compare players', 'Deep dive']
+      actions: ['Check rebounds', 'Check assists', 'Compare players', 'Deep dive'],
+      fullAnalysis: analysis
     };
   };
   

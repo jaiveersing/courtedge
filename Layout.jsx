@@ -2,9 +2,12 @@ import { useState } from "react";
 import Navigation from "./Components/layout/NavigationNew";
 import TopBar from "./Components/layout/TopBar";
 import { useLocation } from "react-router-dom";
+// Ray v10.0 OMEGA - World's Most Advanced NBA Analytics Chatbot
+import RayAssistant from "./Components/ray/RayAssistantOmega";
 
 export default function Layout({ children, currentPageName }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [rayOpen, setRayOpen] = useState(false);
   const location = useLocation();
 
   return (
@@ -26,6 +29,13 @@ export default function Layout({ children, currentPageName }) {
       >
         {children}
       </main>
+      
+      {/* Ray Assistant */}
+      <RayAssistant 
+        isOpen={rayOpen} 
+        onClose={() => setRayOpen(false)}
+        onToggle={() => setRayOpen(!rayOpen)}
+      />
     </div>
   );
 }
