@@ -1767,6 +1767,12 @@ function RayAssistantUltimate({ isOpen, onClose, onToggle }) {
   const [expanded, setExpanded] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
   const [suggestions, setSuggestions] = useState(['Best props today', 'Trending players', 'Curry stats', 'Sharp money']);
+  const [quickActions, setQuickActions] = useState([
+    { icon: '🔥', label: 'Hot props', action: 'Show me the hottest props today' },
+    { icon: '⚡', label: 'Value plays', action: 'Find me +EV props' },
+    { icon: '📊', label: 'Top players', action: 'Who are the top performers this week?' },
+    { icon: '🎯', label: 'Best bets', action: 'What are the best bets tonight?' }
+  ]);
 
   // ═══════════════════════════════════════════════════════════════════════════════════════════════════════
   // REFS
@@ -1838,9 +1844,9 @@ function RayAssistantUltimate({ isOpen, onClose, onToggle }) {
         setMessages([{
           id: 'welcome',
           role: 'assistant',
-          content: `Hey! I'm **Ray** — your AI-powered NBA analytics expert.\n\nI can help you with:\n• **Player analysis** — Stats, trends, matchups\n• **Prop betting** — Lines, EV, hit rates\n• **Comparisons** — Head-to-head breakdowns\n• **Value plays** — Sharp money, +EV props\n• **Fantasy** — Start/sit advice, projections\n\nWhat do you want to know?`,
+          content: `Hey! I'm **Ray** 🧠 — your AI-powered NBA analytics expert.\n\nI can instantly analyze:\n• **📊 Player Stats** — Real-time performance & trends\n• **🎯 Props & Lines** — EV analysis, hit rates, sharp money\n• **⚔️ Comparisons** — Head-to-head player breakdowns\n• **💰 Value Plays** — +EV opportunities & edges\n• **🏆 Rankings** — Top performers by any stat\n• **📈 Predictions** — AI-powered prop forecasts\n\nTry asking: *"Curry points prop"* or *"Compare LeBron vs Giannis"*`,
           timestamp: new Date(),
-          suggestions: ['Best props today', 'Curry stats', 'Compare LeBron vs Curry', 'Who\'s trending?']
+          suggestions: ['🔥 Hot props', '⚡ +EV plays', '📊 Curry analysis', '⚔️ LeBron vs Curry']
         }]);
       }, 300);
     }
@@ -1962,11 +1968,18 @@ function RayAssistantUltimate({ isOpen, onClose, onToggle }) {
       setThinkingSteps([]);
       processingLockRef.current = false;
       
+      const errorSuggestions = [
+        'Try: "Curry points prop"',
+        'Or: "Compare LeBron vs Giannis"',
+        'Or: "Best props today"'
+      ];
+      
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: "Sorry, I hit a snag analyzing that. Try asking a different way?",
-        timestamp: new Date()
+        content: `Hmm, I couldn't process that. 🤔\n\n**Try these formats:**\n• "[Player] stats" — e.g., "Curry stats"\n• "[Player] [stat] prop" — e.g., "LeBron points prop"\n• "Compare [Player] vs [Player]"\n• "Best props today"\n\nWhat would you like to know?`,
+        timestamp: new Date(),
+        suggestions: errorSuggestions
       }]);
     }
   }, [streamResponse, speak]);

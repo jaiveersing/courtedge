@@ -235,7 +235,7 @@ class RayConversationBrain {
   normalizeMessage(message) {
     let normalized = message.toLowerCase().trim();
     
-    // Expand common abbreviations
+    // Expand common abbreviations and slang
     const expansions = {
       'lbj': 'lebron',
       'kd': 'durant',
@@ -249,15 +249,47 @@ class RayConversationBrain {
       'stl': 'steals',
       'blk': 'blocks',
       'pra': 'points rebounds assists',
+      'pa': 'points assists',
+      'pr': 'points rebounds',
+      'ra': 'rebounds assists',
+      '3pm': 'threes',
       'l5': 'last 5',
-      'l10': 'last 10'
+      'l10': 'last 10',
+      'l20': 'last 20',
+      'szn': 'season',
+      'hit rate': 'hit rate',
+      'ev': 'expected value',
+      'ats': 'against the spread',
+      'o/u': 'over under',
+      'prop': 'prop',
+      'line': 'line'
     };
 
     for (const [abbr, full] of Object.entries(expansions)) {
       normalized = normalized.replace(new RegExp(`\\b${abbr}\\b`, 'gi'), full);
     }
 
+    // Smart context injection - if asking about "his" or "he", use last mentioned player
+    if ((normalized.includes(' his ') || normalized.includes(' he ') || normalized.includes(' him ')) 
+        && this.memory.context.currentPlayer) {
+      normalized = normalized.replace(/\b(his|he|him)\b/gi, this.memory.context.currentPlayer);
+    }
+
+    // If just asking "what about" or "how about" with a stat, inject last player
+    if ((normalized.startsWith('what about') || normalized.startsWith('how about')) 
+        && this.memory.context.currentPlayer && !this.hasPlayerName(normalized)) {
+      normalized = `${this.memory.context.currentPlayer} ${normalized}`;
+    }
+
     return normalized;
+  }
+
+  hasPlayerName(text) {
+    // Check if text contains any player name
+    for (const player of PLAYERS_DB) {
+      if (text.includes(player.name.toLowerCase())) return true;
+    }
+    return false;
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
