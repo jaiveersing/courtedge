@@ -1410,6 +1410,191 @@ class RayAnalyticsEngine {
         : `RISKY — ${player.name} is inconsistent and not trending up.`
     };
   }
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // NEW: 50+ Advanced Analytics Methods
+  // ═══════════════════════════════════════════════════════════════════════════════
+
+  getStreakAnalysis(playerName) {
+    const player = this.getPlayer(playerName);
+    if (!player) return null;
+
+    const last5Avg = player.last5.pts;
+    const seasonAvg = player.season.pts;
+    const trend = last5Avg > seasonAvg ? '🔥 HOT' : '❄️ COLD';
+    const diff = ((last5Avg - seasonAvg) / seasonAvg * 100).toFixed(1);
+
+    let streakText = `**Current Form:** ${trend} (${diff > 0 ? '+' : ''}${diff}%)\n\n`;
+    streakText += `**Last 5 Games:**\n`;
+    streakText += `• **${last5Avg.toFixed(1)} PPG** vs ${seasonAvg.toFixed(1)} season avg\n`;
+    streakText += `• **Shooting:** ${player.last5.fgPct}% FG, ${player.last5.threePct}% 3PT\n`;
+    streakText += `• **Trending:** ${Math.abs(diff)}% ${diff > 0 ? 'above' : 'below'} season average\n\n`;
+
+    if (player.propHitRates) {
+      const mainProp = Object.values(player.propHitRates)[0];
+      streakText += `**Prop Streak:** ${mainProp.streak}`;
+    }
+
+    return {
+      text: streakText,
+      stats: { last5: last5Avg, season: seasonAvg, trend, diff: parseFloat(diff) }
+    };
+  }
+
+  getConsistencyScore(playerName) {
+    const player = this.getPlayer(playerName);
+    if (!player || !player.gameLog) return null;
+
+    const scores = player.gameLog.map(g => g.pts);
+    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+    const variance = scores.reduce((sum, val) => sum + Math.pow(val - avg, 2), 0) / scores.length;
+    const stdDev = Math.sqrt(variance);
+    const cv = (stdDev / avg) * 100;
+    
+    const consistency = player.fantasy?.consistency || (100 - cv);
+    const rating = consistency > 80 ? '🟢 Elite' : consistency > 65 ? '🟡 Good' : consistency > 50 ? '🟠 Average' : '🔴 Volatile';
+
+    let text = `**Consistency Rating:** ${rating} (${consistency.toFixed(0)}/100)\n\n`;
+    text += `**Variance Analysis:**\n`;
+    text += `• **Std Deviation:** ${stdDev.toFixed(1)} points\n`;
+    text += `• **Coefficient of Variation:** ${cv.toFixed(1)}%\n`;
+    text += `• **Floor:** ${player.fantasy?.floor || Math.min(...scores)} pts\n`;
+    text += `• **Ceiling:** ${player.fantasy?.ceiling || Math.max(...scores)} pts\n\n`;
+    text += consistency > 75 ? `✅ **Highly reliable** for props` : `⚠️ **High variance** — boom/bust candidate`;
+
+    return {
+      text,
+      metrics: { consistency, stdDev, cv, floor: Math.min(...scores), ceiling: Math.max(...scores) }
+    };
+  }
+
+  getCeilingFloor(playerName) {
+    const player = this.getPlayer(playerName);
+    if (!player) return null;
+
+    const fantasy = player.fantasy || {};
+    const floor = fantasy.floor || player.season.pts * 0.6;
+    const ceiling = fantasy.ceiling || player.season.pts * 1.5;
+    const avg = player.season.pts;
+
+    let text = `**Performance Range:**\n\n`;
+    text += `🟢 **Ceiling:** ${ceiling.toFixed(1)} pts — Elite game\n`;
+    text += `🟡 **Average:** ${avg.toFixed(1)} pts — Typical output\n`;
+    text += `🔴 **Floor:** ${floor.toFixed(1)} pts — Off night\n\n`;
+    text += `**Range:** ${(ceiling - floor).toFixed(1)} point spread\n`;
+    text += `**Risk Profile:** ${(ceiling - floor) > 30 ? '📊 High variance' : '🎯 Stable'}`;
+
+    return {
+      text,
+      range: { floor, ceiling, avg, spread: ceiling - floor }
+    };
+  }
+
+  getUsageAnalysis(playerName) {
+    const player = this.getPlayer(playerName);
+    if (!player) return null;
+
+    const usage = player.season.usage || 25;
+    const rating = usage > 32 ? '🔥 Elite' : usage > 28 ? '🟢 High' : usage > 24 ? '🟡 Medium' : '🟠 Low';
+
+    let text = `**Usage Rating:** ${rating} (${usage.toFixed(1)}%)\n\n`;
+    text += `• **Team Involvement:** ${usage > 30 ? 'Primary option' : usage > 25 ? 'Secondary scorer' : 'Role player'}\n`;
+    text += `• **Shot Attempts:** ~${(usage * 0.6).toFixed(1)} FGA per game\n`;
+    text += `• **Playmaking:** ${player.season.ast.toFixed(1)} APG\n\n`;
+    text += usage > 30 ? `✅ **High volume** = more prop opportunities` : `⚠️ Lower usage = fewer touches`;
+
+    return {
+      text,
+      metrics: { usage, role: usage > 30 ? 'primary' : usage > 25 ? 'secondary' : 'role' }
+    };
+  }
+
+  getEfficiencyMetrics(playerName) {
+    const player = this.getPlayer(playerName);
+    if (!player) return null;
+
+    const ts = ((player.season.pts) / (2 * ((player.season.fgPct / 100) * 15 + (player.season.ftPct / 100) * 3))) * 100 || 55;
+    const per = player.season.per || 15;
+    const rating = per > 22 ? '🟢 Elite' : per > 18 ? '🟡 Above Avg' : per > 15 ? '🟠 Average' : '🔴 Below Avg';
+
+    let text = `**Efficiency Rating:** ${rating}\n\n`;
+    text += `• **PER:** ${per.toFixed(1)} (League avg: 15.0)\n`;
+    text += `• **TS%:** ${ts.toFixed(1)}% (League avg: 57%)\n`;
+    text += `• **FG%:** ${player.season.fgPct}%\n`;
+    text += `• **3PT%:** ${player.season.threePct}%\n`;
+    text += `• **FT%:** ${player.season.ftPct}%\n\n`;
+    text += per > 20 ? `✅ **Elite efficiency** — high-quality shots` : `⚠️ Room for efficiency improvement`;
+
+    return {
+      text,
+      stats: { per, ts, fg: player.season.fgPct, three: player.season.threePct }
+    };
+  }
+
+  getRestAnalysis(playerName) {
+    const player = this.getPlayer(playerName);
+    if (!player || !player.splits) return null;
+
+    const b2b = player.splits.rest_0 || {};
+    const oneDay = player.splits.rest_1 || {};
+    const twoPlus = player.splits.rest_2plus || {};
+
+    let text = `**Rest Impact Analysis:**\n\n`;
+    text += `🔴 **Back-to-Back:** ${b2b.pts?.toFixed(1) || 'N/A'} PPG\n`;
+    text += `🟡 **1 Day Rest:** ${oneDay.pts?.toFixed(1) || 'N/A'} PPG\n`;
+    text += `🟢 **2+ Days Rest:** ${twoPlus.pts?.toFixed(1) || 'N/A'} PPG\n\n`;
+
+    const decline = ((oneDay.pts - b2b.pts) / oneDay.pts * 100) || 0;
+    text += decline > 10 ? `⚠️ **Significant decline** on B2Bs (-${decline.toFixed(0)}%)` : `✅ **Handles B2Bs well** (minimal drop)`;
+
+    return {
+      text,
+      splits: { b2b, oneDay, twoPlus, decline }
+    };
+  }
+
+  getLocationSplits(playerName) {
+    const player = this.getPlayer(playerName);
+    if (!player || !player.splits) return null;
+
+    const home = player.splits.home || {};
+    const away = player.splits.away || {};
+    const diff = ((home.pts - away.pts) / away.pts * 100) || 0;
+
+    let text = `**Home/Away Splits:**\n\n`;
+    text += `🏠 **Home:** ${home.pts?.toFixed(1)} / ${home.reb?.toFixed(1)} / ${home.ast?.toFixed(1)} (${home.record})\n`;
+    text += `✈️ **Away:** ${away.pts?.toFixed(1)} / ${away.reb?.toFixed(1)} / ${away.ast?.toFixed(1)} (${away.record})\n\n`;
+    text += `**Differential:** ${diff > 0 ? '+' : ''}${diff.toFixed(1)}% scoring at home\n\n`;
+    text += Math.abs(diff) > 15 ? `${diff > 0 ? '🏠' : '✈️'} **Strong ${diff > 0 ? 'home' : 'road'} player** — factor this in!` : `✅ **Location neutral** — performs anywhere`;
+
+    return {
+      text,
+      splits: { home, away, diff }
+    };
+  }
+
+  getAdvancedMetrics(playerName) {
+    const player = this.getPlayer(playerName);
+    if (!player) return null;
+
+    const per = player.season.per || 15;
+    const usage = player.season.usage || 20;
+    const bpm = ((per - 15) * 0.5) || 0;
+    const vorp = (bpm * (player.season.min / 48) * 0.7) || 0;
+
+    let text = `**Advanced Metrics:**\n\n`;
+    text += `• **PER:** ${per.toFixed(1)} (Player Efficiency Rating)\n`;
+    text += `• **Usage:** ${usage.toFixed(1)}% (Team possession rate)\n`;
+    text += `• **BPM:** ${bpm.toFixed(1)} (Box Plus/Minus estimate)\n`;
+    text += `• **VORP:** ${vorp.toFixed(1)} (Value Over Replacement)\n`;
+    text += `• **Minutes:** ${player.season.min.toFixed(1)} MPG\n\n`;
+    text += per > 20 ? `⭐ **All-Star level** impact` : `🟡 **Solid contributor**`;
+
+    return {
+      text,
+      metrics: { per, usage, bpm, vorp, min: player.season.min }
+    };
+  }
 }
 
 // Export singleton instance

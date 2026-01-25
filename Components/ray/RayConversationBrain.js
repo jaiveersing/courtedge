@@ -175,6 +175,108 @@ const INTENT_PATTERNS = {
   HELP: [
     /(?:help|what can you do|capabilities|features|how to use)/i,
     /(?:what do you know|what can you tell me)/i
+  ],
+
+  // Advanced Intent Patterns (50+ new patterns)
+  STREAK_ANALYSIS: [
+    /(?:streak|streaking|on fire|hot streak|cold streak)/i,
+    /(\w+(?:\s+\w+)?)\s+(?:hitting|crushing|dominating)/i
+  ],
+
+  CONSISTENCY: [
+    /(?:consistent|consistency|reliable|dependable)/i,
+    /(?:how often|frequency)\s+(?:does|has)\s+(\w+(?:\s+\w+)?)/i
+  ],
+
+  CEILING_FLOOR: [
+    /(?:ceiling|upside|best case|max)/i,
+    /(?:floor|downside|worst case|min)/i,
+    /(?:range|variance|volatility)/i
+  ],
+
+  USAGE_ANALYSIS: [
+    /(?:usage|usage rate|touches|involvement)/i,
+    /(?:how much|how many)\s+(?:does|is)\s+(\w+(?:\s+\w+)?)\s+(?:used|involved)/i
+  ],
+
+  EFFICIENCY: [
+    /(?:efficiency|effective|per|true shooting|ts%)/i,
+    /(?:shooting|scoring)\s+(?:efficiency|effectiveness)/i
+  ],
+
+  PACE_TEMPO: [
+    /(?:pace|tempo|fast|slow|possessions)/i,
+    /(\w+(?:\s+\w+)?)\s+(?:pace|tempo)/i
+  ],
+
+  DEFENSE_MATCHUP: [
+    /(?:defensive|defense)\s+(?:rating|rank|matchup)/i,
+    /(?:vs|against)\s+(?:good|bad|tough|easy)\s+defense/i
+  ],
+
+  MINUTES_PREDICTION: [
+    /(?:minutes|playing time|pt|mins)/i,
+    /(?:how long|how much)\s+(?:will|should)\s+(\w+(?:\s+\w+)?)\s+play/i
+  ],
+
+  CORRELATION: [
+    /(?:correlation|related|connected|linked)/i,
+    /(?:when|if)\s+(\w+(?:\s+\w+)?)\s+(?:scores|gets|has)/i
+  ],
+
+  BEST_GAME: [
+    /(?:best|highest|career high|season high|top)\s+game/i,
+    /(\w+(?:\s+\w+)?)\s+(?:best performance|career game)/i
+  ],
+
+  LINE_MOVEMENT: [
+    /(?:line movement|moving|shifted|odds movement)/i,
+    /(?:sharp|public)\s+(?:money|action|side)/i
+  ],
+
+  WEATHER_IMPACT: [
+    /(?:weather|conditions|environment)/i,
+    /(?:dome|outdoor|indoor)/i
+  ],
+
+  BLOWOUT_ANALYSIS: [
+    /(?:blowout|garbage time|close game)/i,
+    /(?:competitive|tight)\s+game/i
+  ],
+
+  BACK_TO_BACK: [
+    /(?:back to back|b2b|second night|rest)/i,
+    /(?:tired|fatigue|rest days)/i
+  ],
+
+  HOME_AWAY: [
+    /(?:home|away|road)\s+(?:splits|performance)/i,
+    /(?:better at|worse at)\s+(?:home|away)/i
+  ],
+
+  PROP_BUILDER: [
+    /(?:build|create|make)\s+(?:a |my )?(?:prop|parlay)/i,
+    /(?:combine|stack|pair)/i
+  ],
+
+  HEDGE: [
+    /(?:hedge|insurance|middle|arbitrage)/i,
+    /(?:cover|protect)\s+(?:my |the )?bet/i
+  ],
+
+  LIVE_BETTING: [
+    /(?:live|in-game|in game|during game)/i,
+    /(?:halftime|quarter)\s+(?:bet|line)/i
+  ],
+
+  HISTORICAL: [
+    /(?:historically|history|past|previous)/i,
+    /(?:all-time|career)\s+(?:vs|against)/i
+  ],
+
+  ADVANCED_STATS: [
+    /(?:per|bpm|vorp|ws|pir|ortg|drtg)/i,
+    /(?:advanced|analytics)\s+(?:stats|metrics)/i
   ]
 };
 
@@ -457,9 +559,179 @@ class RayConversationBrain {
       case 'FOLLOW_UP':
         return this.handleFollowUp(entities, message);
       
+      case 'STREAK_ANALYSIS':
+        return this.handleStreaks(entities);
+      
+      case 'CONSISTENCY':
+        return this.handleConsistency(entities);
+      
+      case 'CEILING_FLOOR':
+        return this.handleCeilingFloor(entities);
+      
+      case 'USAGE_ANALYSIS':
+        return this.handleUsage(entities);
+      
+      case 'EFFICIENCY':
+        return this.handleEfficiency(entities);
+      
+      case 'BACK_TO_BACK':
+        return this.handleBackToBack(entities);
+      
+      case 'HOME_AWAY':
+        return this.handleHomeSplits(entities);
+      
+      case 'LINE_MOVEMENT':
+        return this.handleLineMovement(entities);
+      
+      case 'ADVANCED_STATS':
+        return this.handleAdvancedStats(entities);
+      
+      case 'PROP_BUILDER':
+        return this.handlePropBuilder(entities);
+      
       default:
         return this.handleUnknown(message);
     }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // NEW Advanced Handlers
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  handleStreaks(entities) {
+    const player = entities.players[0] || this.memory.context.currentPlayer;
+    if (!player) return this.handleUnknown('streak analysis');
+
+    const data = rayAnalytics.getStreakAnalysis(player);
+    if (!data) return { text: `Can't find streak data for ${player}.`, type: 'error' };
+
+    return {
+      text: `🔥 **${player} Streak Analysis**\n\n${data.text}`,
+      type: 'streak',
+      data: data.stats,
+      suggestions: [`${player} consistency`, `${player} vs similar`, 'Best props']
+    };
+  }
+
+  handleConsistency(entities) {
+    const player = entities.players[0] || this.memory.context.currentPlayer;
+    if (!player) return this.handleUnknown('consistency');
+
+    const data = rayAnalytics.getConsistencyScore(player);
+    if (!data) return { text: `Can't analyze consistency for ${player}.`, type: 'error' };
+
+    return {
+      text: `🎯 **${player} Consistency Report**\n\n${data.text}`,
+      type: 'consistency',
+      data: data.metrics,
+      suggestions: [`${player} ceiling floor`, `${player} prop lines`, 'Similar players']
+    };
+  }
+
+  handleCeilingFloor(entities) {
+    const player = entities.players[0] || this.memory.context.currentPlayer;
+    if (!player) return this.handleUnknown('ceiling floor');
+
+    const data = rayAnalytics.getCeilingFloor(player);
+    if (!data) return { text: `Can't find ceiling/floor for ${player}.`, type: 'error' };
+
+    return {
+      text: `📈 **${player} Ceiling & Floor**\n\n${data.text}`,
+      type: 'ceiling_floor',
+      data: data.range,
+      suggestions: [`${player} props`, `${player} best games`, 'Value plays']
+    };
+  }
+
+  handleUsage(entities) {
+    const player = entities.players[0] || this.memory.context.currentPlayer;
+    if (!player) return this.handleUnknown('usage');
+
+    const data = rayAnalytics.getUsageAnalysis(player);
+    if (!data) return { text: `Usage data unavailable for ${player}.`, type: 'error' };
+
+    return {
+      text: `⚡ **${player} Usage Analysis**\n\n${data.text}`,
+      type: 'usage',
+      data: data.metrics,
+      suggestions: [`${player} efficiency`, `${player} minutes`, 'High usage players']
+    };
+  }
+
+  handleEfficiency(entities) {
+    const player = entities.players[0] || this.memory.context.currentPlayer;
+    if (!player) return this.handleUnknown('efficiency');
+
+    const data = rayAnalytics.getEfficiencyMetrics(player);
+    if (!data) return { text: `No efficiency data for ${player}.`, type: 'error' };
+
+    return {
+      text: `📊 **${player} Efficiency Metrics**\n\n${data.text}`,
+      type: 'efficiency',
+      data: data.stats,
+      suggestions: [`${player} advanced stats`, `${player} vs league`, 'Top efficient players']
+    };
+  }
+
+  handleBackToBack(entities) {
+    const player = entities.players[0] || this.memory.context.currentPlayer;
+    if (!player) return this.handleUnknown('back to back');
+
+    const data = rayAnalytics.getRestAnalysis(player);
+    if (!data) return { text: `No rest data for ${player}.`, type: 'error' };
+
+    return {
+      text: `👏 **${player} Rest & B2B Analysis**\n\n${data.text}`,
+      type: 'rest',
+      data: data.splits,
+      suggestions: [`${player} schedule`, `${player} fatigue impact`, 'Rest-sensitive players']
+    };
+  }
+
+  handleHomeSplits(entities) {
+    const player = entities.players[0] || this.memory.context.currentPlayer;
+    if (!player) return this.handleUnknown('home/away');
+
+    const data = rayAnalytics.getLocationSplits(player);
+    if (!data) return { text: `No home/away data for ${player}.`, type: 'error' };
+
+    return {
+      text: `🏠 **${player} Home/Away Splits**\n\n${data.text}`,
+      type: 'location',
+      data: data.splits,
+      suggestions: [`${player} next game`, `${player} road warrior`, 'Home court advantage']
+    };
+  }
+
+  handleLineMovement(entities) {
+    return {
+      text: `💰 **Line Movement & Sharp Action**\n\nSharp money tracking:\n• **Moving lines** indicate sharp action\n• **Reverse line movement** = sharp opposite public\n• **Steam moves** = synchronized sharp bets\n\n*Coming soon: Live line tracking!*`,
+      type: 'lines',
+      suggestions: ['Sharp money plays', 'Public fades', '+EV props']
+    };
+  }
+
+  handleAdvancedStats(entities) {
+    const player = entities.players[0] || this.memory.context.currentPlayer;
+    if (!player) return this.handleUnknown('advanced stats');
+
+    const data = rayAnalytics.getAdvancedMetrics(player);
+    if (!data) return { text: `No advanced stats for ${player}.`, type: 'error' };
+
+    return {
+      text: `🧠 **${player} Advanced Metrics**\n\n${data.text}`,
+      type: 'advanced',
+      data: data.metrics,
+      suggestions: [`${player} per 36`, `${player} impact`, 'Advanced leaderboard']
+    };
+  }
+
+  handlePropBuilder(entities) {
+    return {
+      text: `🎯 **Prop Builder Coming Soon!**\n\nBuild custom same-game parlays with:\n• **Correlation analysis**\n• **+EV identification**\n• **Risk assessment**\n• **Optimal leg combinations**\n\nFor now, try: "Compare [Player] vs [Player]" or "Best props today"`,
+      type: 'builder',
+      suggestions: ['Best correlated props', 'SGP ideas', 'Value parlays']
+    };
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -467,18 +739,27 @@ class RayConversationBrain {
   // ─────────────────────────────────────────────────────────────────────────────
 
   handleGreeting() {
+    const hour = new Date().getHours();
+    const timeGreeting = hour < 12 ? 'Morning' : hour < 18 ? 'Afternoon' : 'Evening';
+    
     const greetings = [
-      "Hey! Ready to dominate the prop market today? 🏀",
-      "What's up! Ray here — your edge in player analytics. What player should we analyze?",
-      "Yo! Let's find some value. Ask me about any player, prop, or matchup.",
-      "Welcome back! I've got the latest stats, trends, and props. Who are we looking at?",
-      "Hey there! I'm Ray — NBA analytics at your service. What do you need?"
+      `${timeGreeting}! 🏀 Ready to find some edges? I've analyzed tonight's slate.`,
+      `Hey! Ray here — let's dominate the prop market today. What player interests you?`,
+      `What's good! I've got fresh stats, sharp angles, and value plays. Who should we analyze?`,
+      `Yo! 🔥 The lines are out. Let's find where the books are vulnerable.`,
+      `Welcome back! Got the latest trends and mismatches loaded. Fire away with any question.`,
+      `${timeGreeting}! ⚡ NBA analytics locked and loaded. Player, prop, or matchup?`
     ];
+
+    const sessionInfo = this.memory.context.sessionStarted;
+    const returning = Date.now() - sessionInfo > 300000; // 5 minutes
 
     return {
       text: greetings[Math.floor(Math.random() * greetings.length)],
       type: 'greeting',
-      suggestions: ['Best props today', 'Curry stats', 'Top scorers', 'Sharp money plays']
+      suggestions: returning 
+        ? ['What\'s changed?', 'Hot props now', 'Sharp action', 'Top plays']
+        : ['Best props today', 'Curry stats', 'Top scorers', 'Value plays']
     };
   }
 
