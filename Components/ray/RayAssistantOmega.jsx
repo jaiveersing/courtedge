@@ -3,9 +3,11 @@
 // ║  ═══════════════════════════════════════════════════════════════════════════════════════════════════════  ║
 // ║  🧠 Neural Networks • 🌌 Holographic Design • 📊 Inline Charts • 💎 Player Cards • 🎯 Prop Analysis       ║
 // ║  ⚔️ Comparisons • 📈 Trends • 💰 EV Calculator • 🏆 Rankings • 🎮 Fantasy • 🗣️ Voice • 🎨 Animations      ║
+// ║  🎤 ALWAYS-ON VOICE: "Hello Ray" to activate • Voice navigation • Instant commands                        ║
 // ╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 import React, { useState, useEffect, useRef, useCallback, useMemo, memo } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   X, Send, Mic, MicOff, Volume2, VolumeX, Brain, Sparkles,
   TrendingUp, TrendingDown, Target, Zap, Activity, Crown, Cpu, Shield,
@@ -23,7 +25,453 @@ import rayPropIntelligence from './RayPropIntelligence';
 import rayComparisonEngine from './RayComparisonEngine';
 
 // ═══════════════════════════════════════════════════════════════════════════════════════════════════════════
-// 🎨 OMEGA QUANTUM STYLES - WORLD'S MOST ADVANCED UI
+// 🎤 VOICE COMMAND SYSTEM - NAVIGATION & PAGE ACTIONS
+// ═══════════════════════════════════════════════════════════════════════════════════════════════════════════
+const VOICE_COMMANDS = {
+  // Wake words to activate Ray
+  wakeWords: ['hello ray', 'hey ray', 'hi ray', 'ok ray', 'yo ray', 'ray', 'hey there ray'],
+  
+  // Navigation commands -> route paths
+  navigation: {
+    // Bets
+    'open bets': '/bets',
+    'go to bets': '/bets', 
+    'take me to bets': '/bets',
+    'show my bets': '/bets',
+    'bets page': '/bets',
+    'my bets': '/bets',
+    'open my bets': '/bets',
+    
+    // Bankroll
+    'open bankroll': '/bankroll',
+    'go to bankroll': '/bankroll',
+    'take me to bankroll': '/bankroll',
+    'bankroll page': '/bankroll',
+    'show bankroll': '/bankroll',
+    'my bankroll': '/bankroll',
+    
+    // Analytics
+    'open analytics': '/analytics',
+    'go to analytics': '/analytics',
+    'take me to analytics': '/analytics',
+    'analytics page': '/analytics',
+    'show analytics': '/analytics',
+    
+    // Workstation
+    'open workstation': '/workstation',
+    'go to workstation': '/workstation',
+    'take me to workstation': '/workstation',
+    'workstation page': '/workstation',
+    'workstation': '/workstation',
+    
+    // ML Workstation
+    'open ml workstation': '/ml-workstation',
+    'go to ml workstation': '/ml-workstation',
+    'take me to ml workstation': '/ml-workstation',
+    'ml workstation': '/ml-workstation',
+    'machine learning': '/ml-workstation',
+    'ml workshop': '/ml-workstation',
+    'ml page': '/ml-workstation',
+    
+    // Dashboard
+    'open dashboard': '/dashboard',
+    'go to dashboard': '/dashboard',
+    'take me to dashboard': '/dashboard',
+    'home': '/dashboard',
+    'go home': '/dashboard',
+    'dashboard': '/dashboard',
+    
+    // Players
+    'open players': '/players',
+    'player database': '/players',
+    'go to players': '/players',
+    'show players': '/players',
+    
+    // Settings
+    'open settings': '/settings',
+    'go to settings': '/settings',
+    'settings': '/settings',
+    
+    // Portfolio
+    'open portfolio': '/portfolio',
+    'go to portfolio': '/portfolio',
+    'portfolio': '/portfolio',
+    
+    // Player Trends
+    'player trends': '/player-trends',
+    'go to trends': '/player-trends',
+    'trends': '/player-trends'
+  },
+  
+  // Page-specific actions (will dispatch custom events)
+  pageActions: {
+    // Workstation actions
+    'last 10 games': { action: 'showGames', value: 10 },
+    'last 10': { action: 'showGames', value: 10 },
+    'show last 10': { action: 'showGames', value: 10 },
+    'last 30 games': { action: 'showGames', value: 30 },
+    'last 30': { action: 'showGames', value: 30 },
+    'show last 30': { action: 'showGames', value: 30 },
+    'last 5 games': { action: 'showGames', value: 5 },
+    'last 5': { action: 'showGames', value: 5 },
+    'alternate lines': { action: 'showAlternateLines' },
+    'show alternate lines': { action: 'showAlternateLines' },
+    'alternate': { action: 'showAlternateLines' },
+    'props': { action: 'showProps' },
+    'show props': { action: 'showProps' },
+    'player props': { action: 'showProps' },
+    'stats': { action: 'showStats' },
+    'show stats': { action: 'showStats' },
+    'compare': { action: 'showCompare' },
+    'comparison': { action: 'showCompare' }
+  },
+  
+  // Quick responses (no processing needed)
+  quickResponses: {
+    'what can you do': "I can navigate anywhere, analyze any player, show props, compare stats, and execute any command instantly. Just say what you want!",
+    'help': "Say 'go to bets' to navigate, 'search Curry' to find a player, 'last 10 games' to see recent games, or ask me anything about NBA analytics!",
+    'thanks': "You're welcome, sir!",
+    'thank you': "My pleasure. Anything else?",
+    'good job': "Thank you, sir. Always at your service.",
+    'goodbye': "Goodbye, sir. I'll be here when you need me - just say 'Hello Ray'."
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════════════════════
+// 🎯 PLAYER NAME MATCHER - Find players in speech
+// ═══════════════════════════════════════════════════════════════════════════════════════════════════════════
+const findPlayerInText = (text) => {
+  const lowerText = text.toLowerCase();
+  
+  // Direct matches first
+  const playerMatches = {
+    'curry': 'Stephen Curry',
+    'stephen curry': 'Stephen Curry',
+    'steph': 'Stephen Curry',
+    'lebron': 'LeBron James',
+    'james': 'LeBron James',
+    'lebron james': 'LeBron James',
+    'giannis': 'Giannis Antetokounmpo',
+    'luka': 'Luka Doncic',
+    'doncic': 'Luka Doncic',
+    'jokic': 'Nikola Jokic',
+    'nikola': 'Nikola Jokic',
+    'embiid': 'Joel Embiid',
+    'tatum': 'Jayson Tatum',
+    'durant': 'Kevin Durant',
+    'kd': 'Kevin Durant',
+    'harden': 'James Harden',
+    'lillard': 'Damian Lillard',
+    'dame': 'Damian Lillard',
+    'booker': 'Devin Booker',
+    'trae': 'Trae Young',
+    'ja': 'Ja Morant',
+    'morant': 'Ja Morant',
+    'kyrie': 'Kyrie Irving',
+    'edwards': 'Anthony Edwards',
+    'ant': 'Anthony Edwards',
+    'ad': 'Anthony Davis',
+    'anthony davis': 'Anthony Davis',
+    'jimmy butler': 'Jimmy Butler',
+    'butler': 'Jimmy Butler',
+    'kawhi': 'Kawhi Leonard',
+    'paul george': 'Paul George',
+    'pg': 'Paul George'
+  };
+  
+  for (const [key, value] of Object.entries(playerMatches)) {
+    if (lowerText.includes(key)) {
+      return value;
+    }
+  }
+  
+  return null;
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════════════════════
+// � NBA VOCABULARY & NAME CORRECTION ENGINE - 100x BETTER VOICE INPUT
+// ═══════════════════════════════════════════════════════════════════════════════════════════════════════════
+const NBA_VOCABULARY = {
+  players: [
+    'LeBron James', 'Stephen Curry', 'Kevin Durant', 'Giannis Antetokounmpo', 'Luka Doncic',
+    'Joel Embiid', 'Nikola Jokic', 'Jayson Tatum', 'Damian Lillard', 'Anthony Davis',
+    'James Harden', 'Devin Booker', 'Trae Young', 'Donovan Mitchell', 'Jimmy Butler',
+    'Kawhi Leonard', 'Paul George', 'Bradley Beal', 'Kyrie Irving', 'Anthony Edwards',
+    'Ja Morant', 'Zion Williamson', 'Shai Gilgeous-Alexander', 'Jaylen Brown', 'DeMar DeRozan',
+    'Karl-Anthony Towns', 'Bam Adebayo', 'Pascal Siakam', 'Domantas Sabonis', 'Tyrese Haliburton'
+  ],
+  teams: [
+    'Lakers', 'Warriors', 'Celtics', 'Heat', 'Bucks', 'Nuggets', 'Suns', 'Mavericks',
+    'Clippers', 'Sixers', '76ers', 'Nets', 'Grizzlies', 'Pelicans', 'Kings', 'Knicks',
+    'Cavaliers', 'Hawks', 'Raptors', 'Bulls', 'Pacers', 'Magic', 'Wizards', 'Hornets'
+  ],
+  stats: [
+    'points', 'rebounds', 'assists', 'steals', 'blocks', 'turnovers', 'field goal',
+    'three pointer', 'free throw', 'plus minus', 'usage rate', 'true shooting',
+    'player efficiency rating', 'PER', 'effective field goal', 'eFG'
+  ],
+  actions: [
+    'compare', 'analyze', 'show stats', 'prop bet', 'over under', 'spread', 'moneyline',
+    'parlay', 'points prop', 'rebounds prop', 'assists prop', 'best bet', 'value play'
+  ],
+  corrections: {
+    'lebron': 'LeBron', 'le bron': 'LeBron', 'lebron james': 'LeBron James',
+    'steph curry': 'Stephen Curry', 'stefan curry': 'Stephen Curry', 'steven curry': 'Stephen Curry',
+    'kevin durant': 'Kevin Durant', 'kd': 'Kevin Durant', 'durant': 'Durant',
+    'giannis': 'Giannis', 'yanis': 'Giannis', 'yannis': 'Giannis',
+    'luca': 'Luka', 'luka': 'Luka', 'luka doncic': 'Luka Doncic',
+    'yokich': 'Jokic', 'jokic': 'Jokic', 'nikola jokic': 'Nikola Jokic',
+    'embid': 'Embiid', 'embiid': 'Embiid', 'joel embiid': 'Joel Embiid',
+    'tatum': 'Tatum', 'jayson tatum': 'Jayson Tatum',
+    'dame': 'Damian Lillard', 'lillard': 'Lillard', 'damian lillard': 'Damian Lillard',
+    'ad': 'Anthony Davis', 'anthony davis': 'Anthony Davis',
+    'harden': 'Harden', 'james harden': 'James Harden',
+    'booker': 'Booker', 'devin booker': 'Devin Booker',
+    'trae young': 'Trae Young', 'tray young': 'Trae Young',
+    'ja morant': 'Ja Morant', 'jaw morant': 'Ja Morant',
+    'kyrie': 'Kyrie', 'kyrie irving': 'Kyrie Irving',
+    'point': 'points', 'rebound': 'rebounds', 'assist': 'assists',
+    'three': 'three pointer', '3': 'three pointer', 'threes': 'three pointers',
+    'free throws': 'free throw', 'ft': 'free throw',
+    'versus': 'vs', 'verse': 'vs', 'compared to': 'compare',
+    'over': 'over', 'under': 'under', 'prop': 'prop',
+    'best bets': 'best bet', 'value plays': 'value play'
+  }
+};
+
+// Intelligent transcript processor
+const processVoiceTranscript = (rawTranscript) => {
+  if (!rawTranscript) return '';
+  
+  let processed = rawTranscript.trim().toLowerCase();
+  
+  // Apply corrections from dictionary
+  Object.entries(NBA_VOCABULARY.corrections).forEach(([wrong, correct]) => {
+    const regex = new RegExp(`\\b${wrong}\\b`, 'gi');
+    processed = processed.replace(regex, correct);
+  });
+  
+  // Fix common speech-to-text errors
+  processed = processed
+    .replace(/\bshow me\b/gi, '')
+    .replace(/\btell me about\b/gi, '')
+    .replace(/\bwhat about\b/gi, '')
+    .replace(/\bwhat is\b/gi, '')
+    .replace(/\bwhat are\b/gi, '')
+    .replace(/\bhow about\b/gi, '')
+    .replace(/\bget me\b/gi, '')
+    .replace(/\s+/g, ' ');
+  
+  // Capitalize proper names
+  NBA_VOCABULARY.players.forEach(player => {
+    const regex = new RegExp(`\\b${player.toLowerCase()}\\b`, 'gi');
+    processed = processed.replace(regex, player);
+  });
+  
+  // Smart capitalization for first letter
+  processed = processed.charAt(0).toUpperCase() + processed.slice(1);
+  
+  // Remove filler words
+  processed = processed
+    .replace(/\buh\b/gi, '')
+    .replace(/\bum\b/gi, '')
+    .replace(/\blike\b/gi, '')
+    .replace(/\byou know\b/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  
+  return processed;
+};
+
+// Simple Levenshtein distance for fuzzy matching
+const levenshteinDistance = (a, b) => {
+  const matrix = [];
+  for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+  
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j] + 1
+        );
+      }
+    }
+  }
+  return matrix[b.length][a.length];
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════════════════════
+// 🗣️ ADVANCED SPEECH PROCESSING - 100x SMARTER TTS
+// ═══════════════════════════════════════════════════════════════════════════════════════════════════════════
+
+// NBA pronunciation dictionary
+const PRONUNCIATION_DICT = {
+  'Giannis': 'YAH-nis',
+  'Antetokounmpo': 'an-tet-oh-KOON-poh',
+  'Jokic': 'YO-kich',
+  'Doncic': 'DON-chich',
+  'Embiid': 'em-BEED',
+  'Siakam': 'see-AH-kum',
+  'Sabonis': 'sah-BOH-nis',
+  'Haliburton': 'HAL-ee-bur-ton',
+  'Gilgeous-Alexander': 'GIL-juss AL-ex-an-der',
+  'DeRozan': 'deh-ROH-zan',
+  'Booker': 'BOOK-er',
+  'Tatum': 'TAY-tum',
+  'Lillard': 'LIL-erd',
+  'Durant': 'duh-RANT',
+  'LeBron': 'leh-BRON',
+  'Curry': 'CUR-ee',
+  'PER': 'P E R',
+  'eFG': 'effective field goal percentage',
+  'TS%': 'true shooting percentage',
+  'USG%': 'usage rate',
+  'BPM': 'box plus minus',
+  'VORP': 'value over replacement player',
+  'WS': 'win shares',
+  'PnR': 'pick and roll',
+  'ISO': 'isolation',
+  'vs': 'versus',
+  '3PT': 'three point',
+  'FT': 'free throw',
+  'FG': 'field goal'
+};
+
+// Detect emotion/tone in text
+const detectEmotion = (text) => {
+  const lowerText = text.toLowerCase();
+  
+  if (lowerText.includes('🔥') || lowerText.includes('dominant') || lowerText.includes('elite') || lowerText.includes('smash')) {
+    return { emotion: 'excited', pitch: 1.15, rate: 1.05 };
+  }
+  if (lowerText.includes('warning') || lowerText.includes('caution') || lowerText.includes('fade')) {
+    return { emotion: 'cautious', pitch: 0.95, rate: 0.95 };
+  }
+  if (lowerText.includes('analysis') || lowerText.includes('data') || lowerText.includes('statistics')) {
+    return { emotion: 'analytical', pitch: 1.0, rate: 0.92 };
+  }
+  if (lowerText.includes('compare') || lowerText.includes('versus') || lowerText.includes('matchup')) {
+    return { emotion: 'comparative', pitch: 1.05, rate: 0.98 };
+  }
+  
+  return { emotion: 'neutral', pitch: 1.0, rate: 1.0 };
+};
+
+// Add natural pauses and emphasis
+const addNaturalPauses = (text) => {
+  let processed = text;
+  
+  // Remove emojis and special chars
+  processed = processed.replace(/[*#📊📈🔥🎯🚀📉💰⚔️🏆✅⚡🎨🌟💎🏀⭐]/g, '');
+  
+  // Add pauses for better flow
+  processed = processed
+    .replace(/\n\n+/g, '... ')  // Double newlines = long pause
+    .replace(/\n/g, ', ')        // Single newline = short pause
+    .replace(/([.!?])\s+/g, '$1... ')  // Add pause after sentences
+    .replace(/([,:;])\s+/g, '$1 ')     // Natural pause at punctuation
+    .replace(/•/g, ',')                 // Bullets become commas
+    .replace(/→/g, 'to')                // Arrow = "to"
+    .replace(/\*\*/g, '')               // Remove bold markers
+    .replace(/`([^`]+)`/g, '$1');       // Remove code markers
+  
+  // Add emphasis to numbers
+  processed = processed.replace(/(\d+\.\d+)%/g, '$1 percent');
+  processed = processed.replace(/(\d+)%/g, '$1 percent');
+  processed = processed.replace(/\$(\d+)/g, '$1 dollars');
+  
+  // Better number reading
+  processed = processed.replace(/\b(\d+)-(\d+)\b/g, '$1 to $2');
+  processed = processed.replace(/\b(\d+)x\b/g, '$1 times');
+  
+  // Apply pronunciation dictionary
+  Object.entries(PRONUNCIATION_DICT).forEach(([word, pronunciation]) => {
+    const regex = new RegExp(`\\b${word}\\b`, 'gi');
+    processed = processed.replace(regex, pronunciation);
+  });
+  
+  return processed.trim();
+};
+
+// Split long text into chunks for better speech flow
+const splitIntoSpeechChunks = (text, maxLength = 200) => {
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+  const chunks = [];
+  let currentChunk = '';
+  
+  sentences.forEach(sentence => {
+    if ((currentChunk + sentence).length > maxLength && currentChunk) {
+      chunks.push(currentChunk.trim());
+      currentChunk = sentence;
+    } else {
+      currentChunk += sentence;
+    }
+  });
+  
+  if (currentChunk) chunks.push(currentChunk.trim());
+  return chunks;
+};
+
+// Select best voice based on platform and quality
+const selectBestVoice = (voices) => {
+  if (!voices || voices.length === 0) return null;
+  
+  // Priority order: high quality, natural, en-US
+  const priorities = [
+    // Premium voices (best quality)
+    { name: 'Google US English', score: 100 },
+    { name: 'Microsoft David', score: 95 },
+    { name: 'Microsoft Mark', score: 94 },
+    { name: 'Alex', score: 90 },  // macOS
+    { name: 'Samantha', score: 88 },  // macOS
+    
+    // Good quality voices
+    { lang: 'en-US', localService: false, score: 80 },  // Cloud voices
+    { lang: 'en-US', score: 70 },
+    { lang: 'en-GB', score: 65 },
+    { lang: 'en', score: 60 }
+  ];
+  
+  let bestVoice = null;
+  let bestScore = 0;
+  
+  voices.forEach(voice => {
+    let score = 0;
+    
+    // Check priorities
+    for (const priority of priorities) {
+      if (priority.name && voice.name.includes(priority.name)) {
+        score = Math.max(score, priority.score);
+      }
+      if (priority.lang && voice.lang === priority.lang) {
+        score = Math.max(score, priority.score);
+        if (priority.localService !== undefined && voice.localService === priority.localService) {
+          score += 5;
+        }
+      }
+    }
+    
+    // Bonus for neural/premium voices
+    if (voice.name.toLowerCase().includes('neural')) score += 15;
+    if (voice.name.toLowerCase().includes('premium')) score += 10;
+    if (voice.name.toLowerCase().includes('enhanced')) score += 10;
+    
+    if (score > bestScore) {
+      bestScore = score;
+      bestVoice = voice;
+    }
+  });
+  
+  return bestVoice;
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════════════════════
+// �🎨 OMEGA QUANTUM STYLES - WORLD'S MOST ADVANCED UI
 // ═══════════════════════════════════════════════════════════════════════════════════════════════════════════
 const omegaStyles = `
   /* ═════════════════════════════════════════════════════════════════════════════════════
@@ -279,6 +727,17 @@ const omegaStyles = `
     50% { 
       filter: drop-shadow(0 0 20px var(--omega-purple)) drop-shadow(0 0 35px var(--omega-cyan));
       transform: scale(1.08);
+    }
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.7;
+      transform: scale(1.05);
     }
   }
 
@@ -1418,14 +1877,167 @@ const omegaStyles = `
   }
 
   .omega-voice-btn.listening {
-    background: var(--omega-red);
+    background: linear-gradient(135deg, var(--omega-purple-bright), var(--omega-cyan));
     color: white;
-    animation: voice-pulse 1.2s ease-in-out infinite;
+    animation: voice-pulse-enhanced 1.2s ease-in-out infinite;
+  }
+
+  .omega-voice-btn.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  @keyframes voice-pulse-enhanced {
+    0%, 100% { 
+      transform: scale(1); 
+      box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7), 0 4px 20px rgba(139, 92, 246, 0.3); 
+    }
+    50% { 
+      transform: scale(1.05); 
+      box-shadow: 0 0 0 10px rgba(139, 92, 246, 0), 0 4px 30px rgba(139, 92, 246, 0.5); 
+    }
   }
 
   @keyframes voice-pulse {
     0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
     50% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+  }
+
+  /* Voice Status Banner */
+  .omega-voice-status {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(6, 182, 212, 0.15));
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 12px 12px 0 0;
+    backdrop-filter: blur(10px);
+    animation: slideUp 0.3s ease;
+  }
+
+  .omega-voice-status.error {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.15));
+    border-color: rgba(239, 68, 68, 0.3);
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .omega-voice-error {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #f87171;
+    font-size: 13px;
+  }
+
+  .omega-voice-dismiss {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: #f87171;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+  }
+
+  .omega-voice-dismiss:hover {
+    opacity: 1;
+  }
+
+  .omega-voice-interim,
+  .omega-voice-listening {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--omega-text);
+  }
+
+  .omega-voice-indicator {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .omega-voice-pulse {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--omega-purple-bright);
+    opacity: 0.3;
+    animation: pulse-ring 1.5s ease-out infinite;
+  }
+
+  @keyframes pulse-ring {
+    0% { transform: scale(0.8); opacity: 0.8; }
+    100% { transform: scale(2); opacity: 0; }
+  }
+
+  .omega-transcript-display {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow: hidden;
+  }
+
+  .omega-interim-text {
+    font-style: italic;
+    color: var(--omega-purple-bright);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+
+  .omega-confidence-badge {
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+    border: 1px solid currentColor;
+  }
+
+  .omega-voice-commands {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--omega-text-dim);
+    margin-left: auto;
+  }
+
+  .omega-voice-hint {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--omega-text-dim);
+    margin-left: auto;
+  }
+
+  .omega-voice-hint kbd {
+    padding: 2px 6px;
+    background: var(--omega-elevated);
+    border: 1px solid var(--omega-border);
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
   }
 
   .omega-textarea {
@@ -1752,6 +2364,10 @@ const parseMarkdown = (text) => {
 // 🌌 MAIN OMEGA COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════════════════════════════════════
 function RayAssistantUltimate({ isOpen, onClose, onToggle }) {
+  // Navigation hook
+  const navigate = useNavigate();
+  const location = useLocation();
+  
   // ═══════════════════════════════════════════════════════════════════════════════════════════════════════
   // STATE
   // ═══════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -1767,6 +2383,16 @@ function RayAssistantUltimate({ isOpen, onClose, onToggle }) {
   const [expanded, setExpanded] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
   const [suggestions, setSuggestions] = useState(['Best props today', 'Trending players', 'Curry stats', 'Sharp money']);
+  const [interimTranscript, setInterimTranscript] = useState('');
+  const [voiceSupported, setVoiceSupported] = useState(true);
+  const [voiceError, setVoiceError] = useState(null);
+  const [voiceConfidence, setVoiceConfidence] = useState(0);
+  
+  // 🎤 ALWAYS-ON WAKE WORD DETECTION STATE
+  const [isAwake, setIsAwake] = useState(false);
+  const [wakeWordListening, setWakeWordListening] = useState(false);
+  const [lastCommand, setLastCommand] = useState('');
+  
   const [quickActions, setQuickActions] = useState([
     { icon: '🔥', label: 'Hot props', action: 'Show me the hottest props today' },
     { icon: '⚡', label: 'Value plays', action: 'Find me +EV props' },
@@ -1780,8 +2406,16 @@ function RayAssistantUltimate({ isOpen, onClose, onToggle }) {
   const scrollRef = useRef(null);
   const textareaRef = useRef(null);
   const recognitionRef = useRef(null);
+  const wakeWordRecognitionRef = useRef(null);
   const processingLockRef = useRef(false);
   const streamIntervalRef = useRef(null);
+  const voiceTimeoutRef = useRef(null);
+  const finalTranscriptRef = useRef('');
+  const awakeTimeoutRef = useRef(null);
+  const processMessageRef = useRef(null); // Ref for processMessage to avoid circular dependency
+  const voicesLoadedRef = useRef(false);
+  const cachedVoiceRef = useRef(null);
+  const speechQueueRef = useRef([]);
 
   // ═══════════════════════════════════════════════════════════════════════════════════════════════════════
   // MEMOIZED DECORATIONS
@@ -1832,19 +2466,57 @@ function RayAssistantUltimate({ isOpen, onClose, onToggle }) {
     return () => document.getElementById(styleId)?.remove();
   }, []);
 
+  // ═══════════════════════════════════════════════════════════════════════════════════════════════════════
+  // 🔊 VOICE PRELOADING - ENSURES SPEECH WORKS IMMEDIATELY
+  // ═══════════════════════════════════════════════════════════════════════════════════════════════════════
+  useEffect(() => {
+    const preloadVoices = () => {
+      const voices = window.speechSynthesis.getVoices();
+      console.log('🔊 Available voices:', voices.length);
+      
+      if (voices.length > 0) {
+        voicesLoadedRef.current = true;
+        // Pre-select the best voice
+        const bestVoice = selectBestVoice(voices);
+        cachedVoiceRef.current = bestVoice;
+        console.log('🔊 Voices preloaded! Best voice:', bestVoice?.name || 'Default');
+      } else {
+        console.warn('⚠️ No voices available yet');
+      }
+    };
+    
+    // Load voices immediately
+    preloadVoices();
+    
+    // Also listen for voiceschanged
+    window.speechSynthesis.addEventListener('voiceschanged', preloadVoices);
+    
+    // Keep speech synthesis alive - Chrome pauses it
+    const keepAlive = setInterval(() => {
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+      }
+    }, 5000);
+    
+    return () => {
+      window.speechSynthesis.removeEventListener('voiceschanged', preloadVoices);
+      clearInterval(keepAlive);
+    };
+  }, []);
+
   // Auto-scroll
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages, streamText, thinkingSteps]);
 
-  // Welcome message
+  // Welcome message + auto-activate voice
   useEffect(() => {
     if (isOpen && messages.length === 0) {
       setTimeout(() => {
         setMessages([{
           id: 'welcome',
           role: 'assistant',
-          content: `Hey! I'm **Ray** 🧠 — your AI-powered NBA analytics expert.\n\nI can instantly analyze:\n• **📊 Player Stats** — Real-time performance & trends\n• **🎯 Props & Lines** — EV analysis, hit rates, sharp money\n• **⚔️ Comparisons** — Head-to-head player breakdowns\n• **💰 Value Plays** — +EV opportunities & edges\n• **🏆 Rankings** — Top performers by any stat\n• **📈 Predictions** — AI-powered prop forecasts\n\nTry asking: *"Curry points prop"* or *"Compare LeBron vs Giannis"*`,
+          content: `Hey! I'm **Ray** 🧠 — your AI-powered NBA analytics expert.\n\n🎤 **Voice Activated!** Say "Hello Ray" anytime to wake me up.\n\nI can instantly:\n• **Navigate** — "Go to bets", "Take me to bankroll", "Open workstation"\n• **Analyze Players** — "Search Curry", "LeBron stats"\n• **Show Data** — "Last 10 games", "Alternate lines", "Show props"\n• **Answer Questions** — "Curry points prop", "Compare LeBron vs Giannis"\n\nClick the 🔊 button above to test voice!`,
           timestamp: new Date(),
           suggestions: ['🔥 Hot props', '⚡ +EV plays', '📊 Curry analysis', '⚔️ LeBron vs Curry']
         }]);
@@ -1853,21 +2525,361 @@ function RayAssistantUltimate({ isOpen, onClose, onToggle }) {
   }, [isOpen, messages.length]);
 
   // ═══════════════════════════════════════════════════════════════════════════════════════════════════════
-  // SPEECH
+  // 🎤 INSTANT VOICE COMMAND EXECUTION - NO DELAYS
+  // ═══════════════════════════════════════════════════════════════════════════════════════════════════════
+  
+  // 🔊 EMERGENCY QUICK SPEAK
+  const quickSpeak = useCallback((text) => {
+    if (!text) return;
+    console.log('🚨 QUICK SPEAK:', text);
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 1.2;
+    u.volume = 1.0;
+    u.onstart = () => console.log('✅ QUICK SPEAK STARTED!');
+    u.onerror = (e) => console.error('❌ QUICK SPEAK ERROR:', e);
+    window.speechSynthesis.speak(u);
+  }, []);
+
+  // Execute voice command instantly
+  const executeVoiceCommand = useCallback((command) => {
+    const lowerCommand = command.toLowerCase().trim();
+    console.log('🎯 EXECUTING COMMAND:', lowerCommand);
+    setLastCommand(command);
+    
+    // Helper to call processMessage via ref
+    const callProcessMessage = (msg) => {
+      if (processMessageRef.current) {
+        processMessageRef.current(msg);
+      }
+    };
+    
+    // 1. Check for quick responses first (instant)
+    for (const [trigger, response] of Object.entries(VOICE_COMMANDS.quickResponses)) {
+      if (lowerCommand.includes(trigger)) {
+        quickSpeak(response);
+        return true;
+      }
+    }
+    
+    // 2. Check for bet queries
+    if (lowerCommand.includes('bet') || lowerCommand.includes('placed') || lowerCommand.includes('wager')) {
+      // Navigate to bets page first
+      navigate('/bets');
+      if (!isOpen && onToggle) onToggle();
+      
+      // Query bet information
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('rayBetQuery', { 
+          detail: { query: lowerCommand }
+        }));
+      }, 500);
+      
+      // Listen for response
+      const handleBetResponse = (event) => {
+        quickSpeak(event.detail.response);
+        window.removeEventListener('rayBetResponse', handleBetResponse);
+      };
+      window.addEventListener('rayBetResponse', handleBetResponse);
+      
+      quickSpeak("Checking your bets");
+      return true;
+    }
+    
+    // 3. Check for navigation commands (instant navigation)
+    for (const [trigger, path] of Object.entries(VOICE_COMMANDS.navigation)) {
+      if (lowerCommand.includes(trigger)) {
+        console.log(`🚀 NAVIGATING TO: ${path}`);
+        quickSpeak(`Going to ${trigger.replace('go to ', '').replace('open ', '').replace('take me to ', '')}`);
+        
+        // Open the chat if not open
+        if (!isOpen && onToggle) onToggle();
+        
+        // Navigate instantly
+        navigate(path);
+        return true;
+      }
+    }
+    
+    // 4. Check for player search/research commands
+    const searchPatterns = [
+      /(?:search|find|look up|research|analyze|show me|looking at)\s+(.+)/i,
+      /(?:i'm looking at|let's look at|check out)\s+(.+)/i
+    ];
+    
+    for (const pattern of searchPatterns) {
+      const match = lowerCommand.match(pattern);
+      if (match) {
+        const playerName = findPlayerInText(match[1]);
+        if (playerName) {
+          console.log(`🔍 SEARCHING PLAYER: ${playerName}`);
+          quickSpeak(`Searching for ${playerName}`);
+          
+          // Open chat if not open
+          if (!isOpen && onToggle) onToggle();
+          
+          // Dispatch player search event for workstation/other pages to catch
+          window.dispatchEvent(new CustomEvent('rayPlayerSearch', { 
+            detail: { player: playerName, query: command }
+          }));
+          
+          // Also process as a message for chat display
+          callProcessMessage(`${playerName} stats`);
+          return true;
+        }
+      }
+    }
+    
+    // 5. Check for page-specific actions
+    for (const [trigger, action] of Object.entries(VOICE_COMMANDS.pageActions)) {
+      if (lowerCommand.includes(trigger)) {
+        console.log(`⚡ PAGE ACTION: ${action.action}`, action);
+        quickSpeak(`Showing ${trigger}`);
+        
+        // Dispatch custom event for pages to catch
+        window.dispatchEvent(new CustomEvent('rayPageAction', { 
+          detail: action
+        }));
+        return true;
+      }
+    }
+    
+    // 6. Check for direct player mention without explicit command
+    const mentionedPlayer = findPlayerInText(lowerCommand);
+    if (mentionedPlayer) {
+      // Check if they want props, stats, etc.
+      if (lowerCommand.includes('prop') || lowerCommand.includes('points') || 
+          lowerCommand.includes('rebounds') || lowerCommand.includes('assists')) {
+        console.log(`📊 PLAYER PROP: ${mentionedPlayer}`);
+        if (!isOpen && onToggle) onToggle();
+        callProcessMessage(command);
+        return true;
+      }
+      
+      // Default to player stats
+      console.log(`📊 PLAYER STATS: ${mentionedPlayer}`);
+      quickSpeak(`Got it, showing ${mentionedPlayer}`);
+      if (!isOpen && onToggle) onToggle();
+      
+      window.dispatchEvent(new CustomEvent('rayPlayerSearch', { 
+        detail: { player: mentionedPlayer, query: command }
+      }));
+      callProcessMessage(`${mentionedPlayer} stats`);
+      return true;
+    }
+    
+    // 7. Fall through to normal chat processing
+    if (!isOpen && onToggle) onToggle();
+    callProcessMessage(command);
+    return true;
+  }, [navigate, isOpen, onToggle, quickSpeak]);
+
+  // ═══════════════════════════════════════════════════════════════════════════════════════════════════════
+  // 🎤 ALWAYS-ON WAKE WORD DETECTION - "HELLO RAY"
+  // ═══════════════════════════════════════════════════════════════════════════════════════════════════════
+  useEffect(() => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      console.warn('🎤 Wake word detection not supported');
+      return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const wakeRecognition = new SpeechRecognition();
+    
+    wakeRecognition.continuous = true;
+    wakeRecognition.interimResults = true;
+    wakeRecognition.lang = 'en-US';
+    wakeRecognition.maxAlternatives = 3;
+    
+    let isProcessingCommand = false;
+    let commandBuffer = '';
+    let silenceTimeout = null;
+    
+    wakeRecognition.onstart = () => {
+      console.log('🎤 ALWAYS-ON: Wake word listener started');
+      setWakeWordListening(true);
+    };
+    
+    wakeRecognition.onresult = (event) => {
+      let transcript = '';
+      
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      
+      const lowerTranscript = transcript.toLowerCase().trim();
+      console.log('🎤 Heard:', lowerTranscript);
+      
+      // Check for wake word if not already awake
+      if (!isAwake && !isProcessingCommand) {
+        for (const wakeWord of VOICE_COMMANDS.wakeWords) {
+          if (lowerTranscript.includes(wakeWord)) {
+            console.log('🔔 WAKE WORD DETECTED!');
+            setIsAwake(true);
+            isProcessingCommand = true;
+            commandBuffer = '';
+            
+            // Play activation sound
+            try {
+              const beep = new AudioContext();
+              const oscillator = beep.createOscillator();
+              const gainNode = beep.createGain();
+              oscillator.connect(gainNode);
+              gainNode.connect(beep.destination);
+              oscillator.frequency.value = 880;
+              gainNode.gain.setValueAtTime(0.3, beep.currentTime);
+              oscillator.start();
+              oscillator.stop(beep.currentTime + 0.15);
+            } catch (e) {}
+            
+            // Respond instantly
+            quickSpeak("Hey! What's up?");
+            
+            // Open chat
+            if (!isOpen && onToggle) onToggle();
+            
+            // Stay awake for 30 seconds
+            if (awakeTimeoutRef.current) clearTimeout(awakeTimeoutRef.current);
+            awakeTimeoutRef.current = setTimeout(() => {
+              setIsAwake(false);
+              isProcessingCommand = false;
+              quickSpeak("I'll be here if you need me");
+            }, 30000);
+            
+            return;
+          }
+        }
+      }
+      
+      // If awake, capture commands
+      if (isAwake && isProcessingCommand) {
+        // Remove wake word from transcript
+        let cleanCommand = lowerTranscript;
+        for (const wakeWord of VOICE_COMMANDS.wakeWords) {
+          cleanCommand = cleanCommand.replace(wakeWord, '').trim();
+        }
+        
+        if (cleanCommand.length > 2) {
+          commandBuffer = cleanCommand;
+          
+          // Reset silence timeout
+          if (silenceTimeout) clearTimeout(silenceTimeout);
+          
+          // Check if it's a final result
+          const lastResult = event.results[event.results.length - 1];
+          if (lastResult.isFinal) {
+            console.log('🎯 FINAL COMMAND:', commandBuffer);
+            
+            // Execute command immediately
+            executeVoiceCommand(commandBuffer);
+            
+            // Reset for next command but stay awake
+            commandBuffer = '';
+            
+            // Extend awake timeout
+            if (awakeTimeoutRef.current) clearTimeout(awakeTimeoutRef.current);
+            awakeTimeoutRef.current = setTimeout(() => {
+              setIsAwake(false);
+              isProcessingCommand = false;
+            }, 15000);
+          } else {
+            // Wait for silence to detect end of command
+            silenceTimeout = setTimeout(() => {
+              if (commandBuffer.length > 3) {
+                console.log('🎯 SILENCE DETECTED, EXECUTING:', commandBuffer);
+                executeVoiceCommand(commandBuffer);
+                commandBuffer = '';
+              }
+            }, 1500);
+          }
+        }
+      }
+    };
+    
+    wakeRecognition.onerror = (event) => {
+      console.warn('🎤 Wake word error:', event.error);
+      
+      // Auto-restart on certain errors
+      if (event.error === 'no-speech' || event.error === 'aborted') {
+        setTimeout(() => {
+          try {
+            wakeRecognition.start();
+          } catch (e) {}
+        }, 1000);
+      }
+    };
+    
+    wakeRecognition.onend = () => {
+      console.log('🎤 Wake word listener ended, restarting...');
+      setWakeWordListening(false);
+      
+      // Auto-restart to keep always listening
+      setTimeout(() => {
+        try {
+          wakeRecognition.start();
+        } catch (e) {
+          console.warn('🎤 Could not restart wake word listener');
+        }
+      }, 500);
+    };
+    
+    // Store reference
+    wakeWordRecognitionRef.current = wakeRecognition;
+    
+    // Start listening after a short delay
+    setTimeout(() => {
+      try {
+        wakeRecognition.start();
+        console.log('🎤 ALWAYS-ON: Wake word listener initialized');
+      } catch (e) {
+        console.warn('🎤 Could not start wake word listener:', e);
+      }
+    }, 2000);
+    
+    return () => {
+      if (silenceTimeout) clearTimeout(silenceTimeout);
+      if (awakeTimeoutRef.current) clearTimeout(awakeTimeoutRef.current);
+      try {
+        wakeRecognition.stop();
+      } catch (e) {}
+    };
+  }, [isAwake, isOpen, onToggle, quickSpeak, executeVoiceCommand]);
+
+  // ═══════════════════════════════════════════════════════════════════════════════════════════════════════
+  // ABSOLUTE EMERGENCY SPEAK - ZERO DELAYS!
   // ═══════════════════════════════════════════════════════════════════════════════════════════════════════
   const speak = useCallback((text) => {
-    if (!voiceEnabled || !text) return;
+    if (!text) return;
+    
+    console.log('🚨 EMERGENCY SPEAK CALLED!');
+    console.log('📣 TEXT:', text);
+    
+    // IMMEDIATE activation - no delays!
     window.speechSynthesis.cancel();
-    const cleaned = text.replace(/[*#📊📈🔥🎯🚀📉•→💰⚔️🏆]/g, '').replace(/\n+/g, '. ');
-    const utterance = new SpeechSynthesisUtterance(cleaned);
-    const voices = window.speechSynthesis.getVoices();
-    const voice = voices.find(v => v.name.includes('David'));
-    if (voice) utterance.voice = voice;
-    utterance.rate = 1.0;
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1.1;
+    utterance.volume = 1.0;
+    
+    utterance.onstart = () => {
+      console.log('✅✅✅ SPEAKING STARTED!');
+      setIsSpeaking(true);
+    };
+    
+    utterance.onend = () => {
+      console.log('✅✅✅ SPEAKING ENDED!');
+      setIsSpeaking(false);
+    };
+    
+    utterance.onerror = (e) => {
+      console.error('❌❌❌ SPEECH ERROR:', e.error, e);
+      setIsSpeaking(false);
+      alert('SPEECH ERROR: ' + e.error + ' - Click the red speaker button to test!');
+    };
+    
+    // SPEAK NOW!
     window.speechSynthesis.speak(utterance);
-  }, [voiceEnabled]);
+    console.log('🚀🚀🚀 UTTERANCE QUEUED!');
+  }, []);
 
   // ═══════════════════════════════════════════════════════════════════════════════════════════════════════
   // STREAM TEXT
@@ -1959,7 +2971,27 @@ function RayAssistantUltimate({ isOpen, onClose, onToggle }) {
         }]);
         
         processingLockRef.current = false;
-        speak(finalText);
+        
+        // FORCE SPEAK WITH ALERT!
+        console.log('🚨🚨🚨 ABOUT TO CALL SPEAK!');
+        console.log('Text length:', finalText?.length);
+        console.log('First 100 chars:', finalText?.substring(0, 100));
+        
+        // Show alert to confirm speak is being called
+        if (finalText) {
+          console.log('✅ Calling speak() NOW!');
+          speak(finalText);
+          
+          // Check if speaking after 500ms
+          setTimeout(() => {
+            if (!window.speechSynthesis.speaking) {
+              console.error('❌❌❌ SPEECH NOT STARTED! Browser might be blocking.');
+              console.log('Try clicking the red 🔊 button first!');
+            }
+          }, 500);
+        } else {
+          console.error('❌ NO TEXT TO SPEAK!');
+        }
       });
       
     } catch (error) {
@@ -1983,6 +3015,11 @@ function RayAssistantUltimate({ isOpen, onClose, onToggle }) {
       }]);
     }
   }, [streamResponse, speak]);
+
+  // Update the processMessage ref whenever processMessage changes
+  useEffect(() => {
+    processMessageRef.current = processMessage;
+  }, [processMessage]);
 
   // ═══════════════════════════════════════════════════════════════════════════════════════════════════════
   // STOP GENERATION
@@ -2044,6 +3081,282 @@ function RayAssistantUltimate({ isOpen, onClose, onToggle }) {
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
   }, []);
+
+  // ═══════════════════════════════════════════════════════════════════════════════════════════════════════
+  // ENHANCED SPEECH RECOGNITION SETUP
+  // ═══════════════════════════════════════════════════════════════════════════════════════════════════════
+  
+  // Initialize speech recognition
+  useEffect(() => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      console.warn('Speech recognition not supported');
+      setVoiceSupported(false);
+      return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
+    const recognition = new SpeechRecognition();
+    
+    // Build grammar for NBA context
+    if (SpeechGrammarList) {
+      const grammarList = new SpeechGrammarList();
+      const allWords = [
+        ...NBA_VOCABULARY.players,
+        ...NBA_VOCABULARY.teams,
+        ...NBA_VOCABULARY.stats,
+        ...NBA_VOCABULARY.actions
+      ];
+      const grammar = `#JSGF V1.0; grammar nba; public <nba> = ${allWords.join(' | ')};`;
+      grammarList.addFromString(grammar, 1);
+      recognition.grammars = grammarList;
+    }
+    
+    // Enhanced configuration
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+    recognition.maxAlternatives = 5;
+
+    recognition.onstart = () => {
+      console.log('🎤 Voice recognition started');
+      setIsListening(true);
+      setVoiceError(null);
+      setInterimTranscript('');
+      finalTranscriptRef.current = '';
+      
+      // Audio feedback
+      if (voiceEnabled) {
+        const beep = new AudioContext();
+        const oscillator = beep.createOscillator();
+        const gainNode = beep.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(beep.destination);
+        oscillator.frequency.value = 800;
+        gainNode.gain.setValueAtTime(0.3, beep.currentTime);
+        oscillator.start();
+        oscillator.stop(beep.currentTime + 0.1);
+      }
+      
+      // Auto-timeout after 30 seconds
+      voiceTimeoutRef.current = setTimeout(() => {
+        if (recognitionRef.current && isListening) {
+          recognition.stop();
+          setVoiceError('Voice input timed out');
+        }
+      }, 30000);
+    };
+
+    recognition.onresult = (event) => {
+      let interimText = '';
+      let finalText = '';
+      let bestConfidence = 0;
+      
+      // Process all results with alternative selection
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const result = event.results[i];
+        
+        // Check all alternatives and pick best match
+        let bestTranscript = result[0].transcript;
+        let bestAltConfidence = result[0].confidence;
+        
+        for (let j = 0; j < result.length; j++) {
+          const alt = result[j];
+          const processed = processVoiceTranscript(alt.transcript);
+          
+          // Boost confidence if contains known NBA terms
+          let confidenceBoost = 0;
+          NBA_VOCABULARY.players.forEach(player => {
+            if (processed.toLowerCase().includes(player.toLowerCase())) {
+              confidenceBoost += 0.15;
+            }
+          });
+          
+          const adjustedConfidence = Math.min(1, alt.confidence + confidenceBoost);
+          
+          if (adjustedConfidence > bestAltConfidence) {
+            bestAltConfidence = adjustedConfidence;
+            bestTranscript = alt.transcript;
+          }
+        }
+        
+        if (result.isFinal) {
+          finalText += bestTranscript + ' ';
+          bestConfidence = Math.max(bestConfidence, bestAltConfidence);
+          setVoiceConfidence(bestAltConfidence * 100);
+          console.log(`✅ Final: "${bestTranscript}" (${(bestAltConfidence * 100).toFixed(0)}% confidence)`);
+        } else {
+          interimText += bestTranscript;
+          console.log(`⏳ Interim: "${bestTranscript}"`);
+        }
+      }
+      
+      // Process and clean up final text
+      if (finalText) {
+        const processed = processVoiceTranscript(finalText);
+        finalTranscriptRef.current = processed;
+        setInput(processed);
+        
+        // Show what was corrected
+        if (processed !== finalText.trim()) {
+          console.log(`🔧 Auto-corrected: "${finalText.trim()}" → "${processed}"`);
+        }
+      }
+      
+      // Process interim text for display
+      if (interimText) {
+        const processedInterim = processVoiceTranscript(interimText);
+        setInterimTranscript(processedInterim);
+      }
+      
+      // Voice commands
+      const command = (finalText + interimText).toLowerCase().trim();
+      
+      if (command.includes('stop listening') || command.includes('cancel')) {
+        recognition.stop();
+        setInput('');
+        setInterimTranscript('');
+        finalTranscriptRef.current = '';
+        return;
+      }
+      
+      if (command.includes('send message') || command.includes('submit') || command.includes('go ahead')) {
+        recognition.stop();
+        if (finalTranscriptRef.current.trim()) {
+          setTimeout(() => processMessage(finalTranscriptRef.current.trim()), 100);
+        }
+        return;
+      }
+      
+      if (command.includes('clear') || command.includes('delete')) {
+        setInput('');
+        setInterimTranscript('');
+        finalTranscriptRef.current = '';
+        return;
+      }
+    };
+
+    recognition.onerror = (event) => {
+      console.error('🚨 Speech recognition error:', event.error);
+      setIsListening(false);
+      setInterimTranscript('');
+      
+      const errorMessages = {
+        'not-allowed': '🚫 Microphone access denied. Please enable microphone in browser settings.',
+        'no-speech': '🔇 No speech detected. Please speak louder.',
+        'audio-capture': '🎤 Microphone not found. Please check your microphone.',
+        'network': '🌐 Network error. Please check your connection.',
+        'aborted': '⏹️ Voice input cancelled.',
+        'language-not-supported': '🌍 Language not supported.'
+      };
+      
+      const errorMsg = errorMessages[event.error] || `❌ Error: ${event.error}`;
+      setVoiceError(errorMsg);
+      
+      if (event.error === 'not-allowed') {
+        setTimeout(() => {
+          alert('🎤 Microphone Access Required\n\nPlease allow microphone access to use voice input.\n\n1. Click the lock icon in address bar\n2. Allow microphone access\n3. Reload the page');
+        }, 100);
+      }
+    };
+
+    recognition.onend = () => {
+      console.log('🛑 Voice recognition ended');
+      setIsListening(false);
+      setInterimTranscript('');
+      
+      if (voiceTimeoutRef.current) {
+        clearTimeout(voiceTimeoutRef.current);
+      }
+      
+      // Auto-submit if we have text and high confidence
+      if (finalTranscriptRef.current.trim() && voiceConfidence > 70) {
+        setTimeout(() => {
+          const text = finalTranscriptRef.current.trim();
+          if (text && !processingLockRef.current) {
+            processMessage(text);
+          }
+        }, 200);
+      }
+    };
+
+    recognition.onsoundstart = () => {
+      console.log('🔊 Sound detected');
+    };
+    
+    recognition.onsoundend = () => {
+      console.log('🔇 Sound ended');
+    };
+    
+    recognition.onspeechstart = () => {
+      console.log('🗣️ Speech detected');
+    };
+    
+    recognition.onspeechend = () => {
+      console.log('✋ Speech ended');
+    };
+
+    recognitionRef.current = recognition;
+
+    return () => {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch (e) {
+          // Already stopped
+        }
+      }
+      if (voiceTimeoutRef.current) {
+        clearTimeout(voiceTimeoutRef.current);
+      }
+    };
+  }, [processMessage, voiceEnabled, voiceConfidence]);
+
+  // Handle voice button toggle
+  useEffect(() => {
+    if (!recognitionRef.current || !voiceSupported) return;
+
+    if (isListening) {
+      try {
+        recognitionRef.current.start();
+      } catch (error) {
+        console.error('Failed to start recognition:', error);
+        setIsListening(false);
+        setVoiceError('Failed to start. Please try again.');
+      }
+    } else {
+      try {
+        recognitionRef.current.stop();
+        if (voiceTimeoutRef.current) {
+          clearTimeout(voiceTimeoutRef.current);
+        }
+      } catch (error) {
+        // Already stopped
+      }
+    }
+  }, [isListening, voiceSupported]);
+  
+  // Voice shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Ctrl/Cmd + Shift + V = Toggle voice
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'V') {
+        e.preventDefault();
+        if (voiceSupported && !processingLockRef.current) {
+          setIsListening(prev => !prev);
+        }
+      }
+      
+      // Escape while listening = Stop
+      if (e.key === 'Escape' && isListening) {
+        e.preventDefault();
+        setIsListening(false);
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isListening, voiceSupported]);
 
   // ═══════════════════════════════════════════════════════════════════════════════════════════════════════
   // RENDER
@@ -2148,10 +3461,72 @@ function RayAssistantUltimate({ isOpen, onClose, onToggle }) {
           <div className="omega-actions">
             <button
               className={`omega-btn-icon ${voiceEnabled ? 'active' : ''}`}
-              onClick={() => setVoiceEnabled(!voiceEnabled)}
-              title={voiceEnabled ? 'Mute voice' : 'Enable voice'}
+              onClick={() => {
+                const newState = !voiceEnabled;
+                setVoiceEnabled(newState);
+                console.log(`🔊 Voice ${newState ? 'ENABLED' : 'DISABLED'}`);
+                
+                // Test speak when enabled
+                if (newState) {
+                  setTimeout(() => {
+                    console.log('🎤 Testing voice...');
+                    const testUtterance = new SpeechSynthesisUtterance("Voice enabled");
+                    testUtterance.rate = 1.2;
+                    testUtterance.volume = 1.0;
+                    window.speechSynthesis.speak(testUtterance);
+                  }, 100);
+                }
+              }}
+              title={voiceEnabled ? 'Mute voice (Currently ON)' : 'Enable voice (Currently OFF)'}
             >
               {voiceEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+            </button>
+            <button
+              className="omega-btn-icon"
+              onClick={() => {
+                console.log('🚨🚨🚨 EMERGENCY TEST BUTTON CLICKED!');
+                
+                // Cancel everything
+                window.speechSynthesis.cancel();
+                
+                // Create test utterance
+                const test = new SpeechSynthesisUtterance("Emergency voice test! Ray is speaking now!");
+                test.rate = 1.1;
+                test.volume = 1.0;
+                
+                test.onstart = () => {
+                  console.log('✅✅✅ TEST SPEECH STARTED!');
+                  alert('Voice is working! You should hear me speaking!');
+                };
+                
+                test.onend = () => {
+                  console.log('✅✅✅ TEST SPEECH ENDED!');
+                };
+                
+                test.onerror = (e) => {
+                  console.error('❌❌❌ TEST FAILED:', e);
+                  alert('VOICE ERROR: ' + e.error + '\n\nMake sure:\n1. Volume is up\n2. Browser has permission\n3. No headphones issue');
+                };
+                
+                // SPEAK!
+                window.speechSynthesis.speak(test);
+                console.log('🚀 Test utterance queued!');
+                
+                // Check status
+                setTimeout(() => {
+                  console.log('Speaking?', window.speechSynthesis.speaking);
+                  console.log('Pending?', window.speechSynthesis.pending);
+                  console.log('Paused?', window.speechSynthesis.paused);
+                  
+                  if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) {
+                    alert('Speech API not working!\n\nTry:\n1. Refresh page\n2. Check browser console\n3. Test in Chrome');
+                  }
+                }, 200);
+              }}
+              title="EMERGENCY TEST - Click to test voice!"
+              style={{ background: '#ff0000', animation: 'pulse 1s infinite' }}
+            >
+              <span style={{ fontSize: '16px', fontWeight: 'bold' }}>🔊</span>
             </button>
             <button
               className="omega-btn-icon"
@@ -2287,11 +3662,74 @@ function RayAssistantUltimate({ isOpen, onClose, onToggle }) {
 
         {/* Input Area */}
         <div className="omega-input-area">
+          {/* Voice Status Banner */}
+          {(isListening || voiceError || interimTranscript) && (
+            <div className={`omega-voice-status ${voiceError ? 'error' : isListening ? 'active' : ''}`}>
+              {voiceError ? (
+                <div className="omega-voice-error">
+                  <AlertCircle size={14} />
+                  <span>{voiceError}</span>
+                  <button 
+                    className="omega-voice-dismiss"
+                    onClick={() => setVoiceError(null)}
+                  >
+                    ×
+                  </button>
+                </div>
+              ) : isListening && interimTranscript ? (
+                <div className="omega-voice-interim">
+                  <div className="omega-voice-indicator">
+                    <div className="omega-voice-pulse" />
+                    <Mic size={12} />
+                  </div>
+                  <div className="omega-transcript-display">
+                    <span className="omega-interim-text">"{interimTranscript}"</span>
+                    {voiceConfidence > 0 && (
+                      <span className="omega-confidence-badge" style={{
+                        background: voiceConfidence > 80 ? 'rgba(34, 197, 94, 0.2)' : 
+                                   voiceConfidence > 60 ? 'rgba(234, 179, 8, 0.2)' : 
+                                   'rgba(239, 68, 68, 0.2)',
+                        color: voiceConfidence > 80 ? '#22c55e' : 
+                               voiceConfidence > 60 ? '#eab308' : '#ef4444'
+                      }}>
+                        {voiceConfidence.toFixed(0)}% confident
+                      </span>
+                    )}
+                  </div>
+                  <div className="omega-voice-commands">
+                    <span>Say "stop listening" to cancel</span>
+                    <span>•</span>
+                    <span>Say "send message" to submit</span>
+                  </div>
+                </div>
+              ) : isListening ? (
+                <div className="omega-voice-listening">
+                  <div className="omega-voice-indicator">
+                    <div className="omega-voice-pulse" />
+                    <Mic size={12} />
+                  </div>
+                  <span>Listening... Speak now</span>
+                  <div className="omega-voice-hint">
+                    Press <kbd>Esc</kbd> or click mic to stop
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          )}
+          
           <div className="omega-input-container">
             <button
-              className={`omega-voice-btn ${isListening ? 'listening' : 'idle'}`}
-              onClick={() => setIsListening(!isListening)}
-              title={isListening ? 'Stop listening' : 'Voice input'}
+              className={`omega-voice-btn ${isListening ? 'listening' : 'idle'} ${!voiceSupported ? 'disabled' : ''}`}
+              onClick={() => {
+                // Auto-activate voice on first click
+                const test = new SpeechSynthesisUtterance('');
+                test.volume = 0;
+                window.speechSynthesis.speak(test);
+                
+                if (voiceSupported) setIsListening(!isListening);
+              }}
+              title={!voiceSupported ? 'Voice input not supported' : isListening ? 'Stop listening (Esc)' : 'Voice input (Ctrl+Shift+V)'}
+              disabled={!voiceSupported}
             >
               {isListening ? (
                 <div className="omega-waveform">

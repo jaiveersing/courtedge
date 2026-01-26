@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { 
   Search, TrendingUp, TrendingDown, X, Calendar, Star, Flame, Target, 
   BarChart3, Activity, RefreshCw, Bookmark, AlertCircle, 
@@ -199,6 +199,69 @@ export default function WorkstationNew() {
   const [bookmarkedPlayers, setBookmarkedPlayers] = useState([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState('analysis');
+  const [gamesDisplayed, setGamesDisplayed] = useState(10);
+  
+  const searchInputRef = useRef(null);
+
+  // 🎤 VOICE COMMAND LISTENER - Ray integration
+  useEffect(() => {
+    const handlePlayerSearch = (event) => {
+      const { player, query } = event.detail;
+      console.log('🎤 Ray requested player search:', player);
+      
+      // Find the player in database
+      const foundPlayer = PLAYERS_DATABASE.find(p => 
+        p.name.toLowerCase().includes(player.toLowerCase()) ||
+        p.name.split(' ').some(namePart => 
+          namePart.toLowerCase() === player.split(' ').pop().toLowerCase()
+        )
+      );
+      
+      if (foundPlayer) {
+        setSelectedPlayer(foundPlayer);
+        setSelectedProp(foundPlayer.props[0]);
+        setSearchQuery(player);
+        
+        // Scroll to player section
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    
+    const handlePageAction = (event) => {
+      const { action, value } = event.detail;
+      console.log('🎤 Ray requested page action:', action, value);
+      
+      switch (action) {
+        case 'showGames':
+          setGamesDisplayed(value);
+          setActiveTab('analysis');
+          break;
+        case 'showAlternateLines':
+          // Switch to alternate lines view if available
+          setActiveTab('analysis');
+          break;
+        case 'showProps':
+          setActiveTab('analysis');
+          break;
+        case 'showStats':
+          setActiveTab('analysis');
+          break;
+        case 'showCompare':
+          // Could switch to comparison mode
+          break;
+        default:
+          console.log('Unknown action:', action);
+      }
+    };
+    
+    window.addEventListener('rayPlayerSearch', handlePlayerSearch);
+    window.addEventListener('rayPageAction', handlePageAction);
+    
+    return () => {
+      window.removeEventListener('rayPlayerSearch', handlePlayerSearch);
+      window.removeEventListener('rayPageAction', handlePageAction);
+    };
+  }, []);
 
   const filteredPlayers = useMemo(() => {
     return PLAYERS_DATABASE.filter(player => {
@@ -236,7 +299,9 @@ export default function WorkstationNew() {
 
   const chartData = useMemo(() => {
     const propType = selectedProp.type.toLowerCase();
-    return selectedPlayer.last10Games.map((game, idx) => {
+    // Use gamesDisplayed to control how many games to show
+    const gamesToShow = selectedPlayer.last10Games.slice(0, gamesDisplayed);
+    return gamesToShow.map((game, idx) => {
       let value;
       switch(propType) {
         case 'points': value = game.pts; break;
@@ -245,9 +310,9 @@ export default function WorkstationNew() {
         case 'pra': value = game.pra; break;
         default: value = game.pts;
       }
-      return { game: `G${10 - idx}`, date: game.date, opp: game.opp, value, line: selectedProp.line, hit: value >= selectedProp.line, result: game.result };
+      return { game: `G${gamesToShow.length - idx}`, date: game.date, opp: game.opp, value, line: selectedProp.line, hit: value >= selectedProp.line, result: game.result };
     }).reverse();
-  }, [selectedPlayer, selectedProp]);
+  }, [selectedPlayer, selectedProp, gamesDisplayed]);
 
   const radarData = useMemo(() => {
     const stats = selectedPlayer.seasonStats;

@@ -202,6 +202,57 @@ export default function BetsPage() {
   const [filterResult, setFilterResult] = useState('all');
   const [filterBetType, setFilterBetType] = useState('all');
 
+  // 🎤 VOICE COMMAND LISTENER - Ray integration for bet queries
+  useEffect(() => {
+    const handleBetQuery = (event) => {
+      const { query } = event.detail;
+      console.log('🎤 Ray requested bet information:', query);
+      
+      // This will be used by Ray to speak the response
+      const today = new Date().toISOString().split('T')[0];
+      const todayBets = bets.filter(b => b.date.split('T')[0] === today);
+      const pendingBets = bets.filter(b => b.result === 'pending');
+      
+      let response = '';
+      
+      if (query.includes('today')) {
+        if (todayBets.length === 0) {
+          response = "You haven't placed any bets today yet.";
+        } else {
+          response = `You have ${todayBets.length} bets today. `;
+          todayBets.slice(0, 3).forEach(bet => {
+            response += `${bet.player} ${bet.pick} ${bet.line} ${bet.betType}. `;
+          });
+          if (todayBets.length > 3) {
+            response += `And ${todayBets.length - 3} more.`;
+          }
+        }
+      } else if (query.includes('pending')) {
+        if (pendingBets.length === 0) {
+          response = "You don't have any pending bets.";
+        } else {
+          response = `You have ${pendingBets.length} pending bets. `;
+          pendingBets.slice(0, 3).forEach(bet => {
+            response += `${bet.player} ${bet.pick} ${bet.line} ${bet.betType} for $${bet.stake}. `;
+          });
+        }
+      } else {
+        response = `You have ${bets.length} total bets on record. ${pendingBets.length} are pending.`;
+      }
+      
+      // Dispatch response back to Ray
+      window.dispatchEvent(new CustomEvent('rayBetResponse', { 
+        detail: { response, bets: query.includes('today') ? todayBets : pendingBets }
+      }));
+    };
+    
+    window.addEventListener('rayBetQuery', handleBetQuery);
+    
+    return () => {
+      window.removeEventListener('rayBetQuery', handleBetQuery);
+    };
+  }, [bets]);
+
   // Generate 100 elite sample bets
   const generateSampleBets = () => {
     const betTypes = ['Points', 'Rebounds', 'Assists', '3PT Made', 'Pts+Reb+Ast', 'Steals', 'Blocks', 'Fantasy Score', 'Double-Double', 'First Basket'];
