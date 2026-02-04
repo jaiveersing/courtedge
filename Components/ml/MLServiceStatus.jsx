@@ -55,14 +55,22 @@ const MLServiceStatus = () => {
   }, []);
 
   const StatusIcon = () => {
-    if (status.loading) return <RefreshCw className="w-5 h-5 animate-spin text-blue-500" />;
-    if (status.connected) return <CheckCircle className="w-5 h-5 text-green-500" />;
+    if (status.loading) {
+return <RefreshCw className="w-5 h-5 animate-spin text-blue-500" />;
+}
+    if (status.connected) {
+return <CheckCircle className="w-5 h-5 text-green-500" />;
+}
     return <XCircle className="w-5 h-5 text-red-500" />;
   };
 
   const StatusBadge = () => {
-    if (status.loading) return <Badge className="bg-blue-500">Checking...</Badge>;
-    if (status.connected) return <Badge className="bg-green-500">Online</Badge>;
+    if (status.loading) {
+return <Badge className="bg-blue-500">Checking...</Badge>;
+}
+    if (status.connected) {
+return <Badge className="bg-green-500">Online</Badge>;
+}
     return <Badge className="bg-red-500">Offline</Badge>;
   };
 

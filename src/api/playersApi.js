@@ -26,13 +26,21 @@ class PlayersAPI {
       });
 
       const response = await fetch(`${API_BASE_URL}/players?${queryParams}`);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {
+throw new Error(`HTTP ${response.status}`);
+}
       
       const data = await response.json();
       // Ensure we always return an array
-      if (Array.isArray(data)) return data;
-      if (data?.data && Array.isArray(data.data)) return data.data;
-      if (data?.players && Array.isArray(data.players)) return data.players;
+      if (Array.isArray(data)) {
+return data;
+}
+      if (data?.data && Array.isArray(data.data)) {
+return data.data;
+}
+      if (data?.players && Array.isArray(data.players)) {
+return data.players;
+}
       return [];
     } catch (error) {
       console.error('Error fetching players from live API:', error);
@@ -46,7 +54,9 @@ class PlayersAPI {
   static async getPlayerById(id) {
     try {
       const response = await fetch(`${API_BASE_URL}/players/${id}`);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {
+throw new Error(`HTTP ${response.status}`);
+}
       return await response.json();
     } catch (error) {
       console.error('Error fetching player:', error);
@@ -60,7 +70,9 @@ class PlayersAPI {
   static async getTeamPlayers(teamCode) {
     try {
       const response = await fetch(`${API_BASE_URL}/players/team/${teamCode}`);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {
+throw new Error(`HTTP ${response.status}`);
+}
       return await response.json();
     } catch (error) {
       console.error('Error fetching team players:', error);
@@ -74,7 +86,9 @@ class PlayersAPI {
   static async searchPlayers(query) {
     try {
       const response = await fetch(`${API_BASE_URL}/players/search/${encodeURIComponent(query)}`);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {
+throw new Error(`HTTP ${response.status}`);
+}
       return await response.json();
     } catch (error) {
       console.error('Error searching players:', error);
@@ -88,7 +102,9 @@ class PlayersAPI {
   static async getLeaders(stat = 'ppg', limit = 10) {
     try {
       const response = await fetch(`${API_BASE_URL}/players/stats/leaders?stat=${stat}&limit=${limit}`);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {
+throw new Error(`HTTP ${response.status}`);
+}
       return await response.json();
     } catch (error) {
       console.error('Error fetching leaders:', error);
@@ -103,7 +119,9 @@ class PlayersAPI {
     try {
       const ids = Array.isArray(playerIds) ? playerIds.join(',') : playerIds;
       const response = await fetch(`${API_BASE_URL}/players/stats/compare?ids=${ids}`);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {
+throw new Error(`HTTP ${response.status}`);
+}
       return await response.json();
     } catch (error) {
       console.error('Error comparing players:', error);
@@ -117,7 +135,9 @@ class PlayersAPI {
   static async getTeamStats(teamCode) {
     try {
       const response = await fetch(`${API_BASE_URL}/players/stats/team-stats/${teamCode}`);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {
+throw new Error(`HTTP ${response.status}`);
+}
       return await response.json();
     } catch (error) {
       console.error('Error fetching team stats:', error);
@@ -131,7 +151,9 @@ class PlayersAPI {
   static async getTeams() {
     try {
       const response = await fetch(`${API_BASE_URL}/teams`);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {
+throw new Error(`HTTP ${response.status}`);
+}
       return await response.json();
     } catch (error) {
       console.error('Error fetching teams:', error);
@@ -145,7 +167,9 @@ class PlayersAPI {
   static async getPositionAverages() {
     try {
       const response = await fetch(`${API_BASE_URL}/players/stats/position-averages`);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {
+throw new Error(`HTTP ${response.status}`);
+}
       return await response.json();
     } catch (error) {
       console.error('Error fetching position averages:', error);
@@ -163,7 +187,9 @@ class PlayersAPI {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ filters, sortBy, sortOrder })
       });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {
+throw new Error(`HTTP ${response.status}`);
+}
       return await response.json();
     } catch (error) {
       console.error('Error with advanced filter:', error);
@@ -181,7 +207,9 @@ class PlayersAPI {
   static async getLiveScoreboard() {
     try {
       const response = await fetch(`${API_BASE_URL}/scoreboard`);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {
+throw new Error(`HTTP ${response.status}`);
+}
       return await response.json();
     } catch (error) {
       console.error('Error fetching live scoreboard:', error);
@@ -195,7 +223,9 @@ class PlayersAPI {
   static async getStandings() {
     try {
       const response = await fetch(`${API_BASE_URL}/standings`);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {
+throw new Error(`HTTP ${response.status}`);
+}
       return await response.json();
     } catch (error) {
       console.error('Error fetching standings:', error);
@@ -209,7 +239,9 @@ class PlayersAPI {
   static async getNews(limit = 20) {
     try {
       const response = await fetch(`${API_BASE_URL}/news?limit=${limit}`);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {
+throw new Error(`HTTP ${response.status}`);
+}
       return await response.json();
     } catch (error) {
       console.error('Error fetching news:', error);
@@ -223,7 +255,9 @@ class PlayersAPI {
   static async getBoxScore(gameId) {
     try {
       const response = await fetch(`${API_BASE_URL}/boxscore/${gameId}`);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {
+throw new Error(`HTTP ${response.status}`);
+}
       return await response.json();
     } catch (error) {
       console.error('Error fetching box score:', error);
@@ -241,7 +275,9 @@ class PlayersAPI {
   static async getCacheStatus() {
     try {
       const response = await fetch(`${API_BASE_URL}/cache/status`);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {
+throw new Error(`HTTP ${response.status}`);
+}
       return await response.json();
     } catch (error) {
       console.error('Error fetching cache status:', error);
@@ -255,7 +291,9 @@ class PlayersAPI {
   static async clearCache() {
     try {
       const response = await fetch(`${API_BASE_URL}/cache/clear`, { method: 'POST' });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {
+throw new Error(`HTTP ${response.status}`);
+}
       return await response.json();
     } catch (error) {
       console.error('Error clearing cache:', error);

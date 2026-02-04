@@ -408,7 +408,9 @@ class RayLiveDataService {
   async getLiveGames() {
     const cacheKey = 'live_games';
     const cached = this.getFromCache(cacheKey, 2 * 60 * 1000); // 2 min cache
-    if (cached) return cached;
+    if (cached) {
+return cached;
+}
     
     // NBA league ID is 12 in API-Sports
     const data = await this.fetchFromAPISports('/games', {
@@ -431,7 +433,9 @@ class RayLiveDataService {
   async getStandings() {
     const cacheKey = 'standings';
     const cached = this.getFromCache(cacheKey, 60 * 60 * 1000); // 1 hour cache
-    if (cached) return cached;
+    if (cached) {
+return cached;
+}
     
     const data = await this.fetchFromAPISports('/standings', {
       league: 12,
@@ -452,7 +456,9 @@ class RayLiveDataService {
   async getTeamStats(teamId) {
     const cacheKey = `team_stats_${teamId}`;
     const cached = this.getFromCache(cacheKey, 30 * 60 * 1000); // 30 min cache
-    if (cached) return cached;
+    if (cached) {
+return cached;
+}
     
     const data = await this.fetchFromAPISports('/teams/statistics', {
       league: 12,
@@ -474,7 +480,9 @@ class RayLiveDataService {
   async searchPlayersAPI(query) {
     const cacheKey = `player_search_${query}`;
     const cached = this.getFromCache(cacheKey, 60 * 60 * 1000); // 1 hour cache
-    if (cached) return cached;
+    if (cached) {
+return cached;
+}
     
     const data = await this.fetchFromAPISports('/players', {
       search: query,
@@ -588,7 +596,9 @@ class RayLiveDataService {
     const lower = input.toLowerCase().trim();
     
     // Check direct alias
-    if (aliases[lower]) return aliases[lower];
+    if (aliases[lower]) {
+return aliases[lower];
+}
     
     // Check if it's already a full name in database
     for (const name of Object.keys(PLAYER_STATS_2025)) {
@@ -682,7 +692,9 @@ class RayLiveDataService {
   async getPlayerStatistics(playerId, season = '2024-2025') {
     const cacheKey = `player_stats_${playerId}_${season}`;
     const cached = this.getFromCache(cacheKey, 30 * 60 * 1000); // 30 min cache
-    if (cached) return cached;
+    if (cached) {
+return cached;
+}
     
     const data = await this.fetchFromAPISports('/players/statistics', {
       id: playerId,
@@ -703,7 +715,9 @@ class RayLiveDataService {
    * Aggregate player statistics from game logs
    */
   aggregatePlayerStats(games) {
-    if (!games || games.length === 0) return null;
+    if (!games || games.length === 0) {
+return null;
+}
     
     const totals = {
       gp: games.length,

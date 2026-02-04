@@ -6,8 +6,14 @@ const BASE_URL = `${import.meta.env.VITE_BASE44_BASE_URL}/${import.meta.env.VITE
 
 async function fetchJSON(url, opts = {}){
   const res = await fetch(url, opts);
-  if(!res.ok) throw new Error(`API error ${res.status}: ${await res.text()}`);
-  try { return await res.json(); } catch(e) { return await res.text(); }
+  if(!res.ok) {
+throw new Error(`API error ${res.status}: ${await res.text()}`);
+}
+  try {
+ return await res.json(); 
+} catch(e) {
+ return await res.text(); 
+}
 }
 
 function buildUrl(entityName){
@@ -30,14 +36,18 @@ export async function fetchEntities(entityName, filters = {}){
   if(USE_PROXY){
     const url = new URL(base, window.location.origin);
     Object.entries(filters).forEach(([k,v]) => {
-      if(v !== undefined && v !== null) url.searchParams.append(k, v);
+      if(v !== undefined && v !== null) {
+url.searchParams.append(k, v);
+}
     });
     return fetchJSON(url.toString(), { headers: { 'Content-Type': 'application/json' } });
   }
 
   const url = new URL(base);
   Object.entries(filters).forEach(([k,v]) => {
-    if(v !== undefined && v !== null) url.searchParams.append(k, v);
+    if(v !== undefined && v !== null) {
+url.searchParams.append(k, v);
+}
   });
   return fetchJSON(url.toString(), {
     headers: {

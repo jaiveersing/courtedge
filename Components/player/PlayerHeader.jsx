@@ -2,7 +2,9 @@ import { Badge } from '../ui/badge';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 
 export default function PlayerHeader({ player, stats, theme = 'dark' }) {
-  if (!player) return null;
+  if (!player) {
+return null;
+}
 
   // Theme-aware styling
   const ds = {

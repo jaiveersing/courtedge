@@ -1199,7 +1199,7 @@ export class BettingAlgorithms {
 
   // Monte Carlo simulation for variance estimation
   static monteCarloVariance(winProb, stake, odds, iterations = 10000) {
-    let results = [];
+    const results = [];
     const profit = odds > 0 ? stake * (odds / 100) : stake * (100 / Math.abs(odds));
     
     for (let i = 0; i < iterations; i++) {
@@ -1361,7 +1361,9 @@ export class BettingAlgorithms {
   }
 
   static ema(prices, period) {
-    if (prices.length === 0) return 0;
+    if (prices.length === 0) {
+return 0;
+}
     const k = 2 / (period + 1);
     let ema = prices[0];
     
@@ -1386,7 +1388,9 @@ export class BettingAlgorithms {
       currentBankroll += outcome;
       history.push(currentBankroll);
       
-      if (currentBankroll <= 0) break;
+      if (currentBankroll <= 0) {
+break;
+}
     }
     
     return {

@@ -26,8 +26,12 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell, 
 
 const TrendCard = ({ trend, index }) => {
   const getIcon = (type) => {
-    if (type === 'home') return Home;
-    if (type === 'away') return Plane;
+    if (type === 'home') {
+return Home;
+}
+    if (type === 'away') {
+return Plane;
+}
     return Zap;
   };
 
@@ -136,7 +140,9 @@ const WorkstationPanel = ({ player, stat, line, recentGames = [] }) => {
   // Get ML prediction when line or bet type changes
   useEffect(() => {
     const getPrediction = async () => {
-      if (!player) return;
+      if (!player) {
+return;
+}
       
       setLoadingPrediction(true);
       try {

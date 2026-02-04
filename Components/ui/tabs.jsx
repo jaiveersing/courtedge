@@ -4,12 +4,16 @@ const Tabs = ({ children, defaultValue, value, onValueChange, className = '', ..
   const [activeTab, setActiveTab] = React.useState(value || defaultValue);
   
   React.useEffect(() => {
-    if (value !== undefined) setActiveTab(value);
+    if (value !== undefined) {
+setActiveTab(value);
+}
   }, [value]);
   
   const handleTabChange = (newValue) => {
     setActiveTab(newValue);
-    if (onValueChange) onValueChange(newValue);
+    if (onValueChange) {
+onValueChange(newValue);
+}
   };
   
   return (

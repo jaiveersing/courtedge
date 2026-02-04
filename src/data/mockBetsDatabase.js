@@ -43,12 +43,20 @@ const generateMockBets = () => {
     let winProbability = 0.58; // Base 58% win rate
     
     // Adjust for streaks (momentum)
-    if (winStreak >= 3) winProbability = 0.65; // Hot streak
-    if (loseStreak >= 3) winProbability = 0.52; // Cold streak
+    if (winStreak >= 3) {
+winProbability = 0.65;
+} // Hot streak
+    if (loseStreak >= 3) {
+winProbability = 0.52;
+} // Cold streak
     
     // Higher odds = lower win probability (realistic)
-    if (odds >= 2.50) winProbability -= 0.10;
-    if (odds >= 3.00) winProbability -= 0.15;
+    if (odds >= 2.50) {
+winProbability -= 0.10;
+}
+    if (odds >= 3.00) {
+winProbability -= 0.15;
+}
     
     result = Math.random() < winProbability ? 'win' : 'loss';
 
@@ -177,8 +185,12 @@ export const getMonthlyPerformance = () => {
     monthly[monthKey].bets++;
     monthly[monthKey].staked += bet.stake;
     monthly[monthKey].profit += bet.profit;
-    if (bet.result === 'win') monthly[monthKey].wins++;
-    if (bet.result === 'loss') monthly[monthKey].losses++;
+    if (bet.result === 'win') {
+monthly[monthKey].wins++;
+}
+    if (bet.result === 'loss') {
+monthly[monthKey].losses++;
+}
   });
   
   return Object.values(monthly).map(m => ({
@@ -206,7 +218,9 @@ export const getBestBetTypes = () => {
     byType[bet.betType].bets++;
     byType[bet.betType].staked += bet.stake;
     byType[bet.betType].profit += bet.profit;
-    if (bet.result === 'win') byType[bet.betType].wins++;
+    if (bet.result === 'win') {
+byType[bet.betType].wins++;
+}
   });
   
   return Object.values(byType)

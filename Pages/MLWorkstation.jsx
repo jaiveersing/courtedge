@@ -30,6 +30,7 @@ import {
   ReferenceLine, Scatter, ScatterChart, ZAxis, PieChart as RechartsPie, Pie
 } from 'recharts';
 import PlayersAPI from '../src/api/playersApi';
+import { WORKSTATION_PLAYERS, NBA_PLAYERS_DATABASE } from '../src/api/mockData';
 
 // ==================== DESIGN SYSTEM ====================
 const useDesignSystem = () => {
@@ -488,7 +489,7 @@ export default function MLWorkstation() {
   const [players, setPlayers] = useState([]);
   const [isLoadingPlayers, setIsLoadingPlayers] = useState(true);
   
-  // Fetch players from LIVE API
+  // Fetch players from LIVE API with fallback to mock data
   useEffect(() => {
     const fetchPlayers = async () => {
       setIsLoadingPlayers(true);
@@ -496,10 +497,14 @@ export default function MLWorkstation() {
         const livePlayers = await PlayersAPI.getPlayers({ limit: 100 });
         if (livePlayers && livePlayers.length > 0) {
           setPlayers(livePlayers);
+        } else {
+          // Fallback to 100 real NBA players mock data
+          setPlayers(NBA_PLAYERS_DATABASE);
         }
       } catch (error) {
         console.error('Error fetching players:', error);
-        setPlayers([]);
+        // Fallback to 100 real NBA players mock data
+        setPlayers(NBA_PLAYERS_DATABASE);
       }
       setIsLoadingPlayers(false);
     };
@@ -508,7 +513,9 @@ export default function MLWorkstation() {
   
   // Filter players based on search
   const filteredPlayers = useMemo(() => {
-    if (!searchQuery) return [];
+    if (!searchQuery) {
+return [];
+}
     const query = searchQuery.toLowerCase();
     return players.filter(p => 
       (p.name || p.fullName || '').toLowerCase().includes(query) || 
@@ -521,7 +528,9 @@ export default function MLWorkstation() {
   
   // Run prediction
   const runPrediction = useCallback(async () => {
-    if (!selectedPlayer) return;
+    if (!selectedPlayer) {
+return;
+}
     
     setLoading(true);
     
@@ -671,7 +680,9 @@ export default function MLWorkstation() {
                     className={`w-full pl-12 pr-4 py-3 rounded-xl ${ds.input} border text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/50`}
                   />
                   <button 
-                    onClick={() => { setShowSearch(false); setSearchQuery(''); }}
+                    onClick={() => {
+ setShowSearch(false); setSearchQuery(''); 
+}}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
                   >
                     <X className="w-5 h-5" />

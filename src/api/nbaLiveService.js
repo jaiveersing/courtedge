@@ -88,7 +88,9 @@ async function fetchWithTimeout(url, options = {}, timeout = 10000) {
 export async function getLiveScoreboard() {
   const cacheKey = 'scoreboard';
   const cached = cache.get(cacheKey, cache.DURATIONS.SCOREBOARD);
-  if (cached) return cached;
+  if (cached) {
+return cached;
+}
 
   try {
     const response = await fetch(`${API_BASE}/api/scoreboard`);
@@ -112,7 +114,9 @@ export async function getLiveScoreboard() {
 export async function getAllTeams() {
   const cacheKey = 'teams';
   const cached = cache.get(cacheKey, cache.DURATIONS.TEAMS);
-  if (cached) return cached;
+  if (cached) {
+return cached;
+}
 
   try {
     const response = await fetch(`${API_BASE}/api/teams`);
@@ -136,7 +140,9 @@ export async function getAllTeams() {
 export async function getTeamRoster(teamId) {
   const cacheKey = `roster_${teamId}`;
   const cached = cache.get(cacheKey, cache.DURATIONS.ROSTER);
-  if (cached) return cached;
+  if (cached) {
+return cached;
+}
 
   try {
     const response = await fetch(`${API_BASE}/api/roster/${teamId}`);
@@ -160,7 +166,9 @@ export async function getTeamRoster(teamId) {
 export async function getPlayerStats(playerId) {
   const cacheKey = `espn_player_${playerId}`;
   const cached = cache.get(cacheKey, cache.DURATIONS.PLAYER_STATS);
-  if (cached) return cached;
+  if (cached) {
+return cached;
+}
 
   try {
     // Get player info and statistics
@@ -249,7 +257,9 @@ export async function getPlayerStats(playerId) {
 export async function getGameBoxScore(gameId) {
   const cacheKey = `espn_boxscore_${gameId}`;
   const cached = cache.get(cacheKey, cache.DURATIONS.BOXSCORE);
-  if (cached) return cached;
+  if (cached) {
+return cached;
+}
 
   try {
     const data = await fetchWithTimeout(`${ESPN_BASE}/summary?event=${gameId}`);
@@ -303,7 +313,9 @@ export async function getGameBoxScore(gameId) {
 export async function getStandings() {
   const cacheKey = 'espn_standings';
   const cached = cache.get(cacheKey, cache.DURATIONS.STANDINGS);
-  if (cached) return cached;
+  if (cached) {
+return cached;
+}
 
   try {
     const data = await fetchWithTimeout(`${ESPN_BASE}/standings`);
@@ -344,7 +356,9 @@ export async function getStandings() {
 export async function getNBANews(limit = 20) {
   const cacheKey = 'espn_news';
   const cached = cache.get(cacheKey, cache.DURATIONS.NEWS);
-  if (cached) return cached;
+  if (cached) {
+return cached;
+}
 
   try {
     const data = await fetchWithTimeout(`${ESPN_BASE}/news?limit=${limit}`);
@@ -373,7 +387,9 @@ export async function getNBANews(limit = 20) {
 export async function getSchedule(dates = null) {
   const cacheKey = `espn_schedule_${dates || 'default'}`;
   const cached = cache.get(cacheKey, cache.DURATIONS.SCHEDULE);
-  if (cached) return cached;
+  if (cached) {
+return cached;
+}
 
   try {
     const params = dates ? `?dates=${dates}` : '';
@@ -410,7 +426,9 @@ export async function getSchedule(dates = null) {
 export async function getAllPlayersWithStats() {
   const cacheKey = 'all_players_stats';
   const cached = cache.get(cacheKey, cache.DURATIONS.PLAYER_STATS);
-  if (cached) return cached;
+  if (cached) {
+return cached;
+}
 
   try {
     const teams = await getAllTeams();
@@ -452,7 +470,9 @@ export async function getAllPlayersWithStats() {
  * Search for a player by name
  */
 export async function searchPlayer(query) {
-  if (!query || query.length < 2) return [];
+  if (!query || query.length < 2) {
+return [];
+}
 
   try {
     // First try ESPN API search
@@ -487,7 +507,9 @@ export async function searchPlayer(query) {
 export async function getPlayerGameLog(playerId, limit = 10) {
   const cacheKey = `player_gamelog_${playerId}`;
   const cached = cache.get(cacheKey, cache.DURATIONS.PLAYER_STATS);
-  if (cached) return cached;
+  if (cached) {
+return cached;
+}
 
   try {
     const data = await fetchWithTimeout(`${ESPN_BASE}/athletes/${playerId}/gamelog`);
@@ -524,7 +546,9 @@ class NBALiveService {
   }
 
   async initialize() {
-    if (this.isInitialized) return;
+    if (this.isInitialized) {
+return;
+}
 
     console.log('🏀 Initializing NBA Live Data Service...');
 

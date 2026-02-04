@@ -3,7 +3,9 @@ import { Badge } from '../ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 
 export default function DailyBreakdownModal({ date, bets, isOpen, onClose }) {
-  if (!date || !bets) return null;
+  if (!date || !bets) {
+return null;
+}
 
   const totalProfit = bets.reduce((sum, bet) => sum + (bet.profit || 0), 0);
 

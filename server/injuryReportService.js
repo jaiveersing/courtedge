@@ -173,11 +173,21 @@ class InjuryReportService {
   calculateSeverity(injury) {
     const status = injury.status?.toLowerCase() || '';
     
-    if (status.includes('out')) return 'high';
-    if (status.includes('doubtful')) return 'high';
-    if (status.includes('questionable')) return 'medium';
-    if (status.includes('probable')) return 'low';
-    if (status.includes('day-to-day')) return 'medium';
+    if (status.includes('out')) {
+return 'high';
+}
+    if (status.includes('doubtful')) {
+return 'high';
+}
+    if (status.includes('questionable')) {
+return 'medium';
+}
+    if (status.includes('probable')) {
+return 'low';
+}
+    if (status.includes('day-to-day')) {
+return 'medium';
+}
     
     return 'unknown';
   }

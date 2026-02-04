@@ -24,7 +24,7 @@ export class DescriptiveStatistics {
   static mode(data) {
     const frequency = {};
     let maxFreq = 0;
-    let modes = [];
+    const modes = [];
     
     data.forEach(val => {
       frequency[val] = (frequency[val] || 0) + 1;
@@ -74,7 +74,9 @@ export class DescriptiveStatistics {
     const upper = Math.ceil(index);
     const weight = index - lower;
     
-    if (upper >= sorted.length) return sorted[lower];
+    if (upper >= sorted.length) {
+return sorted[lower];
+}
     return sorted[lower] * (1 - weight) + sorted[upper] * weight;
   }
 
@@ -328,7 +330,9 @@ export class HypothesisTesting {
     const x = df / (df + t * t);
     let p = 1 - 0.5 * Math.pow(x, df/2);
     
-    if (t < 0) p = 1 - p;
+    if (t < 0) {
+p = 1 - p;
+}
     return 2 * Math.min(p, 1 - p); // two-tailed
   }
 
@@ -422,36 +426,54 @@ export class ProbabilityDistributions {
   }
 
   static uniformCDF(x, a, b) {
-    if (x < a) return 0;
-    if (x > b) return 1;
+    if (x < a) {
+return 0;
+}
+    if (x > b) {
+return 1;
+}
     return (x - a) / (b - a);
   }
 
   // Beta distribution (simplified)
   static betaPDF(x, alpha, beta) {
-    if (x < 0 || x > 1) return 0;
+    if (x < 0 || x > 1) {
+return 0;
+}
     return Math.pow(x, alpha - 1) * Math.pow(1 - x, beta - 1);
   }
 
   // Gamma distribution (simplified)
   static gammaPDF(x, shape, scale) {
-    if (x <= 0) return 0;
+    if (x <= 0) {
+return 0;
+}
     return Math.pow(x, shape - 1) * Math.exp(-x / scale) / 
            (Math.pow(scale, shape) * this.gammaFunction(shape));
   }
 
   static gammaFunction(n) {
     // Stirling's approximation
-    if (n < 1) return Math.PI / Math.sin(Math.PI * n) / this.gammaFunction(1 - n);
-    if (n === 1) return 1;
-    if (n === 2) return 1;
+    if (n < 1) {
+return Math.PI / Math.sin(Math.PI * n) / this.gammaFunction(1 - n);
+}
+    if (n === 1) {
+return 1;
+}
+    if (n === 2) {
+return 1;
+}
     
     return Math.sqrt(2 * Math.PI / n) * Math.pow((n / Math.E) * Math.sqrt(n), n);
   }
 
   static factorial(n) {
-    if (n > 170) return Infinity; // Overflow protection
-    if (n <= 1) return 1;
+    if (n > 170) {
+return Infinity;
+} // Overflow protection
+    if (n <= 1) {
+return 1;
+}
     let result = 1;
     for (let i = 2; i <= n; i++) {
       result *= i;
@@ -467,7 +489,9 @@ export class ProbabilityDistributions {
 export class CorrelationAnalysis {
   
   static covariance(x, y, sample = true) {
-    if (x.length !== y.length) throw new Error('Arrays must have equal length');
+    if (x.length !== y.length) {
+throw new Error('Arrays must have equal length');
+}
     
     const n = x.length;
     const meanX = DescriptiveStatistics.mean(x);
@@ -497,7 +521,9 @@ export class CorrelationAnalysis {
   }
 
   static spearmanCorrelation(x, y) {
-    if (x.length !== y.length) throw new Error('Arrays must have equal length');
+    if (x.length !== y.length) {
+throw new Error('Arrays must have equal length');
+}
     
     // Rank the data
     const rankX = this.rank(x);
@@ -559,10 +585,18 @@ export class CorrelationAnalysis {
     const abs = Math.abs(r);
     const direction = r >= 0 ? 'positive' : 'negative';
     
-    if (abs >= 0.9) return `Very strong ${direction} correlation`;
-    if (abs >= 0.7) return `Strong ${direction} correlation`;
-    if (abs >= 0.5) return `Moderate ${direction} correlation`;
-    if (abs >= 0.3) return `Weak ${direction} correlation`;
+    if (abs >= 0.9) {
+return `Very strong ${direction} correlation`;
+}
+    if (abs >= 0.7) {
+return `Strong ${direction} correlation`;
+}
+    if (abs >= 0.5) {
+return `Moderate ${direction} correlation`;
+}
+    if (abs >= 0.3) {
+return `Weak ${direction} correlation`;
+}
     return `Very weak or no ${direction} correlation`;
   }
 
@@ -692,8 +726,12 @@ export class RegressionAnalysis {
 
   static polynomialEquation(coefficients) {
     const terms = coefficients.map((coef, i) => {
-      if (i === 0) return coef.toFixed(2);
-      if (i === 1) return `${coef.toFixed(2)}x`;
+      if (i === 0) {
+return coef.toFixed(2);
+}
+      if (i === 1) {
+return `${coef.toFixed(2)}x`;
+}
       return `${coef.toFixed(2)}x^${i}`;
     });
     return `y = ${terms.join(' + ')}`;
@@ -702,7 +740,7 @@ export class RegressionAnalysis {
   static logisticRegression(X, y, learningRate = 0.1, iterations = 1000) {
     const n = X.length;
     const features = X[0].length;
-    let weights = new Array(features).fill(0);
+    const weights = new Array(features).fill(0);
     let bias = 0;
     
     const sigmoid = (z) => 1 / (1 + Math.exp(-z));
@@ -850,7 +888,9 @@ export class MonteCarloSimulation {
         
         history.push(bankroll);
         
-        if (bankroll <= 0) break;
+        if (bankroll <= 0) {
+break;
+}
       }
       
       results.push({
@@ -895,8 +935,12 @@ export class MonteCarloSimulation {
       const outcome = playerAvg + z * playerStd;
       
       outcomes.push(outcome);
-      if (outcome > line) overCount++;
-      if (outcome < line) underCount++;
+      if (outcome > line) {
+overCount++;
+}
+      if (outcome < line) {
+underCount++;
+}
     }
     
     return {

@@ -50,7 +50,9 @@ export default function EnhancedPerformance({ data = [] }) {
       weeklyData[weekLabel].profit += bet.profit || 0;
       weeklyData[weekLabel].wagered += bet.amount;
       weeklyData[weekLabel].total += 1;
-      if (bet.result === 'win') weeklyData[weekLabel].wins += 1;
+      if (bet.result === 'win') {
+weeklyData[weekLabel].wins += 1;
+}
     });
 
     const performanceData = Object.values(weeklyData).reverse().map(week => ({
@@ -79,7 +81,9 @@ export default function EnhancedPerformance({ data = [] }) {
         betTypeGroups[type] = { name: type, wins: 0, total: 0, profit: 0 };
       }
       betTypeGroups[type].total += 1;
-      if (bet.result === 'win') betTypeGroups[type].wins += 1;
+      if (bet.result === 'win') {
+betTypeGroups[type].wins += 1;
+}
       betTypeGroups[type].profit += bet.profit || 0;
     });
     const betTypeBreakdown = Object.values(betTypeGroups).map(type => ({

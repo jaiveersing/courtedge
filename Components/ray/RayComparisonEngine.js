@@ -91,8 +91,11 @@ class RayComparisonEngine {
       const diff = p1Val - p2Val;
       const winner = diff > 0 ? p1.name : diff < 0 ? p2.name : 'Tie';
 
-      if (winner === p1.name) p1Wins++;
-      else if (winner === p2.name) p2Wins++;
+      if (winner === p1.name) {
+p1Wins++;
+} else if (winner === p2.name) {
+p2Wins++;
+}
 
       comparison[cat] = {
         [p1.name]: p1Val,
@@ -262,10 +265,15 @@ class RayComparisonEngine {
     // Assign ranks and tiers
     rankings.forEach((p, i) => {
       p.rank = i + 1;
-      if (i < 3) p.tier = 'MVP';
-      else if (i < 8) p.tier = 'All-NBA';
-      else if (i < 15) p.tier = 'All-Star';
-      else p.tier = 'Starter';
+      if (i < 3) {
+p.tier = 'MVP';
+} else if (i < 8) {
+p.tier = 'All-NBA';
+} else if (i < 15) {
+p.tier = 'All-Star';
+} else {
+p.tier = 'Starter';
+}
     });
 
     return {
@@ -287,7 +295,9 @@ class RayComparisonEngine {
 
     for (const name of positionPlayers) {
       const player = PLAYERS_DB[name];
-      if (!player) continue;
+      if (!player) {
+continue;
+}
 
       const score = this.calculatePlayerScore(player, timeframe);
       const stats = player[timeframe] || player.season;
@@ -322,7 +332,9 @@ class RayComparisonEngine {
     const p1 = rayAnalytics.findPlayer(player1Name);
     const p2 = rayAnalytics.findPlayer(player2Name);
 
-    if (!p1 || !p2) return null;
+    if (!p1 || !p2) {
+return null;
+}
 
     const p1Fantasy = rayAnalytics.getFantasyAnalysis().find(f => f.name === p1.name);
     const p2Fantasy = rayAnalytics.getFantasyAnalysis().find(f => f.name === p2.name);
@@ -403,7 +415,9 @@ class RayComparisonEngine {
   }
 
   generateMultiComparison(players) {
-    if (players.length < 2) return 'Need at least 2 players to compare.';
+    if (players.length < 2) {
+return 'Need at least 2 players to compare.';
+}
 
     const lines = [];
     lines.push(`📊 RANKING (${players.length} players):\n`);
@@ -433,7 +447,9 @@ class RayComparisonEngine {
 
     for (const name of playerNames) {
       const player = rayAnalytics.findPlayer(name);
-      if (!player) continue;
+      if (!player) {
+continue;
+}
 
       const score = this.calculatePlayerScore(player, 'last5'); // Recent form matters
       const trend = rayAnalytics.calculateTrend(player);
@@ -483,13 +499,23 @@ class RayComparisonEngine {
     lines.push(`✅ START: ${start.name} ${start.trendEmoji}`);
     lines.push(`• Recent form: ${start.recentScore.toFixed(1)} score`);
     lines.push(`• Consistency: ${start.consistency}%`);
-    if (start.matchupBonus > 0) lines.push(`• Good matchup vs ${opponent}`);
-    if (start.injuryStatus !== 'healthy') lines.push(`⚠️ Injury: ${start.injuryStatus}`);
+    if (start.matchupBonus > 0) {
+lines.push(`• Good matchup vs ${opponent}`);
+}
+    if (start.injuryStatus !== 'healthy') {
+lines.push(`⚠️ Injury: ${start.injuryStatus}`);
+}
 
     lines.push(`\n❌ SIT: ${sit.name}`);
-    if (sit.trend === 'down') lines.push(`• Trending down lately`);
-    if (sit.matchupBonus < 0) lines.push(`• Tough matchup vs ${opponent}`);
-    if (sit.injuryStatus !== 'healthy') lines.push(`⚠️ Injury concern: ${sit.injuryStatus}`);
+    if (sit.trend === 'down') {
+lines.push(`• Trending down lately`);
+}
+    if (sit.matchupBonus < 0) {
+lines.push(`• Tough matchup vs ${opponent}`);
+}
+    if (sit.injuryStatus !== 'healthy') {
+lines.push(`⚠️ Injury concern: ${sit.injuryStatus}`);
+}
 
     return lines.join('\n');
   }

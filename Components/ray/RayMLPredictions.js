@@ -75,7 +75,9 @@ export class LinearRegressionModel extends MLModelBase {
   }
 
   predict(x) {
-    if (!this.trained) throw new Error('Model must be trained first');
+    if (!this.trained) {
+throw new Error('Model must be trained first');
+}
     return this.weights[0] * x + this.bias;
   }
 
@@ -126,8 +128,8 @@ export class MultipleRegressionModel extends MLModelBase {
     
     // Gradient descent
     for (let iter = 0; iter < iterations; iter++) {
-      let predictions = X.map(row => this.predictArray(row));
-      let error = predictions.map((pred, i) => pred - y[i]);
+      const predictions = X.map(row => this.predictArray(row));
+      const error = predictions.map((pred, i) => pred - y[i]);
       
       // Update weights
       for (let j = 0; j < features; j++) {
@@ -139,7 +141,7 @@ export class MultipleRegressionModel extends MLModelBase {
       }
       
       // Update bias
-      let biasGradient = error.reduce((sum, err) => sum + err, 0);
+      const biasGradient = error.reduce((sum, err) => sum + err, 0);
       this.bias -= (learningRate * biasGradient) / n;
       
       // Track history every 100 iterations
@@ -160,7 +162,9 @@ export class MultipleRegressionModel extends MLModelBase {
   }
 
   predictArray(features) {
-    if (!this.trained) throw new Error('Model must be trained first');
+    if (!this.trained) {
+throw new Error('Model must be trained first');
+}
     let sum = this.bias;
     for (let i = 0; i < features.length; i++) {
       sum += this.weights[i] * features[i];
@@ -198,7 +202,9 @@ export class DecisionTreeClassifier {
     
     for (const group of groups) {
       const size = group.length;
-      if (size === 0) continue;
+      if (size === 0) {
+continue;
+}
       
       let score = 0;
       for (const classVal of classes) {
@@ -259,7 +265,9 @@ export class DecisionTreeClassifier {
   }
 
   buildTree(dataset, features, depth = 0) {
-    if (dataset.length === 0) return null;
+    if (dataset.length === 0) {
+return null;
+}
     
     const split = this.getBestSplit(dataset, features);
     
@@ -284,7 +292,9 @@ export class DecisionTreeClassifier {
   }
 
   predictOne(node, row) {
-    if (typeof node !== 'object') return node;
+    if (typeof node !== 'object') {
+return node;
+}
     
     if (row[node.index] < node.value) {
       return this.predictOne(node.left, row);
@@ -294,7 +304,9 @@ export class DecisionTreeClassifier {
   }
 
   predict(features) {
-    if (!this.trained) throw new Error('Model must be trained first');
+    if (!this.trained) {
+throw new Error('Model must be trained first');
+}
     return this.predictOne(this.tree, features);
   }
 }
@@ -345,7 +357,9 @@ export class NaiveBayesClassifier {
   }
 
   predict(features) {
-    if (!this.trained) throw new Error('Model must be trained first');
+    if (!this.trained) {
+throw new Error('Model must be trained first');
+}
     
     let bestClass = null;
     let bestProb = -Infinity;
@@ -368,7 +382,9 @@ export class NaiveBayesClassifier {
   }
 
   predictProba(features) {
-    if (!this.trained) throw new Error('Model must be trained first');
+    if (!this.trained) {
+throw new Error('Model must be trained first');
+}
     
     const probs = {};
     let total = 0;
@@ -421,7 +437,9 @@ export class KNNClassifier {
   }
 
   predict(features) {
-    if (!this.trained) throw new Error('Model must be trained first');
+    if (!this.trained) {
+throw new Error('Model must be trained first');
+}
     
     // Calculate distances to all training points
     const distances = this.X.map((trainPoint, i) => ({
@@ -452,7 +470,9 @@ export class KNNClassifier {
   }
 
   predictProba(features) {
-    if (!this.trained) throw new Error('Model must be trained first');
+    if (!this.trained) {
+throw new Error('Model must be trained first');
+}
     
     const distances = this.X.map((trainPoint, i) => ({
       distance: this.euclideanDistance(features, trainPoint),
@@ -573,7 +593,9 @@ export class TimeSeriesForecaster {
     
     // Calculate residual
     const residual = data.map((val, i) => {
-      if (trend[i] === null) return null;
+      if (trend[i] === null) {
+return null;
+}
       return val - trend[i] - seasonal[i % period];
     });
     

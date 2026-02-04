@@ -5,12 +5,16 @@ const Dialog = ({ children, open, onOpenChange }) => {
   const [isOpen, setIsOpen] = React.useState(open || false);
   
   React.useEffect(() => {
-    if (open !== undefined) setIsOpen(open);
+    if (open !== undefined) {
+setIsOpen(open);
+}
   }, [open]);
   
   const handleOpenChange = (newOpen) => {
     setIsOpen(newOpen);
-    if (onValueChange) onOpenChange(newOpen);
+    if (onValueChange) {
+onOpenChange(newOpen);
+}
   };
   
   return React.Children.map(children, child =>
@@ -38,7 +42,9 @@ const DialogOverlay = React.forwardRef(({ className = "", onClick, ...props }, r
 DialogOverlay.displayName = "DialogOverlay";
 
 const DialogContent = React.forwardRef(({ className = "", children, isOpen, onOpenChange, ...props }, ref) => {
-  if (!isOpen) return null;
+  if (!isOpen) {
+return null;
+}
   
   return (
     <div className="fixed inset-0 z-50">

@@ -189,8 +189,11 @@ const PerformanceChartElite = ({ bets = [], height = 350, showBrush = false, com
       dataByDate[dateStr].dailyProfit += profit;
       dataByDate[dateStr].bets += 1;
       dataByDate[dateStr].wagered += stake;
-      if (bet.result === 'won' || bet.result === 'win') dataByDate[dateStr].wins += 1;
-      else if (bet.result === 'lost' || bet.result === 'loss') dataByDate[dateStr].losses += 1;
+      if (bet.result === 'won' || bet.result === 'win') {
+dataByDate[dateStr].wins += 1;
+} else if (bet.result === 'lost' || bet.result === 'loss') {
+dataByDate[dateStr].losses += 1;
+}
     });
 
     // Build chart data with cumulative values
@@ -266,7 +269,9 @@ const PerformanceChartElite = ({ bets = [], height = 350, showBrush = false, com
 
   // Custom tooltip component
   const CustomTooltip = ({ active, payload, label }) => {
-    if (!active || !payload?.length) return null;
+    if (!active || !payload?.length) {
+return null;
+}
     const data = payload[0]?.payload;
     
     return (

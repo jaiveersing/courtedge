@@ -86,12 +86,19 @@ export class WeatherImpactAnalyzer {
     let advantage = 3.0; // Base HCA points
     
     // Altitude bonus
-    if (venueInfo.altitude > 4000) advantage += 2.5;
-    else if (venueInfo.altitude > 2000) advantage += 1.0;
+    if (venueInfo.altitude > 4000) {
+advantage += 2.5;
+} else if (venueInfo.altitude > 2000) {
+advantage += 1.0;
+}
     
     // Climate extremes
-    if (venueInfo.typical_temp > 80 || venueInfo.typical_temp < 65) advantage += 0.5;
-    if (venueInfo.humidity > 70 || venueInfo.humidity < 30) advantage += 0.5;
+    if (venueInfo.typical_temp > 80 || venueInfo.typical_temp < 65) {
+advantage += 0.5;
+}
+    if (venueInfo.humidity > 70 || venueInfo.humidity < 30) {
+advantage += 0.5;
+}
     
     return {
       total_points: advantage.toFixed(1),
@@ -170,15 +177,22 @@ export class WeatherImpactAnalyzer {
     let impact = 0;
     
     // Altitude increases scoring (thinner air = longer shots)
-    if (conditions.altitude.value > 4000) impact += 5;
-    else if (conditions.altitude.value > 2000) impact += 2;
+    if (conditions.altitude.value > 4000) {
+impact += 5;
+} else if (conditions.altitude.value > 2000) {
+impact += 2;
+}
     
     // Extreme temps reduce scoring
     const temp = conditions.temperature.value;
-    if (temp < 60 || temp > 85) impact -= 3;
+    if (temp < 60 || temp > 85) {
+impact -= 3;
+}
     
     // High humidity reduces scoring
-    if (conditions.humidity.value > 70) impact -= 2;
+    if (conditions.humidity.value > 70) {
+impact -= 2;
+}
     
     return {
       change: impact > 0 ? `+${impact}%` : `${impact}%`,
@@ -211,15 +225,23 @@ export class WeatherImpactAnalyzer {
     
     // Temperature extremes hurt efficiency
     const temp = conditions.temperature.value;
-    if (Math.abs(temp - 72) > 15) impact -= 4;
-    else if (Math.abs(temp - 72) > 8) impact -= 2;
+    if (Math.abs(temp - 72) > 15) {
+impact -= 4;
+} else if (Math.abs(temp - 72) > 8) {
+impact -= 2;
+}
     
     // Humidity impacts
-    if (conditions.humidity.value > 75) impact -= 3;
-    else if (conditions.humidity.value < 25) impact -= 1;
+    if (conditions.humidity.value > 75) {
+impact -= 3;
+} else if (conditions.humidity.value < 25) {
+impact -= 1;
+}
     
     // Timezone
-    if (Math.abs(conditions.timezone_shift.hours) >= 3) impact -= 3;
+    if (Math.abs(conditions.timezone_shift.hours) >= 3) {
+impact -= 3;
+}
     
     return {
       change: impact !== 0 ? `${impact}%` : '0%',
@@ -233,9 +255,15 @@ export class WeatherImpactAnalyzer {
   static identifyPrimaryEfficiencyFactor(conditions) {
     const factors = [];
     
-    if (Math.abs(conditions.temperature.value - 72) > 10) factors.push('Temperature');
-    if (conditions.humidity.value > 70 || conditions.humidity.value < 30) factors.push('Humidity');
-    if (Math.abs(conditions.timezone_shift.hours) >= 3) factors.push('Timezone');
+    if (Math.abs(conditions.temperature.value - 72) > 10) {
+factors.push('Temperature');
+}
+    if (conditions.humidity.value > 70 || conditions.humidity.value < 30) {
+factors.push('Humidity');
+}
+    if (Math.abs(conditions.timezone_shift.hours) >= 3) {
+factors.push('Timezone');
+}
     
     return factors.length > 0 ? factors[0] : 'None';
   }
@@ -244,12 +272,19 @@ export class WeatherImpactAnalyzer {
     let paceChange = 0;
     
     // Altitude increases pace (home teams run more)
-    if (conditions.altitude.value > 4000) paceChange += 3;
-    else if (conditions.altitude.value > 2000) paceChange += 1;
+    if (conditions.altitude.value > 4000) {
+paceChange += 3;
+} else if (conditions.altitude.value > 2000) {
+paceChange += 1;
+}
     
     // Heat/humidity slows pace
-    if (conditions.temperature.value > 85) paceChange -= 2;
-    if (conditions.humidity.value > 70) paceChange -= 1.5;
+    if (conditions.temperature.value > 85) {
+paceChange -= 2;
+}
+    if (conditions.humidity.value > 70) {
+paceChange -= 1.5;
+}
     
     return {
       change: paceChange > 0 ? `+${paceChange.toFixed(1)}` : `${paceChange.toFixed(1)}`,
@@ -263,15 +298,24 @@ export class WeatherImpactAnalyzer {
     let fatigueScore = 0;
     
     // Altitude is biggest stamina factor
-    if (conditions.altitude.value > 4000) fatigueScore += 40;
-    else if (conditions.altitude.value > 2000) fatigueScore += 20;
+    if (conditions.altitude.value > 4000) {
+fatigueScore += 40;
+} else if (conditions.altitude.value > 2000) {
+fatigueScore += 20;
+}
     
     // Heat and humidity
-    if (conditions.temperature.value > 85) fatigueScore += 15;
-    if (conditions.humidity.value > 70) fatigueScore += 15;
+    if (conditions.temperature.value > 85) {
+fatigueScore += 15;
+}
+    if (conditions.humidity.value > 70) {
+fatigueScore += 15;
+}
     
     // Timezone
-    if (Math.abs(conditions.timezone_shift.hours) >= 3) fatigueScore += 20;
+    if (Math.abs(conditions.timezone_shift.hours) >= 3) {
+fatigueScore += 20;
+}
     
     return {
       fatigue_score: fatigueScore,
@@ -351,12 +395,21 @@ export class WeatherImpactAnalyzer {
   static assessWeatherRisk(conditions, venueFactors) {
     let riskScore = 0;
     
-    if (conditions.altitude.impact_level === 'Extreme') riskScore += 8;
-    else if (conditions.altitude.impact_level === 'Moderate') riskScore += 4;
+    if (conditions.altitude.impact_level === 'Extreme') {
+riskScore += 8;
+} else if (conditions.altitude.impact_level === 'Moderate') {
+riskScore += 4;
+}
     
-    if (conditions.temperature.impact_level === 'High') riskScore += 3;
-    if (conditions.humidity.impact_level === 'High') riskScore += 3;
-    if (conditions.timezone_shift.impact_level === 'High') riskScore += 4;
+    if (conditions.temperature.impact_level === 'High') {
+riskScore += 3;
+}
+    if (conditions.humidity.impact_level === 'High') {
+riskScore += 3;
+}
+    if (conditions.timezone_shift.impact_level === 'High') {
+riskScore += 4;
+}
     
     return {
       overall_score: riskScore,
@@ -642,8 +695,11 @@ export class RefereeTendencyAnalyzer {
     let confidence = 50;
     
     // More experience = more confidence in data
-    if (profile.games_officiated > 1500) confidence += 20;
-    else if (profile.games_officiated > 1000) confidence += 10;
+    if (profile.games_officiated > 1500) {
+confidence += 20;
+} else if (profile.games_officiated > 1000) {
+confidence += 10;
+}
     
     // Extreme tendencies = more predictable
     if (Math.abs(profile.pace_impact) > 2 || Math.abs(profile.fouls_per_game - 21) > 2.5) {
@@ -706,9 +762,15 @@ export class PublicBettingAnalyzer {
   }
 
   static calculateFadeRating(percentage) {
-    if (percentage > 80) return '🔥 PREMIUM FADE (80%+ public)';
-    if (percentage > 70) return '✅ GOOD FADE (70%+ public)';
-    if (percentage > 65) return '📊 MODERATE FADE (65%+ public)';
+    if (percentage > 80) {
+return '🔥 PREMIUM FADE (80%+ public)';
+}
+    if (percentage > 70) {
+return '✅ GOOD FADE (70%+ public)';
+}
+    if (percentage > 65) {
+return '📊 MODERATE FADE (65%+ public)';
+}
     return '➡️ LOW FADE VALUE';
   }
 
@@ -916,11 +978,17 @@ export class PublicBettingAnalyzer {
     let score = 0;
     
     // Heavy public = fade potential
-    if (publicSide.spread.heavy_public) score += 25;
-    if (publicSide.total.heavy_public) score += 25;
+    if (publicSide.spread.heavy_public) {
+score += 25;
+}
+    if (publicSide.total.heavy_public) {
+score += 25;
+}
     
     // Sharp confirmation = high fade potential
-    if (sharpMoney.detected) score += 30;
+    if (sharpMoney.detected) {
+score += 30;
+}
     
     // Very heavy public (>80%) = premium fade
     if (publicSide.spread.favorite_bets > 80 || publicSide.total.over_bets > 80) {

@@ -37,7 +37,9 @@ export const Sparkline = ({
   showArea = true,
   line = null
 }) => {
-  if (!data || data.length < 2) return null;
+  if (!data || data.length < 2) {
+return null;
+}
   
   const values = data.map(d => typeof d === 'object' ? d.value : d);
   const min = Math.min(...values);
@@ -111,7 +113,9 @@ export const DistributionChart = ({
   bins = 10,
   isDark = true
 }) => {
-  if (!data || data.length < 5) return null;
+  if (!data || data.length < 5) {
+return null;
+}
   
   const values = data.map(d => typeof d === 'object' ? d.value : d);
   const min = Math.min(...values);
@@ -226,16 +230,28 @@ export const ConfidenceGauge = ({
   const offset = circumference - (displayValue / 100) * circumference;
   
   const getColor = (val) => {
-    if (val >= 80) return '#10b981';
-    if (val >= 65) return '#3b82f6';
-    if (val >= 50) return '#f59e0b';
+    if (val >= 80) {
+return '#10b981';
+}
+    if (val >= 65) {
+return '#3b82f6';
+}
+    if (val >= 50) {
+return '#f59e0b';
+}
     return '#ef4444';
   };
   
   const getLabel = (val) => {
-    if (val >= 80) return 'High';
-    if (val >= 65) return 'Good';
-    if (val >= 50) return 'Moderate';
+    if (val >= 80) {
+return 'High';
+}
+    if (val >= 65) {
+return 'Good';
+}
+    if (val >= 50) {
+return 'Moderate';
+}
     return 'Low';
   };
   
@@ -304,7 +320,9 @@ export const HitRateIndicator = ({
   showStreak = true,
   isDark = true
 }) => {
-  if (!games || games.length === 0) return null;
+  if (!games || games.length === 0) {
+return null;
+}
   
   const sizes = {
     sm: { dot: 'w-2 h-2', gap: 'gap-0.5' },
@@ -323,7 +341,7 @@ export const HitRateIndicator = ({
   
   // Calculate current streak
   let streak = 0;
-  let streakType = results[0] ? 'hit' : 'miss';
+  const streakType = results[0] ? 'hit' : 'miss';
   for (const result of results) {
     if ((result && streakType === 'hit') || (!result && streakType === 'miss')) {
       streak++;
@@ -380,16 +398,28 @@ export const EdgeIndicator = ({
   isDark = true
 }) => {
   const getColor = (e) => {
-    if (e >= 15) return '#10b981';
-    if (e >= 8) return '#3b82f6';
-    if (e >= 3) return '#f59e0b';
+    if (e >= 15) {
+return '#10b981';
+}
+    if (e >= 8) {
+return '#3b82f6';
+}
+    if (e >= 3) {
+return '#f59e0b';
+}
     return '#6b7280';
   };
   
   const getLabel = (e) => {
-    if (e >= 15) return 'Strong Edge';
-    if (e >= 8) return 'Solid Edge';
-    if (e >= 3) return 'Marginal Edge';
+    if (e >= 15) {
+return 'Strong Edge';
+}
+    if (e >= 8) {
+return 'Solid Edge';
+}
+    if (e >= 3) {
+return 'Marginal Edge';
+}
     return 'No Edge';
   };
   
@@ -672,10 +702,18 @@ export const PercentileBar = ({
   isDark = true
 }) => {
   const getColor = (p) => {
-    if (p >= 90) return '#10b981';
-    if (p >= 75) return '#3b82f6';
-    if (p >= 50) return '#f59e0b';
-    if (p >= 25) return '#f97316';
+    if (p >= 90) {
+return '#10b981';
+}
+    if (p >= 75) {
+return '#3b82f6';
+}
+    if (p >= 50) {
+return '#f59e0b';
+}
+    if (p >= 25) {
+return '#f97316';
+}
     return '#ef4444';
   };
   
@@ -823,7 +861,9 @@ export const AnalysisCard = ({
   analysis,
   isDark = true
 }) => {
-  if (!analysis) return null;
+  if (!analysis) {
+return null;
+}
   
   const { performance, lineInteraction, confidence, recommendation, grade } = analysis;
   

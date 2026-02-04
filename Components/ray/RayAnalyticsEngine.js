@@ -1064,7 +1064,9 @@ class RayAnalyticsEngine {
   // ─────────────────────────────────────────────────────────────────────────────
   getPlayerAnalysis(playerName) {
     const player = this.findPlayer(playerName);
-    if (!player) return null;
+    if (!player) {
+return null;
+}
 
     const trend = this.calculateTrend(player);
     const hotStreaks = this.findHotStreaks(player);
@@ -1114,12 +1116,20 @@ class RayAnalyticsEngine {
 
   getTrendDescription(direction, strength, name, change) {
     if (direction === 'up') {
-      if (strength === 'strong') return `${name} is on FIRE 🔥 — averaging ${Math.abs(change)}% more points over the last 5 games!`;
-      if (strength === 'moderate') return `${name} is heating up 📈 — solid uptick in production lately.`;
+      if (strength === 'strong') {
+return `${name} is on FIRE 🔥 — averaging ${Math.abs(change)}% more points over the last 5 games!`;
+}
+      if (strength === 'moderate') {
+return `${name} is heating up 📈 — solid uptick in production lately.`;
+}
       return `${name} trending slightly upward — good momentum.`;
     } else if (direction === 'down') {
-      if (strength === 'strong') return `${name} is in a slump 📉 — production down ${Math.abs(change)}% recently.`;
-      if (strength === 'moderate') return `${name} cooling off a bit — worth monitoring.`;
+      if (strength === 'strong') {
+return `${name} is in a slump 📉 — production down ${Math.abs(change)}% recently.`;
+}
+      if (strength === 'moderate') {
+return `${name} cooling off a bit — worth monitoring.`;
+}
       return `${name} slightly below average — could bounce back.`;
     }
     return `${name} is rock steady — performing right at season average.`;
@@ -1134,23 +1144,35 @@ class RayAnalyticsEngine {
     
     // Count consecutive games over season avg
     for (const game of log) {
-      if (game.pts > player.season.pts) streaks.pts++;
-      else break;
+      if (game.pts > player.season.pts) {
+streaks.pts++;
+} else {
+break;
+}
     }
     
     for (const game of log) {
-      if (game.reb > player.season.reb) streaks.reb++;
-      else break;
+      if (game.reb > player.season.reb) {
+streaks.reb++;
+} else {
+break;
+}
     }
     
     for (const game of log) {
-      if (game.ast > player.season.ast) streaks.ast++;
-      else break;
+      if (game.ast > player.season.ast) {
+streaks.ast++;
+} else {
+break;
+}
     }
     
     for (const game of log) {
-      if (game.result === 'W') streaks.wins++;
-      else break;
+      if (game.result === 'W') {
+streaks.wins++;
+} else {
+break;
+}
     }
 
     return streaks;
@@ -1161,7 +1183,9 @@ class RayAnalyticsEngine {
   // ─────────────────────────────────────────────────────────────────────────────
   calculateConsistency(player) {
     const log = player.gameLog || [];
-    if (log.length === 0) return { score: 0, rating: 'Unknown' };
+    if (log.length === 0) {
+return { score: 0, rating: 'Unknown' };
+}
 
     const avg = player.season.pts;
     const variance = log.reduce((sum, g) => sum + Math.pow(g.pts - avg, 2), 0) / log.length;
@@ -1169,9 +1193,13 @@ class RayAnalyticsEngine {
     const cv = (stdDev / avg) * 100; // Coefficient of variation
 
     let rating = 'Very High';
-    if (cv > 30) rating = 'Low';
-    else if (cv > 20) rating = 'Moderate';
-    else if (cv > 10) rating = 'High';
+    if (cv > 30) {
+rating = 'Low';
+} else if (cv > 20) {
+rating = 'Moderate';
+} else if (cv > 10) {
+rating = 'High';
+}
 
     return {
       score: Math.round(100 - cv),
@@ -1261,7 +1289,9 @@ class RayAnalyticsEngine {
     const p1 = this.findPlayer(player1Name);
     const p2 = this.findPlayer(player2Name);
 
-    if (!p1 || !p2) return null;
+    if (!p1 || !p2) {
+return null;
+}
 
     const comparison = {
       player1: p1,
@@ -1290,8 +1320,11 @@ class RayAnalyticsEngine {
     // Determine overall winner
     let p1Wins = 0, p2Wins = 0;
     for (const stat of Object.values(comparison.stats)) {
-      if (stat.winner === p1.name) p1Wins++;
-      else p2Wins++;
+      if (stat.winner === p1.name) {
+p1Wins++;
+} else {
+p2Wins++;
+}
     }
     comparison.overallWinner = p1Wins > p2Wins ? p1.name : p2.name;
     comparison.verdict = p1Wins > p2Wins 
@@ -1306,7 +1339,9 @@ class RayAnalyticsEngine {
   // ─────────────────────────────────────────────────────────────────────────────
   getMatchupAnalysis(playerName, opponentTeam) {
     const player = this.findPlayer(playerName);
-    if (!player) return null;
+    if (!player) {
+return null;
+}
 
     const team = this.teams[opponentTeam.toUpperCase()];
     const vsTeamStats = player.vsTeam?.[opponentTeam.toUpperCase()];
@@ -1442,7 +1477,9 @@ class RayAnalyticsEngine {
   // ─────────────────────────────────────────────────────────────────────────────
   getFantasyAnalysis(playerName) {
     const player = this.findPlayer(playerName);
-    if (!player) return null;
+    if (!player) {
+return null;
+}
 
     const fantasy = player.fantasy;
     const trend = this.calculateTrend(player);
@@ -1472,7 +1509,9 @@ class RayAnalyticsEngine {
 
   getStreakAnalysis(playerName) {
     const player = this.getPlayer(playerName);
-    if (!player) return null;
+    if (!player) {
+return null;
+}
 
     const last5Avg = player.last5.pts;
     const seasonAvg = player.season.pts;
@@ -1498,7 +1537,9 @@ class RayAnalyticsEngine {
 
   getConsistencyScore(playerName) {
     const player = this.getPlayer(playerName);
-    if (!player || !player.gameLog) return null;
+    if (!player || !player.gameLog) {
+return null;
+}
 
     const scores = player.gameLog.map(g => g.pts);
     const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
@@ -1525,7 +1566,9 @@ class RayAnalyticsEngine {
 
   getCeilingFloor(playerName) {
     const player = this.getPlayer(playerName);
-    if (!player) return null;
+    if (!player) {
+return null;
+}
 
     const fantasy = player.fantasy || {};
     const floor = fantasy.floor || player.season.pts * 0.6;
@@ -1547,7 +1590,9 @@ class RayAnalyticsEngine {
 
   getUsageAnalysis(playerName) {
     const player = this.getPlayer(playerName);
-    if (!player) return null;
+    if (!player) {
+return null;
+}
 
     const usage = player.season.usage || 25;
     const rating = usage > 32 ? '🔥 Elite' : usage > 28 ? '🟢 High' : usage > 24 ? '🟡 Medium' : '🟠 Low';
@@ -1566,7 +1611,9 @@ class RayAnalyticsEngine {
 
   getEfficiencyMetrics(playerName) {
     const player = this.getPlayer(playerName);
-    if (!player) return null;
+    if (!player) {
+return null;
+}
 
     const ts = ((player.season.pts) / (2 * ((player.season.fgPct / 100) * 15 + (player.season.ftPct / 100) * 3))) * 100 || 55;
     const per = player.season.per || 15;
@@ -1588,7 +1635,9 @@ class RayAnalyticsEngine {
 
   getRestAnalysis(playerName) {
     const player = this.getPlayer(playerName);
-    if (!player || !player.splits) return null;
+    if (!player || !player.splits) {
+return null;
+}
 
     const b2b = player.splits.rest_0 || {};
     const oneDay = player.splits.rest_1 || {};
@@ -1610,7 +1659,9 @@ class RayAnalyticsEngine {
 
   getLocationSplits(playerName) {
     const player = this.getPlayer(playerName);
-    if (!player || !player.splits) return null;
+    if (!player || !player.splits) {
+return null;
+}
 
     const home = player.splits.home || {};
     const away = player.splits.away || {};
@@ -1630,7 +1681,9 @@ class RayAnalyticsEngine {
 
   getAdvancedMetrics(playerName) {
     const player = this.getPlayer(playerName);
-    if (!player) return null;
+    if (!player) {
+return null;
+}
 
     const per = player.season.per || 15;
     const usage = player.season.usage || 20;

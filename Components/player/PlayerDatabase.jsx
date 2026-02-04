@@ -6,6 +6,7 @@ import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
 import PlayersAPI from '../../src/api/playersApi';
+import { NBA_PLAYERS_DATABASE } from '../../src/api/mockData';
 
 const PlayerDatabase = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -26,7 +27,7 @@ const PlayerDatabase = () => {
 
   const playersPerPage = 20;
 
-  // Fetch live players data
+  // Fetch live players data with fallback to mock data
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -44,15 +45,27 @@ const PlayerDatabase = () => {
         console.log('✅ Teams data:', teamsData);
         console.log('✅ Scoring leaders:', scoringData);
         
-        setPlayers(Array.isArray(playersData) ? playersData : []);
+        // Use live data if available, otherwise fallback to 100 real NBA players
+        if (Array.isArray(playersData) && playersData.length > 0) {
+          setPlayers(playersData);
+        } else {
+          console.log('⚠️ No live data, using 100 real NBA players mock data');
+          setPlayers(NBA_PLAYERS_DATABASE);
+        }
         setTeams(teamsData?.data || []);
-        setScoringLeaders(scoringData?.data || []);
-        setReboundLeaders(reboundData?.data || []);
-        setAssistLeaders(assistData?.data || []);
+        setScoringLeaders(scoringData?.data || NBA_PLAYERS_DATABASE.slice(0, 5));
+        setReboundLeaders(reboundData?.data || NBA_PLAYERS_DATABASE.sort((a,b) => b.rpg - a.rpg).slice(0, 5));
+        setAssistLeaders(assistData?.data || NBA_PLAYERS_DATABASE.sort((a,b) => b.apg - a.apg).slice(0, 5));
         
-        console.log(`📊 Set ${playersData?.length || 0} players`);
+        console.log(`📊 Set ${playersData?.length || NBA_PLAYERS_DATABASE.length} players`);
       } catch (error) {
         console.error('Error fetching live data:', error);
+        // Fallback to 100 real NBA players mock data
+        console.log('⚠️ API error, using 100 real NBA players mock data');
+        setPlayers(NBA_PLAYERS_DATABASE);
+        setScoringLeaders(NBA_PLAYERS_DATABASE.slice(0, 5));
+        setReboundLeaders([...NBA_PLAYERS_DATABASE].sort((a,b) => b.rpg - a.rpg).slice(0, 5));
+        setAssistLeaders([...NBA_PLAYERS_DATABASE].sort((a,b) => b.apg - a.apg).slice(0, 5));
       } finally {
         setLoading(false);
       }
@@ -108,7 +121,9 @@ const PlayerDatabase = () => {
   };
 
   const SortIcon = ({ field }) => {
-    if (sortBy !== field) return null;
+    if (sortBy !== field) {
+return null;
+}
     return sortOrder === 'desc' ? <TrendingDown className="w-3 h-3 ml-1" /> : <TrendingUp className="w-3 h-3 ml-1" />;
   };
 
@@ -125,13 +140,13 @@ const PlayerDatabase = () => {
           </CardHeader>
           <CardContent className="space-y-2">
             {scoringLeaders?.map((player, idx) => (
-              <div key={player.id} className="flex items-center justify-between text-sm">
+              <div key={player.id || idx} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
                   <span className="text-slate-400 w-4">{idx + 1}.</span>
                   <span className="font-medium">{player.name}</span>
                   <Badge variant="outline" className="text-xs">{player.team}</Badge>
                 </div>
-                <span className="font-bold text-orange-500">{player.value.toFixed(1)}</span>
+                <span className="font-bold text-orange-500">{(player.value || player.ppg || 0).toFixed(1)}</span>
               </div>
             ))}
           </CardContent>
@@ -146,13 +161,13 @@ const PlayerDatabase = () => {
           </CardHeader>
           <CardContent className="space-y-2">
             {reboundLeaders?.map((player, idx) => (
-              <div key={player.id} className="flex items-center justify-between text-sm">
+              <div key={player.id || idx} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
                   <span className="text-slate-400 w-4">{idx + 1}.</span>
                   <span className="font-medium">{player.name}</span>
                   <Badge variant="outline" className="text-xs">{player.team}</Badge>
                 </div>
-                <span className="font-bold text-blue-500">{player.value.toFixed(1)}</span>
+                <span className="font-bold text-blue-500">{(player.value || player.rpg || 0).toFixed(1)}</span>
               </div>
             ))}
           </CardContent>
@@ -167,13 +182,13 @@ const PlayerDatabase = () => {
           </CardHeader>
           <CardContent className="space-y-2">
             {assistLeaders?.map((player, idx) => (
-              <div key={player.id} className="flex items-center justify-between text-sm">
+              <div key={player.id || idx} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
                   <span className="text-slate-400 w-4">{idx + 1}.</span>
                   <span className="font-medium">{player.name}</span>
                   <Badge variant="outline" className="text-xs">{player.team}</Badge>
                 </div>
-                <span className="font-bold text-green-500">{player.value.toFixed(1)}</span>
+                <span className="font-bold text-green-500">{(player.value || player.apg || 0).toFixed(1)}</span>
               </div>
             ))}
           </CardContent>
@@ -224,7 +239,7 @@ const PlayerDatabase = () => {
               <td className="p-3">
                 <div>
                   <div className="font-medium">{player.name}</div>
-                  <div className="text-xs text-slate-400">{player.height} • {player.weight} lbs • {player.age} yo</div>
+                  <div className="text-xs text-slate-400">#{player.number || '-'} • {player.position}</div>
                 </div>
               </td>
               <td className="text-center p-3">
@@ -233,12 +248,12 @@ const PlayerDatabase = () => {
               <td className="text-center p-3">
                 <Badge className="bg-slate-700">{player.position}</Badge>
               </td>
-              <td className="text-center p-3 font-semibold text-orange-500">{player.ppg.toFixed(1)}</td>
-              <td className="text-center p-3 font-semibold text-blue-500">{player.rpg.toFixed(1)}</td>
-              <td className="text-center p-3 font-semibold text-green-500">{player.apg.toFixed(1)}</td>
-              <td className="text-center p-3">{(player.fgPct * 100).toFixed(1)}%</td>
-              <td className="text-center p-3 font-semibold">{player.per.toFixed(1)}</td>
-              <td className="text-center p-3 text-slate-400">{player.gamesPlayed}</td>
+              <td className="text-center p-3 font-semibold text-orange-500">{(player.ppg || 0).toFixed(1)}</td>
+              <td className="text-center p-3 font-semibold text-blue-500">{(player.rpg || 0).toFixed(1)}</td>
+              <td className="text-center p-3 font-semibold text-green-500">{(player.apg || 0).toFixed(1)}</td>
+              <td className="text-center p-3">{((player.fgPct || 0) * 100).toFixed(1)}%</td>
+              <td className="text-center p-3 font-semibold">{(player.per || player.ppg || 0).toFixed(1)}</td>
+              <td className="text-center p-3 text-slate-400">{player.gamesPlayed || player.mpg || '-'}</td>
             </tr>
           ))}
         </tbody>
@@ -257,7 +272,7 @@ const PlayerDatabase = () => {
                 <div className="flex items-center gap-2 mt-1">
                   <Badge variant="outline" className="text-xs">{player.team}</Badge>
                   <Badge className="bg-slate-700 text-xs">{player.position}</Badge>
-                  <span className="text-xs text-slate-400">#{player.jersey}</span>
+                  <span className="text-xs text-slate-400">#{player.number || player.jersey || '-'}</span>
                 </div>
               </div>
               <Award className="w-5 h-5 text-yellow-500" />
@@ -266,34 +281,34 @@ const PlayerDatabase = () => {
           <CardContent>
             <div className="grid grid-cols-3 gap-3 mb-3">
               <div className="text-center">
-                <div className="text-2xl font-bold text-orange-500">{player.ppg.toFixed(1)}</div>
+                <div className="text-2xl font-bold text-orange-500">{(player.ppg || 0).toFixed(1)}</div>
                 <div className="text-xs text-slate-400">PPG</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-500">{player.rpg.toFixed(1)}</div>
+                <div className="text-2xl font-bold text-blue-500">{(player.rpg || 0).toFixed(1)}</div>
                 <div className="text-xs text-slate-400">RPG</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-500">{player.apg.toFixed(1)}</div>
+                <div className="text-2xl font-bold text-green-500">{(player.apg || 0).toFixed(1)}</div>
                 <div className="text-xs text-slate-400">APG</div>
               </div>
             </div>
             <div className="grid grid-cols-3 gap-2 text-xs">
               <div className="text-center">
                 <div className="text-slate-400">FG%</div>
-                <div className="font-semibold">{(player.fgPct * 100).toFixed(1)}%</div>
+                <div className="font-semibold">{((player.fgPct || 0) * 100).toFixed(1)}%</div>
               </div>
               <div className="text-center">
                 <div className="text-slate-400">3P%</div>
-                <div className="font-semibold">{(player.fg3Pct * 100).toFixed(1)}%</div>
+                <div className="font-semibold">{((player.threePct || player.fg3Pct || 0) * 100).toFixed(1)}%</div>
               </div>
               <div className="text-center">
-                <div className="text-slate-400">PER</div>
-                <div className="font-semibold">{player.per.toFixed(1)}</div>
+                <div className="text-slate-400">FT%</div>
+                <div className="font-semibold">{((player.ftPct || 0) * 100).toFixed(1)}%</div>
               </div>
             </div>
             <div className="mt-3 pt-3 border-t border-slate-800 text-xs text-slate-400">
-              {player.height} • {player.weight} lbs • {player.age} years • {player.gamesPlayed} GP
+              #{player.number || '-'} • {player.mpg || '-'} MPG
             </div>
           </CardContent>
         </Card>

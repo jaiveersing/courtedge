@@ -29,7 +29,9 @@ const PerformanceChart = ({ bets = [], height = 400, showBrush = true }) => {
 
   // Process bets into time-series data
   const chartData = useMemo(() => {
-    if (!bets.length) return [];
+    if (!bets.length) {
+return [];
+}
 
     // Filter by time range
     const now = new Date();
@@ -93,8 +95,12 @@ const PerformanceChart = ({ bets = [], height = 400, showBrush = true }) => {
       }
 
       cumulativeProfit += profit;
-      if (bet.result === 'win') cumulativeWins++;
-      if (bet.result === 'loss') cumulativeLosses++;
+      if (bet.result === 'win') {
+cumulativeWins++;
+}
+      if (bet.result === 'loss') {
+cumulativeLosses++;
+}
       totalWagered += bet.stake;
 
       dataByDate[date].dailyProfit += profit;
@@ -143,7 +149,9 @@ const PerformanceChart = ({ bets = [], height = 400, showBrush = true }) => {
 
   // Custom tooltip
   const CustomTooltip = ({ active, payload, label }) => {
-    if (!active || !payload || !payload.length) return null;
+    if (!active || !payload || !payload.length) {
+return null;
+}
 
     const data = payload[0].payload;
 

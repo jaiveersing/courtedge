@@ -272,7 +272,9 @@ class RequestManager {
 
   async waitForRateLimit(apiName) {
     const apiConfig = Object.values(CONFIG.apis).find(a => a.name === apiName);
-    if (!apiConfig) return;
+    if (!apiConfig) {
+return;
+}
 
     const count = this.requestCounts.get(apiName) || 0;
     if (count >= apiConfig.rateLimit) {
@@ -440,7 +442,9 @@ class RayLiveDataServiceUltra {
     // Check cache first
     if (!forceRefresh) {
       const cached = this.cache.get('playerStats', playerName, CONFIG.cache.playerStats);
-      if (cached) return cached;
+      if (cached) {
+return cached;
+}
     }
 
     // Try to fetch from API
@@ -466,7 +470,9 @@ class RayLiveDataServiceUltra {
       .sort((a, b) => a[1].priority - b[1].priority);
 
     for (const [apiName, config] of apis) {
-      if (this.apiStatus[apiName]?.status === 'failed') continue;
+      if (this.apiStatus[apiName]?.status === 'failed') {
+continue;
+}
 
       try {
         const data = await this.requestManager.execute(
@@ -493,7 +499,9 @@ class RayLiveDataServiceUltra {
 
   async fetchFromAPI(apiName, playerName) {
     const config = CONFIG.apis[apiName];
-    if (!config) return null;
+    if (!config) {
+return null;
+}
 
     // Implementation would vary by API
     // For now, return null to use local fallback
@@ -517,7 +525,9 @@ class RayLiveDataServiceUltra {
   }
 
   enhancePlayerData(player) {
-    if (!player?.season) return player;
+    if (!player?.season) {
+return player;
+}
 
     // Calculate additional metrics
     const s = player.season;
@@ -538,7 +548,9 @@ class RayLiveDataServiceUltra {
   }
 
   calculateConsistency(player) {
-    if (!player.season || !player.last10) return 50;
+    if (!player.season || !player.last10) {
+return 50;
+}
     
     const s = player.season;
     const l10 = player.last10;
@@ -576,8 +588,11 @@ class RayLiveDataServiceUltra {
     }
 
     let momentum = 'neutral';
-    if (l5.pts > l10.pts * 1.08) momentum = 'hot';
-    else if (l5.pts < l10.pts * 0.92) momentum = 'cold';
+    if (l5.pts > l10.pts * 1.08) {
+momentum = 'hot';
+} else if (l5.pts < l10.pts * 0.92) {
+momentum = 'cold';
+}
 
     return { direction, strength, momentum };
   }
@@ -591,7 +606,9 @@ class RayLiveDataServiceUltra {
 
     if (!forceRefresh) {
       const cached = this.cache.get('teamData', teamCode, CONFIG.cache.standings);
-      if (cached) return cached;
+      if (cached) {
+return cached;
+}
     }
 
     const data = TEAM_DATA[teamCode.toUpperCase()];
@@ -616,7 +633,9 @@ class RayLiveDataServiceUltra {
       this.getPlayerStats(player2Name)
     ]);
 
-    if (!p1 || !p2) return null;
+    if (!p1 || !p2) {
+return null;
+}
 
     const categories = ['pts', 'reb', 'ast', 'stl', 'blk', 'fgPct', 'fg3Pct'];
     const comparison = {};
@@ -633,8 +652,11 @@ class RayLiveDataServiceUltra {
         diff: Math.abs(v1 - v2).toFixed(1)
       };
 
-      if (v1 > v2) p1Wins++;
-      else if (v2 > v1) p2Wins++;
+      if (v1 > v2) {
+p1Wins++;
+} else if (v2 > v1) {
+p2Wins++;
+}
     }
 
     return {
@@ -741,7 +763,9 @@ class RayLiveDataServiceUltra {
     return () => {
       const listeners = this.listeners.get(event);
       const index = listeners.indexOf(callback);
-      if (index > -1) listeners.splice(index, 1);
+      if (index > -1) {
+listeners.splice(index, 1);
+}
     };
   }
 

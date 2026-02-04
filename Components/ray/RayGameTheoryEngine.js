@@ -206,7 +206,9 @@ export class DominantStrategyAnalyzer {
       let isDominant = true;
       
       for (let j = 0; j < strategies.length; j++) {
-        if (i === j) continue;
+        if (i === j) {
+continue;
+}
         
         // Check if strategy i dominates strategy j
         let dominatesAll = true;
@@ -250,7 +252,9 @@ export class DominantStrategyAnalyzer {
       let strictlyBetterSomewhere = false;
       
       for (let j = 0; j < strategies.length; j++) {
-        if (i === j) continue;
+        if (i === j) {
+continue;
+}
         
         for (let k = 0; k < strategies[i].length; k++) {
           if (strategies[i][k] < strategies[j][k]) {
@@ -262,7 +266,9 @@ export class DominantStrategyAnalyzer {
           }
         }
         
-        if (!isWeaklyDominant) break;
+        if (!isWeaklyDominant) {
+break;
+}
       }
       
       if (isWeaklyDominant && strictlyBetterSomewhere) {
@@ -556,13 +562,23 @@ export class BettingPsychologyAnalyzer {
     // Penalties for undisciplined behavior
     const biases = this.detectCognitiveBiases(history);
     
-    if (biases.lossChasingBias.detected) disciplineScore -= 25;
-    if (biases.gamblersFallacy.severity === 'High') disciplineScore -= 20;
-    if (biases.overconfidence.severity === 'High') disciplineScore -= 15;
-    if (biases.confirmationBias.severity === 'High') disciplineScore -= 10;
+    if (biases.lossChasingBias.detected) {
+disciplineScore -= 25;
+}
+    if (biases.gamblersFallacy.severity === 'High') {
+disciplineScore -= 20;
+}
+    if (biases.overconfidence.severity === 'High') {
+disciplineScore -= 15;
+}
+    if (biases.confirmationBias.severity === 'High') {
+disciplineScore -= 10;
+}
     
     const unitVariability = this.analyzeUnitVariability(history);
-    if (parseFloat(unitVariability.coefficientOfVariation) > 60) disciplineScore -= 15;
+    if (parseFloat(unitVariability.coefficientOfVariation) > 60) {
+disciplineScore -= 15;
+}
     
     disciplineScore = Math.max(0, disciplineScore);
     
@@ -579,8 +595,12 @@ export class BettingPsychologyAnalyzer {
     
     // Additional adjustments
     Object.values(biases).forEach(bias => {
-      if (bias.severity === 'High') score -= 5;
-      if (bias.severity === 'Moderate') score -= 2;
+      if (bias.severity === 'High') {
+score -= 5;
+}
+      if (bias.severity === 'Moderate') {
+score -= 2;
+}
     });
     
     return {
@@ -758,17 +778,25 @@ export class ExpectedValueMaximizer {
       maxCorrelation = 0.3
     } = constraints;
     
-    let selectedBets = [];
+    const selectedBets = [];
     let totalStake = 0;
     
     for (const bet of bets) {
-      if (selectedBets.length >= maxBetsPerDay) break;
-      if (totalStake + bet.kellyStake > maxTotalStake) break;
-      if (bet.expectedValue < minEV) break;
+      if (selectedBets.length >= maxBetsPerDay) {
+break;
+}
+      if (totalStake + bet.kellyStake > maxTotalStake) {
+break;
+}
+      if (bet.expectedValue < minEV) {
+break;
+}
       
       // Check correlation with existing bets
       const maxExistingCorrelation = this.calculateMaxCorrelation(bet, selectedBets);
-      if (maxExistingCorrelation > maxCorrelation) continue;
+      if (maxExistingCorrelation > maxCorrelation) {
+continue;
+}
       
       selectedBets.push(bet);
       totalStake += bet.kellyStake;
@@ -778,12 +806,18 @@ export class ExpectedValueMaximizer {
   }
 
   static calculateMaxCorrelation(bet, existingBets) {
-    if (existingBets.length === 0) return 0;
+    if (existingBets.length === 0) {
+return 0;
+}
     
     return Math.max(...existingBets.map(existing => {
       // Simple correlation: same game = 1.0, same team = 0.5, different = 0
-      if (existing.gameId === bet.gameId) return 1.0;
-      if (existing.team === bet.team) return 0.5;
+      if (existing.gameId === bet.gameId) {
+return 1.0;
+}
+      if (existing.team === bet.team) {
+return 0.5;
+}
       return 0.1;
     }));
   }

@@ -154,9 +154,15 @@ export default function PlayerPropsModern() {
       player.team.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .filter(player => {
-      if (filterValue === 'all') return true;
-      if (filterValue === 'over') return getEdge(player) > 3;
-      if (filterValue === 'under') return getEdge(player) < -3;
+      if (filterValue === 'all') {
+return true;
+}
+      if (filterValue === 'over') {
+return getEdge(player) > 3;
+}
+      if (filterValue === 'under') {
+return getEdge(player) < -3;
+}
       return true;
     })
     .sort((a, b) => Math.abs(getEdge(b)) - Math.abs(getEdge(a)));

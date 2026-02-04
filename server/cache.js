@@ -91,7 +91,9 @@ class RedisCacheService {
    * Cache data with automatic TTL
    */
   async cache(key, data, type = 'default') {
-    if (!this.connected) return false;
+    if (!this.connected) {
+return false;
+}
 
     try {
       const value = JSON.stringify(data);
@@ -110,7 +112,9 @@ class RedisCacheService {
    * Get cached data
    */
   async getCached(key) {
-    if (!this.connected) return null;
+    if (!this.connected) {
+return null;
+}
 
     try {
       const value = await this.get(key);
@@ -126,7 +130,9 @@ class RedisCacheService {
    * Cache with tags for easy invalidation
    */
   async cacheWithTags(key, data, tags = [], ttl = 300) {
-    if (!this.connected) return false;
+    if (!this.connected) {
+return false;
+}
 
     try {
       // Store main data
@@ -150,7 +156,9 @@ class RedisCacheService {
    * Invalidate cache by tag
    */
   async invalidateByTag(tag) {
-    if (!this.connected) return false;
+    if (!this.connected) {
+return false;
+}
 
     try {
       const keys = await this.client.smembers(`tag:${tag}`);
@@ -197,7 +205,9 @@ class RedisCacheService {
    * Rate limiting with Redis
    */
   async checkRateLimit(key, limit, window) {
-    if (!this.connected) return { allowed: true };
+    if (!this.connected) {
+return { allowed: true };
+}
 
     try {
       const current = await this.incr(key);
@@ -223,7 +233,9 @@ class RedisCacheService {
    * Leaderboard using sorted sets
    */
   async updateLeaderboard(leaderboardKey, userId, score) {
-    if (!this.connected) return false;
+    if (!this.connected) {
+return false;
+}
 
     try {
       await this.zadd(leaderboardKey, score, userId);
@@ -240,7 +252,9 @@ class RedisCacheService {
    * Get top N from leaderboard
    */
   async getTopLeaderboard(leaderboardKey, count = 10) {
-    if (!this.connected) return [];
+    if (!this.connected) {
+return [];
+}
 
     try {
       const results = await this.client.zrevrange(
@@ -334,7 +348,9 @@ class RedisCacheService {
    * Get cache stats
    */
   async getStats() {
-    if (!this.connected) return null;
+    if (!this.connected) {
+return null;
+}
 
     try {
       const info = await promisify(this.client.info).bind(this.client)();
@@ -375,7 +391,9 @@ class RedisCacheService {
    * Clear all cache
    */
   async flushAll() {
-    if (!this.connected) return false;
+    if (!this.connected) {
+return false;
+}
 
     try {
       await promisify(this.client.flushdb).bind(this.client)();

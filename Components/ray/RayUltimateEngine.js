@@ -29,7 +29,9 @@ class MLConnector {
   }
 
   async checkHealth() {
-    if (Date.now() - this.lastHealthCheck < 60000) return this.isOnline;
+    if (Date.now() - this.lastHealthCheck < 60000) {
+return this.isOnline;
+}
     
     try {
       const controller = new AbortController();
@@ -87,7 +89,9 @@ class MLConnector {
 
   generateLocalPrediction(playerName, opponent, propType) {
     const player = PLAYERS_DB[playerName] || EXTENDED_PLAYERS[playerName];
-    if (!player) return null;
+    if (!player) {
+return null;
+}
 
     const stat = propType === 'pts' ? 'pts' : 
                  propType === 'reb' ? 'reb' : 
@@ -477,8 +481,12 @@ class EntityExtractor {
     }
 
     // Extract over/under directions
-    if (/over/i.test(lowerText)) entities.directions.push('over');
-    if (/under/i.test(lowerText)) entities.directions.push('under');
+    if (/over/i.test(lowerText)) {
+entities.directions.push('over');
+}
+    if (/under/i.test(lowerText)) {
+entities.directions.push('under');
+}
 
     return entities;
   }
@@ -753,8 +761,11 @@ class ResponseGenerator {
       const v1 = stats1[key] || 0;
       const v2 = stats2[key] || 0;
       const winner = v1 > v2 ? '←' : v2 > v1 ? '→' : '=';
-      if (v1 > v2) p1Wins++;
-      else if (v2 > v1) p2Wins++;
+      if (v1 > v2) {
+p1Wins++;
+} else if (v2 > v1) {
+p2Wins++;
+}
       
       text += `| ${label} | **${v1.toFixed(1)}** | **${v2.toFixed(1)}** | ${winner} |\n`;
     }
@@ -830,7 +841,9 @@ class ResponseGenerator {
     const opportunities = [];
 
     for (const [playerName, player] of Object.entries(allPlayers)) {
-      if (!player.season || !player.last5) continue;
+      if (!player.season || !player.last5) {
+continue;
+}
 
       const statTypes = ['pts', 'reb', 'ast'];
       
@@ -839,7 +852,9 @@ class ResponseGenerator {
         const last5Avg = player.last5[stat];
         const last10Avg = player.last10?.[stat] || seasonAvg;
 
-        if (!seasonAvg || !last5Avg) continue;
+        if (!seasonAvg || !last5Avg) {
+continue;
+}
 
         const diff5 = ((last5Avg - seasonAvg) / seasonAvg) * 100;
         const trending = last5Avg > last10Avg;
@@ -932,9 +947,15 @@ class ResponseGenerator {
       text += `\n### Situational Splits\n\n`;
       text += `| Situation | PTS | REB | AST |\n`;
       text += `|-----------|-----|-----|-----|\n`;
-      if (player.splits.home) text += `| Home | ${player.splits.home.pts} | ${player.splits.home.reb} | ${player.splits.home.ast} |\n`;
-      if (player.splits.away) text += `| Away | ${player.splits.away.pts} | ${player.splits.away.reb} | ${player.splits.away.ast} |\n`;
-      if (player.splits.rest_2plus) text += `| 2+ Days Rest | ${player.splits.rest_2plus.pts} | ${player.splits.rest_2plus.reb} | ${player.splits.rest_2plus.ast} |\n`;
+      if (player.splits.home) {
+text += `| Home | ${player.splits.home.pts} | ${player.splits.home.reb} | ${player.splits.home.ast} |\n`;
+}
+      if (player.splits.away) {
+text += `| Away | ${player.splits.away.pts} | ${player.splits.away.reb} | ${player.splits.away.ast} |\n`;
+}
+      if (player.splits.rest_2plus) {
+text += `| 2+ Days Rest | ${player.splits.rest_2plus.pts} | ${player.splits.rest_2plus.reb} | ${player.splits.rest_2plus.ast} |\n`;
+}
     }
 
     return {
@@ -955,7 +976,9 @@ class ResponseGenerator {
 
     // Find correlated plays
     for (const [playerName, player] of Object.entries(allPlayers)) {
-      if (!player.last5 || !player.season) continue;
+      if (!player.last5 || !player.season) {
+continue;
+}
 
       const ptsDiff = player.last5.pts - player.season.pts;
       const astDiff = player.last5.ast - player.season.ast;
@@ -1041,10 +1064,15 @@ class ResponseGenerator {
 
     const hour = new Date().getHours();
     let timeGreeting = '';
-    if (hour < 12) timeGreeting = "Good morning! ";
-    else if (hour < 17) timeGreeting = "Good afternoon! ";
-    else if (hour < 21) timeGreeting = "Good evening! ";
-    else timeGreeting = "Burning the midnight oil? ";
+    if (hour < 12) {
+timeGreeting = "Good morning! ";
+} else if (hour < 17) {
+timeGreeting = "Good afternoon! ";
+} else if (hour < 21) {
+timeGreeting = "Good evening! ";
+} else {
+timeGreeting = "Burning the midnight oil? ";
+}
 
     return {
       text: timeGreeting + greetings[Math.floor(Math.random() * greetings.length)],

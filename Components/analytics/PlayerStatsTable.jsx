@@ -16,7 +16,9 @@ export default function PlayerStatsTable({ players, sortBy, onSort }) {
       setLocalSortBy(column);
       setSortDirection('desc');
     }
-    if (onSort) onSort(column);
+    if (onSort) {
+onSort(column);
+}
   };
 
   const sortedPlayers = [...(players || [])].sort((a, b) => {

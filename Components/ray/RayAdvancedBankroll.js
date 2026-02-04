@@ -77,12 +77,24 @@ export class BankrollManager {
   }
 
   static ratePerformance(roi, winRate, profitFactor) {
-    if (roi > 15 && winRate > 55 && profitFactor > 1.5) return 'Elite 🌟';
-    if (roi > 10 && winRate > 52 && profitFactor > 1.3) return 'Excellent ⭐';
-    if (roi > 5 && winRate > 50 && profitFactor > 1.1) return 'Good ✅';
-    if (roi > 0 && winRate > 48) return 'Profitable 💰';
-    if (roi > -5) return 'Break-even ➡️';
-    if (roi > -10) return 'Struggling 📉';
+    if (roi > 15 && winRate > 55 && profitFactor > 1.5) {
+return 'Elite 🌟';
+}
+    if (roi > 10 && winRate > 52 && profitFactor > 1.3) {
+return 'Excellent ⭐';
+}
+    if (roi > 5 && winRate > 50 && profitFactor > 1.1) {
+return 'Good ✅';
+}
+    if (roi > 0 && winRate > 48) {
+return 'Profitable 💰';
+}
+    if (roi > -5) {
+return 'Break-even ➡️';
+}
+    if (roi > -10) {
+return 'Struggling 📉';
+}
     return 'Poor 🚨';
   }
 
@@ -150,7 +162,9 @@ export class BankrollManager {
   }
 
   static calculateVolatility(returns) {
-    if (returns.length === 0) return 0;
+    if (returns.length === 0) {
+return 0;
+}
     
     const mean = returns.reduce((sum, r) => sum + r, 0) / returns.length;
     const variance = returns.reduce((sum, r) => sum + Math.pow(r - mean, 2), 0) / returns.length;
@@ -160,7 +174,9 @@ export class BankrollManager {
   }
 
   static calculateSharpeRatio(returns, volatility) {
-    if (returns.length === 0 || volatility === 0) return '0.00';
+    if (returns.length === 0 || volatility === 0) {
+return '0.00';
+}
     
     const avgReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length;
     const riskFreeRate = 0; // Assume 0 for betting
@@ -171,7 +187,9 @@ export class BankrollManager {
   }
 
   static calculateRiskOfRuin(bankroll, history) {
-    if (history.length < 10) return 'Insufficient data';
+    if (history.length < 10) {
+return 'Insufficient data';
+}
     
     const winRate = history.filter(b => b.result === 'win').length / history.length;
     const avgStake = history.reduce((sum, b) => sum + (b.stake || 0), 0) / history.length;
@@ -202,7 +220,9 @@ export class BankrollManager {
   }
 
   static calculateVaR(returns, bankroll) {
-    if (returns.length === 0) return { var_95: '0', var_99: '0' };
+    if (returns.length === 0) {
+return { var_95: '0', var_99: '0' };
+}
     
     const sortedReturns = [...returns].sort((a, b) => a - b);
     
@@ -231,35 +251,60 @@ export class BankrollManager {
     
     // Performance factors
     const roi = parseFloat(performance.roi);
-    if (roi > 15) score += 25;
-    else if (roi > 10) score += 20;
-    else if (roi > 5) score += 15;
-    else if (roi > 0) score += 10;
-    else if (roi > -5) score += 0;
-    else score -= 15;
+    if (roi > 15) {
+score += 25;
+} else if (roi > 10) {
+score += 20;
+} else if (roi > 5) {
+score += 15;
+} else if (roi > 0) {
+score += 10;
+} else if (roi > -5) {
+score += 0;
+} else {
+score -= 15;
+}
     
     const winRate = parseFloat(performance.winRate);
-    if (winRate > 55) score += 15;
-    else if (winRate > 52) score += 10;
-    else if (winRate > 50) score += 5;
-    else if (winRate > 48) score += 0;
-    else score -= 10;
+    if (winRate > 55) {
+score += 15;
+} else if (winRate > 52) {
+score += 10;
+} else if (winRate > 50) {
+score += 5;
+} else if (winRate > 48) {
+score += 0;
+} else {
+score -= 10;
+}
     
     // Risk factors
     const maxDD = parseFloat(riskMetrics.maxDrawdown);
-    if (maxDD > 30) score -= 20;
-    else if (maxDD > 20) score -= 15;
-    else if (maxDD > 10) score -= 5;
+    if (maxDD > 30) {
+score -= 20;
+} else if (maxDD > 20) {
+score -= 15;
+} else if (maxDD > 10) {
+score -= 5;
+}
     
     const currentDD = parseFloat(riskMetrics.currentDrawdown);
-    if (currentDD > 20) score -= 15;
-    else if (currentDD > 10) score -= 8;
-    else if (currentDD > 5) score -= 3;
+    if (currentDD > 20) {
+score -= 15;
+} else if (currentDD > 10) {
+score -= 8;
+} else if (currentDD > 5) {
+score -= 3;
+}
     
     const sharpe = parseFloat(riskMetrics.sharpeRatio);
-    if (sharpe > 2) score += 10;
-    else if (sharpe > 1) score += 5;
-    else if (sharpe < 0) score -= 10;
+    if (sharpe > 2) {
+score += 10;
+} else if (sharpe > 1) {
+score += 5;
+} else if (sharpe < 0) {
+score -= 10;
+}
     
     score = Math.max(0, Math.min(100, score));
     
@@ -272,33 +317,71 @@ export class BankrollManager {
   }
 
   static gradeHealth(score) {
-    if (score >= 90) return 'A+ (Exceptional)';
-    if (score >= 85) return 'A (Excellent)';
-    if (score >= 80) return 'A- (Very Good)';
-    if (score >= 75) return 'B+ (Good)';
-    if (score >= 70) return 'B (Above Average)';
-    if (score >= 65) return 'B- (Satisfactory)';
-    if (score >= 60) return 'C+ (Acceptable)';
-    if (score >= 55) return 'C (Fair)';
-    if (score >= 50) return 'C- (Marginal)';
-    if (score >= 45) return 'D+ (Poor)';
-    if (score >= 40) return 'D (Very Poor)';
+    if (score >= 90) {
+return 'A+ (Exceptional)';
+}
+    if (score >= 85) {
+return 'A (Excellent)';
+}
+    if (score >= 80) {
+return 'A- (Very Good)';
+}
+    if (score >= 75) {
+return 'B+ (Good)';
+}
+    if (score >= 70) {
+return 'B (Above Average)';
+}
+    if (score >= 65) {
+return 'B- (Satisfactory)';
+}
+    if (score >= 60) {
+return 'C+ (Acceptable)';
+}
+    if (score >= 55) {
+return 'C (Fair)';
+}
+    if (score >= 50) {
+return 'C- (Marginal)';
+}
+    if (score >= 45) {
+return 'D+ (Poor)';
+}
+    if (score >= 40) {
+return 'D (Very Poor)';
+}
     return 'F (Critical)';
   }
 
   static describeHealth(score) {
-    if (score >= 80) return '✅ Excellent bankroll health - Continue current strategy';
-    if (score >= 70) return '👍 Good bankroll health - Minor optimizations possible';
-    if (score >= 60) return '⚖️ Fair bankroll health - Some improvements needed';
-    if (score >= 50) return '⚠️ Marginal bankroll health - Significant changes recommended';
-    if (score >= 40) return '🚨 Poor bankroll health - Major changes required';
+    if (score >= 80) {
+return '✅ Excellent bankroll health - Continue current strategy';
+}
+    if (score >= 70) {
+return '👍 Good bankroll health - Minor optimizations possible';
+}
+    if (score >= 60) {
+return '⚖️ Fair bankroll health - Some improvements needed';
+}
+    if (score >= 50) {
+return '⚠️ Marginal bankroll health - Significant changes recommended';
+}
+    if (score >= 40) {
+return '🚨 Poor bankroll health - Major changes required';
+}
     return '🆘 Critical bankroll health - STOP BETTING and reassess';
   }
 
   static getHealthColor(score) {
-    if (score >= 80) return 'green';
-    if (score >= 60) return 'yellow';
-    if (score >= 40) return 'orange';
+    if (score >= 80) {
+return 'green';
+}
+    if (score >= 60) {
+return 'yellow';
+}
+    if (score >= 40) {
+return 'orange';
+}
     return 'red';
   }
 
@@ -687,13 +770,21 @@ export class KellyOptimizer {
     let correlation = 0;
     
     // Same game = high correlation
-    if (bet1.gameId === bet2.gameId) correlation = 0.7;
+    if (bet1.gameId === bet2.gameId) {
+correlation = 0.7;
+}
     // Same team = moderate correlation
-    else if (bet1.team === bet2.team) correlation = 0.4;
+    else if (bet1.team === bet2.team) {
+correlation = 0.4;
+}
     // Same day = low correlation
-    else if (bet1.date === bet2.date) correlation = 0.2;
+    else if (bet1.date === bet2.date) {
+correlation = 0.2;
+}
     // Different = very low correlation
-    else correlation = 0.1;
+    else {
+correlation = 0.1;
+}
     
     return correlation;
   }

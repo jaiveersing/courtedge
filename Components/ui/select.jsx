@@ -6,13 +6,17 @@ const Select = ({ children, value, onValueChange, defaultValue, ...props }) => {
   
   const handleValueChange = (newValue) => {
     setSelectedValue(newValue);
-    if (onValueChange) onValueChange(newValue);
+    if (onValueChange) {
+onValueChange(newValue);
+}
   };
 
   return (
     <div className="relative inline-block w-full" {...props}>
       {React.Children.map(children, child => {
-        if (!child) return null;
+        if (!child) {
+return null;
+}
         return React.cloneElement(child, { 
           value: selectedValue, 
           onValueChange: handleValueChange 
@@ -50,7 +54,9 @@ const SelectContent = React.forwardRef(({ className = "", children, value, onVal
     >
       <div className="p-1 max-h-60 overflow-y-auto">
         {React.Children.map(children, child => {
-          if (!child) return null;
+          if (!child) {
+return null;
+}
           return React.cloneElement(child, { 
             currentValue: value,
             onValueChange 

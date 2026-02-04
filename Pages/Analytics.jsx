@@ -209,7 +209,9 @@ export default function AnalyticsPage() {
 
   // ==================== ADVANCED ANALYTICS CALCULATIONS ====================
   const analytics = useMemo(() => {
-    if (!bets.length) return null;
+    if (!bets.length) {
+return null;
+}
 
     const wins = bets.filter(b => b.result === 'win').length;
     const losses = bets.filter(b => b.result === 'loss').length;
@@ -226,10 +228,17 @@ export default function AnalyticsPage() {
       let count = 0;
       let type = null;
       for (const bet of bets) {
-        if (bet.result === 'push') continue;
-        if (!type) type = bet.result;
-        if (bet.result === type) count++;
-        else break;
+        if (bet.result === 'push') {
+continue;
+}
+        if (!type) {
+type = bet.result;
+}
+        if (bet.result === type) {
+count++;
+} else {
+break;
+}
       }
       return { count, type };
     };
@@ -243,7 +252,9 @@ export default function AnalyticsPage() {
       profitByType[bet.betType].profit += bet.profit || 0;
       profitByType[bet.betType].count++;
       profitByType[bet.betType].stake += bet.stake;
-      if (bet.result === 'win') profitByType[bet.betType].wins++;
+      if (bet.result === 'win') {
+profitByType[bet.betType].wins++;
+}
     });
 
     // Profit by player
@@ -254,7 +265,9 @@ export default function AnalyticsPage() {
       }
       profitByPlayer[bet.player].profit += bet.profit || 0;
       profitByPlayer[bet.player].count++;
-      if (bet.result === 'win') profitByPlayer[bet.player].wins++;
+      if (bet.result === 'win') {
+profitByPlayer[bet.player].wins++;
+}
     });
 
     // Profit by bookmaker
@@ -266,7 +279,9 @@ export default function AnalyticsPage() {
       profitByBookmaker[bet.bookmaker].profit += bet.profit || 0;
       profitByBookmaker[bet.bookmaker].count++;
       profitByBookmaker[bet.bookmaker].stake += bet.stake;
-      if (bet.result === 'win') profitByBookmaker[bet.bookmaker].wins++;
+      if (bet.result === 'win') {
+profitByBookmaker[bet.bookmaker].wins++;
+}
     });
 
     // Daily performance for chart
@@ -282,7 +297,9 @@ export default function AnalyticsPage() {
       dailyPerformance[day].profit += bet.profit || 0;
       dailyPerformance[day].cumulative = cumProfit;
       dailyPerformance[day].bets++;
-      if (bet.result === 'win') dailyPerformance[day].wins++;
+      if (bet.result === 'win') {
+dailyPerformance[day].wins++;
+}
     });
 
     // Weekly performance
@@ -297,7 +314,9 @@ export default function AnalyticsPage() {
       }
       weekMap[weekKey].profit += bet.profit || 0;
       weekMap[weekKey].bets++;
-      if (bet.result === 'win') weekMap[weekKey].wins++;
+      if (bet.result === 'win') {
+weekMap[weekKey].wins++;
+}
     });
     Object.values(weekMap).forEach(w => weeklyData.push(w));
 
@@ -340,7 +359,9 @@ export default function AnalyticsPage() {
       }
       modelPerformance[bet.model].profit += bet.profit || 0;
       modelPerformance[bet.model].count++;
-      if (bet.result === 'win') modelPerformance[bet.model].wins++;
+      if (bet.result === 'win') {
+modelPerformance[bet.model].wins++;
+}
     });
 
     return {

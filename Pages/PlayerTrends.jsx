@@ -195,7 +195,9 @@ const AnimatedNumber = ({ value, duration = 1000, suffix = '', prefix = '', deci
 
   useEffect(() => {
     const animate = (timestamp) => {
-      if (!startTimeRef.current) startTimeRef.current = timestamp;
+      if (!startTimeRef.current) {
+startTimeRef.current = timestamp;
+}
       const progress = Math.min((timestamp - startTimeRef.current) / duration, 1);
       const easeOutQuart = 1 - Math.pow(1 - progress, 4);
       setDisplayValue(easeOutQuart * value);
@@ -205,7 +207,9 @@ const AnimatedNumber = ({ value, duration = 1000, suffix = '', prefix = '', deci
     };
     rafRef.current = requestAnimationFrame(animate);
     return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (rafRef.current) {
+cancelAnimationFrame(rafRef.current);
+}
     };
   }, [value, duration]);
 
@@ -241,7 +245,9 @@ const PulsingDot = ({ color = 'bg-green-500', size = 'w-2 h-2' }) => (
 
 // 🔥 Streak Flame Component
 const StreakFlame = ({ streak }) => {
-  if (streak < 3) return null;
+  if (streak < 3) {
+return null;
+}
   const intensity = Math.min(streak, 10);
   return (
     <div className="relative flex items-center gap-1">
@@ -581,7 +587,9 @@ const TrendCard = ({ trend, ds, expanded, onToggle, onBookmark, isBookmarked }) 
             {/* Quick Actions */}
             <div className="flex flex-col gap-2">
               <button
-                onClick={(e) => { e.stopPropagation(); onBookmark(); }}
+                onClick={(e) => {
+ e.stopPropagation(); onBookmark(); 
+}}
                 className={`p-2 rounded-lg transition-all ${ds.bg.tertiary} ${isBookmarked ? 'text-amber-400' : ds.text.muted} hover:scale-110`}
               >
                 <Bookmark size={16} fill={isBookmarked ? 'currentColor' : 'none'} />
@@ -703,7 +711,9 @@ const TrendCard = ({ trend, ds, expanded, onToggle, onBookmark, isBookmarked }) 
 
 // Generate trends from LIVE player data
 const generateTrendsFromLiveData = (players) => {
-  if (!players || players.length === 0) return [];
+  if (!players || players.length === 0) {
+return [];
+}
   
   const statTypes = [
     { label: "1Q Points", value: "1q_points" },
@@ -908,7 +918,9 @@ export default function PlayerTrends() {
 
   // Live update simulation
   useEffect(() => {
-    if (!isLive) return;
+    if (!isLive) {
+return;
+}
     const interval = setInterval(() => {
       setLastUpdate(new Date());
     }, 30000);
@@ -1152,10 +1164,14 @@ export default function PlayerTrends() {
               {/* Quick Filter Chips */}
               <div className="flex gap-2 mt-4 flex-wrap">
                 {[
-                  { label: '🔥 Hot Streaks', filter: () => { setFilterHitRate(80); setSortBy('streak'); } },
+                  { label: '🔥 Hot Streaks', filter: () => {
+ setFilterHitRate(80); setSortBy('streak'); 
+} },
                   { label: '👑 Elite Only', filter: () => setFilterHitRate(85) },
                   { label: '🎯 Points Props', filter: () => setFilterStatType('points') },
-                  { label: '📊 Reset All', filter: () => { setFilterHitRate(0); setFilterStatType('all'); setSortBy('hitRate'); } },
+                  { label: '📊 Reset All', filter: () => {
+ setFilterHitRate(0); setFilterStatType('all'); setSortBy('hitRate'); 
+} },
                 ].map((chip, idx) => (
                   <button
                     key={idx}
@@ -1178,7 +1194,9 @@ export default function PlayerTrends() {
               <h3 className={`text-2xl font-bold ${ds.text.primary} mb-2`}>No Trends Found</h3>
               <p className={ds.text.muted}>Try adjusting your filters or search query</p>
               <Button
-                onClick={() => { setSearchQuery(''); setFilterHitRate(0); setFilterStatType('all'); }}
+                onClick={() => {
+ setSearchQuery(''); setFilterHitRate(0); setFilterStatType('all'); 
+}}
                 className={`mt-4 ${ds.gradient.primary} text-white`}
               >
                 Reset Filters

@@ -229,7 +229,9 @@ class WeatherService {
     } else if (weather.windSpeed > 10) {
       impacts.overall = 'medium';
       impacts.factors.push(`Moderate winds (${Math.round(weather.windSpeed)} mph) may affect passing accuracy`);
-      if (sport === 'football') impacts.passing = 'slight_negative';
+      if (sport === 'football') {
+impacts.passing = 'slight_negative';
+}
     }
 
     // Precipitation impact
@@ -339,7 +341,9 @@ class WeatherService {
     const alerts = [];
 
     for (const game of games) {
-      if (!game.stadium || !game.gameTime) continue;
+      if (!game.stadium || !game.gameTime) {
+continue;
+}
 
       const weather = await this.getGameWeather(
         game.id,
@@ -370,7 +374,9 @@ class WeatherService {
    */
   async getHistoricalWeather(stadium, startDate, endDate) {
     const location = this.stadiumLocations[stadium];
-    if (!location) return null;
+    if (!location) {
+return null;
+}
 
     const { apiKey, baseUrl } = this.providers.visualcrossing;
     

@@ -21,7 +21,9 @@ if (!JWT_SECRET && process.env.NODE_ENV === 'production') {
 
 // Development fallback with warning
 const getJwtSecret = () => {
-  if (JWT_SECRET) return JWT_SECRET;
+  if (JWT_SECRET) {
+return JWT_SECRET;
+}
   console.warn('⚠️  WARNING: Using development JWT secret. Set JWT_SECRET in production!');
   return 'dev-only-secret-change-in-production-' + Date.now();
 };
@@ -276,9 +278,15 @@ router.patch('/me', authenticateToken, [
   }
 
   // Update fields
-  if (firstName !== undefined) user.firstName = firstName;
-  if (lastName !== undefined) user.lastName = lastName;
-  if (settings) user.settings = { ...user.settings, ...settings };
+  if (firstName !== undefined) {
+user.firstName = firstName;
+}
+  if (lastName !== undefined) {
+user.lastName = lastName;
+}
+  if (settings) {
+user.settings = { ...user.settings, ...settings };
+}
 
   user.updatedAt = new Date().toISOString();
 

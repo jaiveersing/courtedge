@@ -79,10 +79,18 @@ export class HeadToHeadAnalyzer {
     const three_rate = player.three_point_rate || 0.35;
     const assist_rate = player.assist_rate || 20;
     
-    if (usage > 30 && three_rate < 0.25) return 'Aggressive Scorer (Paint/Mid)';
-    if (usage > 30 && three_rate > 0.4) return 'Volume Three-Point Shooter';
-    if (assist_rate > 30) return 'Facilitator/Playmaker';
-    if (three_rate > 0.5) return 'Spot-Up Shooter';
+    if (usage > 30 && three_rate < 0.25) {
+return 'Aggressive Scorer (Paint/Mid)';
+}
+    if (usage > 30 && three_rate > 0.4) {
+return 'Volume Three-Point Shooter';
+}
+    if (assist_rate > 30) {
+return 'Facilitator/Playmaker';
+}
+    if (three_rate > 0.5) {
+return 'Spot-Up Shooter';
+}
     return 'Balanced Scorer';
   }
 
@@ -91,10 +99,18 @@ export class HeadToHeadAnalyzer {
     const blk = player.stats?.blk || 0.5;
     const def_rating = player.def_rating || 110;
     
-    if (blk > 2) return 'Rim Protector';
-    if (stl > 1.5) return 'Ball Hawk/Disruptor';
-    if (def_rating < 105) return 'Elite Defender';
-    if (def_rating < 110) return 'Solid Defender';
+    if (blk > 2) {
+return 'Rim Protector';
+}
+    if (stl > 1.5) {
+return 'Ball Hawk/Disruptor';
+}
+    if (def_rating < 105) {
+return 'Elite Defender';
+}
+    if (def_rating < 110) {
+return 'Solid Defender';
+}
     return 'Average Defender';
   }
 
@@ -120,8 +136,12 @@ export class HeadToHeadAnalyzer {
     
     const diff = Math.abs(paceA - paceB);
     
-    if (diff < 5) return 'Similar pace preferences - expect normal flow';
-    if (diff < 10) return 'Slight pace difference - minor adjustments';
+    if (diff < 5) {
+return 'Similar pace preferences - expect normal flow';
+}
+    if (diff < 10) {
+return 'Slight pace difference - minor adjustments';
+}
     return 'Significant pace difference - expect adjustment period';
   }
 
@@ -180,17 +200,29 @@ export class HeadToHeadAnalyzer {
 
   static describeMagnitude(diff, stat) {
     if (stat === 'scoring') {
-      if (diff > 10) return 'Major';
-      if (diff > 5) return 'Moderate';
+      if (diff > 10) {
+return 'Major';
+}
+      if (diff > 5) {
+return 'Moderate';
+}
       return 'Slight';
     }
     if (stat === 'efficiency') {
-      if (diff > 0.08) return 'Major';
-      if (diff > 0.04) return 'Moderate';
+      if (diff > 0.08) {
+return 'Major';
+}
+      if (diff > 0.04) {
+return 'Moderate';
+}
       return 'Slight';
     }
-    if (diff > 10) return 'Major';
-    if (diff > 5) return 'Moderate';
+    if (diff > 10) {
+return 'Major';
+}
+    if (diff > 5) {
+return 'Moderate';
+}
     return 'Slight';
   }
 
@@ -212,15 +244,21 @@ export class HeadToHeadAnalyzer {
   }
 
   static calculateTrendDirection(values) {
-    if (values.length < 2) return 'Unknown';
+    if (values.length < 2) {
+return 'Unknown';
+}
     
     const first_half_avg = values.slice(0, Math.floor(values.length / 2)).reduce((sum, v) => sum + v, 0) / Math.floor(values.length / 2);
     const second_half_avg = values.slice(Math.floor(values.length / 2)).reduce((sum, v) => sum + v, 0) / Math.ceil(values.length / 2);
     
     const change = ((second_half_avg - first_half_avg) / first_half_avg) * 100;
     
-    if (change > 10) return 'Improving 📈';
-    if (change < -10) return 'Declining 📉';
+    if (change > 10) {
+return 'Improving 📈';
+}
+    if (change < -10) {
+return 'Declining 📉';
+}
     return 'Stable ➡️';
   }
 
@@ -233,13 +271,20 @@ export class HeadToHeadAnalyzer {
       const statsB = game.stats[playerB_id];
       
       if (statsA && statsB) {
-        if (statsA.points > statsB.points) playerA_better++;
-        else if (statsB.points > statsA.points) playerB_better++;
+        if (statsA.points > statsB.points) {
+playerA_better++;
+} else if (statsB.points > statsA.points) {
+playerB_better++;
+}
       }
     });
     
-    if (playerA_better > playerB_better) return 'Player A dominant';
-    if (playerB_better > playerA_better) return 'Player B dominant';
+    if (playerA_better > playerB_better) {
+return 'Player A dominant';
+}
+    if (playerB_better > playerA_better) {
+return 'Player B dominant';
+}
     return 'Evenly matched';
   }
 
@@ -282,9 +327,15 @@ export class HeadToHeadAnalyzer {
   }
 
   static calculateConfidence(sampleSize) {
-    if (sampleSize >= 10) return 'High';
-    if (sampleSize >= 5) return 'Moderate';
-    if (sampleSize >= 2) return 'Low';
+    if (sampleSize >= 10) {
+return 'High';
+}
+    if (sampleSize >= 5) {
+return 'Moderate';
+}
+    if (sampleSize >= 2) {
+return 'Low';
+}
     return 'Very Low (No H2H data)';
   }
 
@@ -376,11 +427,21 @@ export class PaceStyleAnalyzer {
   }
 
   static classifyTempo(pace) {
-    if (pace > 105) return 'Breakneck';
-    if (pace > 102) return 'Fast';
-    if (pace > 98) return 'Above Average';
-    if (pace > 96) return 'Below Average';
-    if (pace > 93) return 'Slow';
+    if (pace > 105) {
+return 'Breakneck';
+}
+    if (pace > 102) {
+return 'Fast';
+}
+    if (pace > 98) {
+return 'Above Average';
+}
+    if (pace > 96) {
+return 'Below Average';
+}
+    if (pace > 93) {
+return 'Slow';
+}
     return 'Grinding';
   }
 
@@ -475,10 +536,18 @@ export class PaceStyleAnalyzer {
     const typicalLine = 220;
     const diff = projectedTotal - typicalLine;
     
-    if (diff > 10) return `Strong OVER lean (projected ${projectedTotal.toFixed(0)} vs typical ${typicalLine})`;
-    if (diff > 5) return `Lean OVER (projected ${projectedTotal.toFixed(0)})`;
-    if (diff < -10) return `Strong UNDER lean (projected ${projectedTotal.toFixed(0)} vs typical ${typicalLine})`;
-    if (diff < -5) return `Lean UNDER (projected ${projectedTotal.toFixed(0)})`;
+    if (diff > 10) {
+return `Strong OVER lean (projected ${projectedTotal.toFixed(0)} vs typical ${typicalLine})`;
+}
+    if (diff > 5) {
+return `Lean OVER (projected ${projectedTotal.toFixed(0)})`;
+}
+    if (diff < -10) {
+return `Strong UNDER lean (projected ${projectedTotal.toFixed(0)} vs typical ${typicalLine})`;
+}
+    if (diff < -5) {
+return `Lean UNDER (projected ${projectedTotal.toFixed(0)})`;
+}
     return `No strong lean - projected near typical total`;
   }
 
@@ -507,12 +576,20 @@ export class PaceStyleAnalyzer {
     const pace = team.pace || 100;
     const astRate = team.assist_rate || 0.60;
     
-    let style = [];
+    const style = [];
     
-    if (threePtRate > 0.42) style.push('Three-Point Heavy');
-    if (pace > 102) style.push('Fast-Paced');
-    if (astRate > 0.65) style.push('Ball Movement');
-    if (team.paint_points_pct > 0.50) style.push('Paint-Dominant');
+    if (threePtRate > 0.42) {
+style.push('Three-Point Heavy');
+}
+    if (pace > 102) {
+style.push('Fast-Paced');
+}
+    if (astRate > 0.65) {
+style.push('Ball Movement');
+}
+    if (team.paint_points_pct > 0.50) {
+style.push('Paint-Dominant');
+}
     
     return style.length > 0 ? style.join(', ') : 'Balanced';
   }
@@ -522,12 +599,20 @@ export class PaceStyleAnalyzer {
     const stlRate = team.steals_per_game || 7;
     const blkRate = team.blocks_per_game || 4;
     
-    let style = [];
+    const style = [];
     
-    if (defRating < 108) style.push('Elite Defense');
-    if (stlRate > 8) style.push('Pressure Defense');
-    if (blkRate > 5) style.push('Rim Protection');
-    if (team.opponent_three_pct < 0.35) style.push('Perimeter Lockdown');
+    if (defRating < 108) {
+style.push('Elite Defense');
+}
+    if (stlRate > 8) {
+style.push('Pressure Defense');
+}
+    if (blkRate > 5) {
+style.push('Rim Protection');
+}
+    if (team.opponent_three_pct < 0.35) {
+style.push('Perimeter Lockdown');
+}
     
     return style.length > 0 ? style.join(', ') : 'Average Defense';
   }
@@ -618,10 +703,18 @@ export class InjuryImpactAnalyzer {
   }
 
   static classifyImpactSeverity(score) {
-    if (score > 15) return '🚨 Critical';
-    if (score > 10) return '⚠️ Major';
-    if (score > 5) return '⚡ Moderate';
-    if (score > 2) return '📊 Minor';
+    if (score > 15) {
+return '🚨 Critical';
+}
+    if (score > 10) {
+return '⚠️ Major';
+}
+    if (score > 5) {
+return '⚡ Moderate';
+}
+    if (score > 2) {
+return '📊 Minor';
+}
     return '✅ Minimal';
   }
 
@@ -655,10 +748,18 @@ export class InjuryImpactAnalyzer {
     const ppg = player.stats?.pts || 0;
     const usage = player.usage_rate || 0;
     
-    if (ppg > 25 && usage > 0.30) return '⭐ Superstar';
-    if (ppg > 20 || usage > 0.28) return '🌟 Star';
-    if (ppg > 15) return '🔑 Key Rotation';
-    if (ppg > 10) return '📋 Rotation Player';
+    if (ppg > 25 && usage > 0.30) {
+return '⭐ Superstar';
+}
+    if (ppg > 20 || usage > 0.28) {
+return '🌟 Star';
+}
+    if (ppg > 15) {
+return '🔑 Key Rotation';
+}
+    if (ppg > 10) {
+return '📋 Rotation Player';
+}
     return '🪑 Bench';
   }
 

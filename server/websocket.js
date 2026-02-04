@@ -73,11 +73,15 @@ class MLWebSocketServer {
   }
 
   async broadcastLivePredictions() {
-    if (this.clients.size === 0) return;
+    if (this.clients.size === 0) {
+return;
+}
 
     try {
       const response = await fetch(`${this.mlServiceUrl}/detect/sharp_money?sport=nba`);
-      if (!response.ok) return;
+      if (!response.ok) {
+return;
+}
 
       const data = await response.json();
 
@@ -94,11 +98,15 @@ class MLWebSocketServer {
   }
 
   async broadcastSharpMoney() {
-    if (this.clients.size === 0) return;
+    if (this.clients.size === 0) {
+return;
+}
 
     try {
       const response = await fetch(`${this.mlServiceUrl}/detect/sharp_money?sport=nba`);
-      if (!response.ok) return;
+      if (!response.ok) {
+return;
+}
 
       const data = await response.json();
 

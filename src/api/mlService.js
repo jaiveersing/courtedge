@@ -248,7 +248,9 @@ class CacheManager {
   }
 
   get(key) {
-    if (!this.cache.has(key)) return null;
+    if (!this.cache.has(key)) {
+return null;
+}
     if (Date.now() > this.ttl.get(key)) {
       this.cache.delete(key);
       this.ttl.delete(key);
@@ -331,7 +333,9 @@ class RequestQueue {
   }
 
   async process() {
-    if (this.running >= this.maxConcurrent || this.queue.length === 0) return;
+    if (this.running >= this.maxConcurrent || this.queue.length === 0) {
+return;
+}
 
     this.running++;
     const { fn, resolve, reject } = this.queue.shift();
@@ -382,7 +386,9 @@ class MLServiceClient {
     // Check cache first
     if (cacheKey && options.method !== 'POST') {
       const cached = this.cache.get(cacheKey);
-      if (cached) return cached;
+      if (cached) {
+return cached;
+}
     }
 
     const startTime = Date.now();
@@ -1737,8 +1743,12 @@ class MLServiceClient {
 
   async getPlayerTrends({ playerId, playerName, days = 30 }) {
     const params = new URLSearchParams({ days: days.toString() });
-    if (playerId) params.append('player_id', playerId);
-    if (playerName) params.append('player_name', playerName);
+    if (playerId) {
+params.append('player_id', playerId);
+}
+    if (playerName) {
+params.append('player_name', playerName);
+}
     return this.request(`/trends/player?${params}`);
   }
 

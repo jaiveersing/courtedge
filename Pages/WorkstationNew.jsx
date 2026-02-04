@@ -17,150 +17,10 @@ import {
   PolarAngleAxis, PolarRadiusAxis, Radar, ComposedChart, Bar, Area
 } from 'recharts';
 import { useTheme } from '../src/contexts/ThemeContext';
+import { WORKSTATION_PLAYERS } from '../src/api/mockData';
 
-// Player Database
-const PLAYERS_DATABASE = [
-  { 
-    id: 1, name: 'LeBron James', team: 'LAL', teamFull: 'Los Angeles Lakers',
-    position: 'SF', number: 23, opponent: 'vs GSW', gameTime: '7:30 PM',
-    isHome: true, status: 'Active', image: 'LJ',
-    seasonStats: { ppg: 27.3, rpg: 7.8, apg: 8.9, spg: 1.2, bpg: 0.8, fgPct: 52.1, threePct: 38.5, ftPct: 73.2, mpg: 35.2, gamesPlayed: 45 },
-    props: [
-      { type: 'Points', line: 25.5, hitRate: 87, avg: 27.3, overOdds: -115, underOdds: -105, trend: 'hot' },
-      { type: 'Rebounds', line: 7.5, hitRate: 68, avg: 7.8, overOdds: -110, underOdds: -110, trend: 'neutral' },
-      { type: 'Assists', line: 8.5, hitRate: 72, avg: 8.9, overOdds: -120, underOdds: +100, trend: 'hot' },
-      { type: 'PRA', line: 43.5, hitRate: 85, avg: 44.0, overOdds: -125, underOdds: +105, trend: 'hot' },
-      { type: '3PT Made', line: 2.5, hitRate: 58, avg: 2.4, overOdds: +115, underOdds: -135, trend: 'cold' },
-    ],
-    last10Games: [
-      { date: 'Jan 20', opp: 'GSW', pts: 28, reb: 8, ast: 11, pra: 47, result: 'W', mins: 36 },
-      { date: 'Jan 18', opp: 'SAC', pts: 31, reb: 7, ast: 9, pra: 47, result: 'W', mins: 38 },
-      { date: 'Jan 16', opp: 'PHX', pts: 22, reb: 5, ast: 12, pra: 39, result: 'L', mins: 34 },
-      { date: 'Jan 14', opp: 'LAC', pts: 29, reb: 9, ast: 8, pra: 46, result: 'W', mins: 37 },
-      { date: 'Jan 12', opp: 'MEM', pts: 26, reb: 6, ast: 10, pra: 42, result: 'W', mins: 35 },
-      { date: 'Jan 10', opp: 'DEN', pts: 24, reb: 7, ast: 11, pra: 42, result: 'L', mins: 36 },
-      { date: 'Jan 08', opp: 'DAL', pts: 29, reb: 8, ast: 9, pra: 46, result: 'W', mins: 38 },
-      { date: 'Jan 06', opp: 'POR', pts: 31, reb: 9, ast: 7, pra: 47, result: 'W', mins: 37 },
-      { date: 'Jan 04', opp: 'UTA', pts: 27, reb: 6, ast: 10, pra: 43, result: 'W', mins: 35 },
-      { date: 'Jan 02', opp: 'MIN', pts: 24, reb: 7, ast: 8, pra: 39, result: 'L', mins: 34 },
-    ],
-    vsOpponent: { games: 12, avgPts: 29.2, overRate: 83, record: '8-4' },
-    mlPrediction: { value: 28.3, confidence: 92, edge: 2.8, recommendation: 'OVER' },
-    market: { publicOver: 68, sharpOver: 82, lineMovement: -0.5 }
-  },
-  { 
-    id: 2, name: 'Stephen Curry', team: 'GSW', teamFull: 'Golden State Warriors',
-    position: 'PG', number: 30, opponent: '@ LAL', gameTime: '7:30 PM',
-    isHome: false, status: 'Active', image: 'SC',
-    seasonStats: { ppg: 29.1, rpg: 4.5, apg: 6.2, spg: 0.9, bpg: 0.3, fgPct: 47.8, threePct: 42.1, ftPct: 91.2, mpg: 34.8, gamesPlayed: 42 },
-    props: [
-      { type: 'Points', line: 28.5, hitRate: 62, avg: 29.1, overOdds: -105, underOdds: -115, trend: 'neutral' },
-      { type: 'Rebounds', line: 4.5, hitRate: 55, avg: 4.5, overOdds: -110, underOdds: -110, trend: 'neutral' },
-      { type: 'Assists', line: 5.5, hitRate: 68, avg: 6.2, overOdds: -115, underOdds: -105, trend: 'hot' },
-      { type: 'PRA', line: 38.5, hitRate: 72, avg: 39.8, overOdds: -120, underOdds: +100, trend: 'hot' },
-      { type: '3PT Made', line: 5.5, hitRate: 52, avg: 5.2, overOdds: +105, underOdds: -125, trend: 'neutral' },
-    ],
-    last10Games: [
-      { date: 'Jan 20', opp: 'LAL', pts: 32, reb: 5, ast: 7, pra: 44, result: 'L', mins: 36 },
-      { date: 'Jan 18', opp: 'PHX', pts: 28, reb: 4, ast: 8, pra: 40, result: 'W', mins: 35 },
-      { date: 'Jan 16', opp: 'SAC', pts: 35, reb: 3, ast: 5, pra: 43, result: 'W', mins: 37 },
-      { date: 'Jan 14', opp: 'DEN', pts: 25, reb: 6, ast: 6, pra: 37, result: 'L', mins: 34 },
-      { date: 'Jan 12', opp: 'OKC', pts: 30, reb: 4, ast: 7, pra: 41, result: 'W', mins: 36 },
-      { date: 'Jan 10', opp: 'HOU', pts: 27, reb: 5, ast: 5, pra: 37, result: 'W', mins: 35 },
-      { date: 'Jan 08', opp: 'MEM', pts: 33, reb: 4, ast: 8, pra: 45, result: 'W', mins: 38 },
-      { date: 'Jan 06', opp: 'MIN', pts: 26, reb: 3, ast: 6, pra: 35, result: 'L', mins: 33 },
-      { date: 'Jan 04', opp: 'POR', pts: 29, reb: 5, ast: 7, pra: 41, result: 'W', mins: 36 },
-      { date: 'Jan 02', opp: 'SAS', pts: 31, reb: 4, ast: 6, pra: 41, result: 'W', mins: 35 },
-    ],
-    vsOpponent: { games: 15, avgPts: 27.8, overRate: 67, record: '7-8' },
-    mlPrediction: { value: 29.5, confidence: 78, edge: 1.0, recommendation: 'LEAN OVER' },
-    market: { publicOver: 72, sharpOver: 58, lineMovement: +0.5 }
-  },
-  { 
-    id: 3, name: 'Giannis Antetokounmpo', team: 'MIL', teamFull: 'Milwaukee Bucks',
-    position: 'PF', number: 34, opponent: 'vs BOS', gameTime: '8:00 PM',
-    isHome: true, status: 'Active', image: 'GA',
-    seasonStats: { ppg: 31.2, rpg: 11.8, apg: 5.9, spg: 1.1, bpg: 1.4, fgPct: 60.5, threePct: 28.9, ftPct: 64.8, mpg: 35.5, gamesPlayed: 40 },
-    props: [
-      { type: 'Points', line: 30.5, hitRate: 58, avg: 31.2, overOdds: -110, underOdds: -110, trend: 'hot' },
-      { type: 'Rebounds', line: 11.5, hitRate: 62, avg: 11.8, overOdds: -115, underOdds: -105, trend: 'hot' },
-      { type: 'Assists', line: 5.5, hitRate: 55, avg: 5.9, overOdds: -105, underOdds: -115, trend: 'neutral' },
-      { type: 'PRA', line: 48.5, hitRate: 70, avg: 48.9, overOdds: -115, underOdds: -105, trend: 'hot' },
-      { type: 'Blocks', line: 1.5, hitRate: 48, avg: 1.4, overOdds: +115, underOdds: -135, trend: 'cold' },
-    ],
-    last10Games: [
-      { date: 'Jan 21', opp: 'BOS', pts: 35, reb: 14, ast: 6, pra: 55, result: 'W', mins: 38 },
-      { date: 'Jan 19', opp: 'PHI', pts: 28, reb: 12, ast: 7, pra: 47, result: 'W', mins: 36 },
-      { date: 'Jan 17', opp: 'MIA', pts: 32, reb: 10, ast: 5, pra: 47, result: 'L', mins: 35 },
-      { date: 'Jan 15', opp: 'CLE', pts: 30, reb: 13, ast: 6, pra: 49, result: 'W', mins: 37 },
-      { date: 'Jan 13', opp: 'NYK', pts: 29, reb: 11, ast: 8, pra: 48, result: 'W', mins: 36 },
-      { date: 'Jan 11', opp: 'IND', pts: 33, reb: 12, ast: 4, pra: 49, result: 'W', mins: 35 },
-      { date: 'Jan 09', opp: 'CHI', pts: 27, reb: 9, ast: 7, pra: 43, result: 'L', mins: 34 },
-      { date: 'Jan 07', opp: 'DET', pts: 36, reb: 14, ast: 5, pra: 55, result: 'W', mins: 37 },
-      { date: 'Jan 05', opp: 'ATL', pts: 31, reb: 11, ast: 6, pra: 48, result: 'W', mins: 36 },
-      { date: 'Jan 03', opp: 'ORL', pts: 28, reb: 10, ast: 5, pra: 43, result: 'W', mins: 34 },
-    ],
-    vsOpponent: { games: 18, avgPts: 32.5, overRate: 72, record: '10-8' },
-    mlPrediction: { value: 32.1, confidence: 85, edge: 1.6, recommendation: 'OVER' },
-    market: { publicOver: 55, sharpOver: 75, lineMovement: -1.0 }
-  },
-  { 
-    id: 4, name: 'Luka Doncic', team: 'DAL', teamFull: 'Dallas Mavericks',
-    position: 'PG', number: 77, opponent: '@ PHX', gameTime: '9:00 PM',
-    isHome: false, status: 'Active', image: 'LD',
-    seasonStats: { ppg: 33.8, rpg: 9.2, apg: 9.8, spg: 1.4, bpg: 0.5, fgPct: 49.2, threePct: 38.2, ftPct: 78.5, mpg: 37.2, gamesPlayed: 38 },
-    props: [
-      { type: 'Points', line: 33.5, hitRate: 55, avg: 33.8, overOdds: -105, underOdds: -115, trend: 'neutral' },
-      { type: 'Rebounds', line: 9.5, hitRate: 48, avg: 9.2, overOdds: +105, underOdds: -125, trend: 'cold' },
-      { type: 'Assists', line: 9.5, hitRate: 52, avg: 9.8, overOdds: -110, underOdds: -110, trend: 'neutral' },
-      { type: 'PRA', line: 52.5, hitRate: 62, avg: 52.8, overOdds: -115, underOdds: -105, trend: 'hot' },
-      { type: '3PT Made', line: 3.5, hitRate: 58, avg: 3.6, overOdds: -110, underOdds: -110, trend: 'neutral' },
-    ],
-    last10Games: [
-      { date: 'Jan 20', opp: 'PHX', pts: 38, reb: 10, ast: 12, pra: 60, result: 'W', mins: 39 },
-      { date: 'Jan 18', opp: 'LAC', pts: 32, reb: 8, ast: 9, pra: 49, result: 'L', mins: 37 },
-      { date: 'Jan 16', opp: 'UTA', pts: 35, reb: 11, ast: 8, pra: 54, result: 'W', mins: 38 },
-      { date: 'Jan 14', opp: 'SAS', pts: 29, reb: 7, ast: 11, pra: 47, result: 'W', mins: 36 },
-      { date: 'Jan 12', opp: 'HOU', pts: 36, reb: 9, ast: 10, pra: 55, result: 'W', mins: 38 },
-      { date: 'Jan 10', opp: 'OKC', pts: 31, reb: 10, ast: 8, pra: 49, result: 'L', mins: 37 },
-      { date: 'Jan 08', opp: 'NOP', pts: 34, reb: 8, ast: 12, pra: 54, result: 'W', mins: 38 },
-      { date: 'Jan 06', opp: 'DEN', pts: 28, reb: 9, ast: 9, pra: 46, result: 'L', mins: 36 },
-      { date: 'Jan 04', opp: 'MIN', pts: 37, reb: 11, ast: 10, pra: 58, result: 'W', mins: 39 },
-      { date: 'Jan 02', opp: 'GSW', pts: 33, reb: 8, ast: 11, pra: 52, result: 'W', mins: 37 },
-    ],
-    vsOpponent: { games: 14, avgPts: 35.2, overRate: 64, record: '8-6' },
-    mlPrediction: { value: 34.5, confidence: 72, edge: 1.0, recommendation: 'LEAN OVER' },
-    market: { publicOver: 62, sharpOver: 68, lineMovement: 0 }
-  },
-  { 
-    id: 5, name: 'Jayson Tatum', team: 'BOS', teamFull: 'Boston Celtics',
-    position: 'SF', number: 0, opponent: '@ MIL', gameTime: '8:00 PM',
-    isHome: false, status: 'Active', image: 'JT',
-    seasonStats: { ppg: 27.8, rpg: 8.5, apg: 4.8, spg: 1.0, bpg: 0.7, fgPct: 47.5, threePct: 37.8, ftPct: 85.2, mpg: 36.5, gamesPlayed: 44 },
-    props: [
-      { type: 'Points', line: 27.5, hitRate: 55, avg: 27.8, overOdds: -110, underOdds: -110, trend: 'neutral' },
-      { type: 'Rebounds', line: 8.5, hitRate: 52, avg: 8.5, overOdds: -105, underOdds: -115, trend: 'neutral' },
-      { type: 'Assists', line: 4.5, hitRate: 58, avg: 4.8, overOdds: -115, underOdds: -105, trend: 'neutral' },
-      { type: 'PRA', line: 40.5, hitRate: 68, avg: 41.1, overOdds: -120, underOdds: +100, trend: 'hot' },
-      { type: '3PT Made', line: 3.5, hitRate: 48, avg: 3.2, overOdds: +110, underOdds: -130, trend: 'cold' },
-    ],
-    last10Games: [
-      { date: 'Jan 21', opp: 'MIL', pts: 25, reb: 9, ast: 5, pra: 39, result: 'L', mins: 37 },
-      { date: 'Jan 19', opp: 'CLE', pts: 30, reb: 7, ast: 4, pra: 41, result: 'W', mins: 36 },
-      { date: 'Jan 17', opp: 'NYK', pts: 28, reb: 10, ast: 6, pra: 44, result: 'W', mins: 38 },
-      { date: 'Jan 15', opp: 'PHI', pts: 26, reb: 8, ast: 5, pra: 39, result: 'W', mins: 35 },
-      { date: 'Jan 13', opp: 'MIA', pts: 32, reb: 9, ast: 4, pra: 45, result: 'W', mins: 37 },
-      { date: 'Jan 11', opp: 'BKN', pts: 24, reb: 7, ast: 6, pra: 37, result: 'W', mins: 34 },
-      { date: 'Jan 09', opp: 'TOR', pts: 29, reb: 8, ast: 3, pra: 40, result: 'W', mins: 36 },
-      { date: 'Jan 07', opp: 'CHI', pts: 27, reb: 9, ast: 5, pra: 41, result: 'L', mins: 35 },
-      { date: 'Jan 05', opp: 'WAS', pts: 31, reb: 10, ast: 6, pra: 47, result: 'W', mins: 38 },
-      { date: 'Jan 03', opp: 'ORL', pts: 26, reb: 8, ast: 4, pra: 38, result: 'W', mins: 35 },
-    ],
-    vsOpponent: { games: 16, avgPts: 26.5, overRate: 56, record: '9-7' },
-    mlPrediction: { value: 27.2, confidence: 68, edge: -0.3, recommendation: 'PASS' },
-    market: { publicOver: 58, sharpOver: 45, lineMovement: +1.0 }
-  }
-];
+// Player Database - Import 100 real NBA players
+const PLAYERS_DATABASE = WORKSTATION_PLAYERS;
 
 const getTrendIcon = (trend) => {
   switch(trend) {
@@ -171,9 +31,15 @@ const getTrendIcon = (trend) => {
 };
 
 const getHitRateColor = (rate) => {
-  if (rate >= 75) return 'text-green-600 dark:text-green-400';
-  if (rate >= 60) return 'text-yellow-600 dark:text-yellow-400';
-  if (rate >= 50) return 'text-orange-600 dark:text-orange-400';
+  if (rate >= 75) {
+return 'text-green-600 dark:text-green-400';
+}
+  if (rate >= 60) {
+return 'text-yellow-600 dark:text-yellow-400';
+}
+  if (rate >= 50) {
+return 'text-orange-600 dark:text-orange-400';
+}
   return 'text-red-600 dark:text-red-400';
 };
 
@@ -449,7 +315,9 @@ export default function WorkstationNew() {
               <CardContent className="p-2 max-h-[400px] overflow-y-auto">
                 <div className="space-y-2">
                   {filteredPlayers.map(player => (
-                    <button key={player.id} onClick={() => { setSelectedPlayer(player); setSelectedProp(player.props[0]); }}
+                    <button key={player.id} onClick={() => {
+ setSelectedPlayer(player); setSelectedProp(player.props[0]); 
+}}
                       className={`w-full p-3 rounded-xl transition-all duration-200 text-left ${
                         selectedPlayer.id === player.id
                           ? 'bg-primary/10 border-2 border-primary'
@@ -469,7 +337,9 @@ export default function WorkstationNew() {
                             <span className={player.isHome ? 'text-green-600 dark:text-green-400' : ''}>{player.opponent}</span>
                           </div>
                         </div>
-                        <button onClick={(e) => { e.stopPropagation(); toggleBookmark(player.id); }} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
+                        <button onClick={(e) => {
+ e.stopPropagation(); toggleBookmark(player.id); 
+}} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
                           <Bookmark className={`w-4 h-4 ${bookmarkedPlayers.includes(player.id) ? 'text-yellow-500 fill-yellow-500' : 'text-muted-foreground'}`} />
                         </button>
                       </div>
@@ -861,7 +731,9 @@ export default function WorkstationNew() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {PLAYERS_DATABASE.filter(p => p.mlPrediction.confidence >= 80).slice(0, 3).map(player => (
-                  <button key={player.id} onClick={() => { setSelectedPlayer(player); setSelectedProp(player.props[0]); }}
+                  <button key={player.id} onClick={() => {
+ setSelectedPlayer(player); setSelectedProp(player.props[0]); 
+}}
                     className="w-full p-3 bg-secondary border border-border rounded-xl hover:bg-muted transition-colors text-left">
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-medium text-foreground">{player.name}</span>

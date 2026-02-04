@@ -89,29 +89,55 @@ export class ShotQualityAnalyzer {
 
   static distanceQuality(distance) {
     // Optimal distances get higher scores
-    if (distance <= 3) return 95; // At rim
-    if (distance <= 10) return 70; // Paint
-    if (distance >= 22 && distance <= 24) return 80; // Three point range
-    if (distance >= 10 && distance < 22) return 45; // Mid-range (inefficient)
-    if (distance > 24) return 65; // Deep three
+    if (distance <= 3) {
+return 95;
+} // At rim
+    if (distance <= 10) {
+return 70;
+} // Paint
+    if (distance >= 22 && distance <= 24) {
+return 80;
+} // Three point range
+    if (distance >= 10 && distance < 22) {
+return 45;
+} // Mid-range (inefficient)
+    if (distance > 24) {
+return 65;
+} // Deep three
     return 50;
   }
 
   static opennessQuality(defenderDistance) {
     // Defender distance in feet
-    if (defenderDistance >= 6) return 100; // Wide open
-    if (defenderDistance >= 4) return 85; // Open
-    if (defenderDistance >= 2) return 60; // Contested
-    if (defenderDistance >= 1) return 35; // Tightly contested
+    if (defenderDistance >= 6) {
+return 100;
+} // Wide open
+    if (defenderDistance >= 4) {
+return 85;
+} // Open
+    if (defenderDistance >= 2) {
+return 60;
+} // Contested
+    if (defenderDistance >= 1) {
+return 35;
+} // Tightly contested
     return 15; // Heavily contested
   }
 
   static shotClockQuality(remaining) {
     // Shot clock remaining in seconds
-    if (remaining >= 15) return 90; // Early in clock
-    if (remaining >= 10) return 75; // Mid clock
-    if (remaining >= 7) return 60; // Getting late
-    if (remaining >= 4) return 40; // Rushed
+    if (remaining >= 15) {
+return 90;
+} // Early in clock
+    if (remaining >= 10) {
+return 75;
+} // Mid clock
+    if (remaining >= 7) {
+return 60;
+} // Getting late
+    if (remaining >= 4) {
+return 40;
+} // Rushed
     return 20; // Desperation
   }
 
@@ -137,7 +163,7 @@ export class ShotQualityAnalyzer {
 
   static shooterSkillQuality(shooterRating, shotType) {
     // Shooter rating 0-100, shot type (e.g., "catch_and_shoot", "pullup", "driving")
-    let baseRating = shooterRating;
+    const baseRating = shooterRating;
     
     // Shot type adjustments
     const typeMultipliers = {
@@ -189,26 +215,58 @@ export class ShotQualityAnalyzer {
   }
 
   static gradeShot(quality) {
-    if (quality >= 85) return "A+";
-    if (quality >= 80) return "A";
-    if (quality >= 75) return "A-";
-    if (quality >= 70) return "B+";
-    if (quality >= 65) return "B";
-    if (quality >= 60) return "B-";
-    if (quality >= 55) return "C+";
-    if (quality >= 50) return "C";
-    if (quality >= 45) return "C-";
-    if (quality >= 40) return "D+";
-    if (quality >= 35) return "D";
+    if (quality >= 85) {
+return "A+";
+}
+    if (quality >= 80) {
+return "A";
+}
+    if (quality >= 75) {
+return "A-";
+}
+    if (quality >= 70) {
+return "B+";
+}
+    if (quality >= 65) {
+return "B";
+}
+    if (quality >= 60) {
+return "B-";
+}
+    if (quality >= 55) {
+return "C+";
+}
+    if (quality >= 50) {
+return "C";
+}
+    if (quality >= 45) {
+return "C-";
+}
+    if (quality >= 40) {
+return "D+";
+}
+    if (quality >= 35) {
+return "D";
+}
     return "F";
   }
 
   static generateRecommendation(quality, shot) {
-    if (quality >= 80) return "Excellent shot - Green light!";
-    if (quality >= 70) return "Good shot - Take it";
-    if (quality >= 60) return "Acceptable shot - Okay to take";
-    if (quality >= 50) return "Marginal shot - Look for better option";
-    if (quality >= 40) return "Poor shot - Pass if possible";
+    if (quality >= 80) {
+return "Excellent shot - Green light!";
+}
+    if (quality >= 70) {
+return "Good shot - Take it";
+}
+    if (quality >= 60) {
+return "Acceptable shot - Okay to take";
+}
+    if (quality >= 50) {
+return "Marginal shot - Look for better option";
+}
+    if (quality >= 40) {
+return "Poor shot - Pass if possible";
+}
     return "Bad shot - Avoid this look";
   }
 
@@ -229,7 +287,9 @@ export class ShotQualityAnalyzer {
     playerShots.forEach(shot => {
       const zone = this.classifyShot(shot);
       zones[zone].attempts++;
-      if (shot.made) zones[zone].makes++;
+      if (shot.made) {
+zones[zone].makes++;
+}
     });
     
     // Calculate percentages and performance
@@ -254,16 +314,28 @@ export class ShotQualityAnalyzer {
     const distance = shot.distance;
     const isCorner = shot.location.x > 20; // Simplified corner detection
     
-    if (distance <= 3) return "RESTRICTED_AREA";
-    if (distance <= 10) return "PAINT_NON_RA";
-    if (distance <= 16) return "MID_RANGE_SHORT";
-    if (distance < 22) return "MID_RANGE_LONG";
-    if (isCorner) return "CORNER_THREE";
+    if (distance <= 3) {
+return "RESTRICTED_AREA";
+}
+    if (distance <= 10) {
+return "PAINT_NON_RA";
+}
+    if (distance <= 16) {
+return "MID_RANGE_SHORT";
+}
+    if (distance < 22) {
+return "MID_RANGE_LONG";
+}
+    if (isCorner) {
+return "CORNER_THREE";
+}
     return "ABOVE_BREAK_THREE";
   }
 
   static calculateAverageShotQuality(shots) {
-    if (shots.length === 0) return 0;
+    if (shots.length === 0) {
+return 0;
+}
     const totalQuality = shots.reduce((sum, shot) => {
       const quality = this.calculateShotQuality(shot);
       return sum + parseFloat(quality.overallQuality);
@@ -309,10 +381,18 @@ export class ShotQualityAnalyzer {
   }
 
   static getHeatColor(performance) {
-    if (performance >= 0.1) return "#00ff00"; // Bright green
-    if (performance >= 0.05) return "#90ee90"; // Light green
-    if (performance >= 0.0) return "#ffff00"; // Yellow
-    if (performance >= -0.05) return "#ffa500"; // Orange
+    if (performance >= 0.1) {
+return "#00ff00";
+} // Bright green
+    if (performance >= 0.05) {
+return "#90ee90";
+} // Light green
+    if (performance >= 0.0) {
+return "#ffff00";
+} // Yellow
+    if (performance >= -0.05) {
+return "#ffa500";
+} // Orange
     return "#ff0000"; // Red
   }
 }
@@ -483,14 +563,30 @@ export class DefensiveImpactAnalyzer {
   }
 
   static gradeDefense(rating) {
-    if (rating >= 90) return "A+ (Elite)";
-    if (rating >= 85) return "A (Excellent)";
-    if (rating >= 80) return "A- (Very Good)";
-    if (rating >= 75) return "B+ (Good)";
-    if (rating >= 70) return "B (Above Average)";
-    if (rating >= 65) return "B- (Average)";
-    if (rating >= 60) return "C+ (Below Average)";
-    if (rating >= 55) return "C (Poor)";
+    if (rating >= 90) {
+return "A+ (Elite)";
+}
+    if (rating >= 85) {
+return "A (Excellent)";
+}
+    if (rating >= 80) {
+return "A- (Very Good)";
+}
+    if (rating >= 75) {
+return "B+ (Good)";
+}
+    if (rating >= 70) {
+return "B (Above Average)";
+}
+    if (rating >= 65) {
+return "B- (Average)";
+}
+    if (rating >= 60) {
+return "C+ (Below Average)";
+}
+    if (rating >= 55) {
+return "C (Poor)";
+}
     return "D (Very Poor)";
   }
 
@@ -553,10 +649,18 @@ export class DefensiveImpactAnalyzer {
   }
 
   static getDefensiblePositions(switchScore) {
-    if (switchScore > 80) return "1-5 (All positions)";
-    if (switchScore > 70) return "1-4";
-    if (switchScore > 60) return "2-4";
-    if (switchScore > 50) return "3-4";
+    if (switchScore > 80) {
+return "1-5 (All positions)";
+}
+    if (switchScore > 70) {
+return "1-4";
+}
+    if (switchScore > 60) {
+return "2-4";
+}
+    if (switchScore > 50) {
+return "3-4";
+}
     return "Primary position only";
   }
 }
@@ -594,11 +698,15 @@ export class HotHandAnalyzer {
       if (shot.made) {
         tempMake++;
         tempMiss = 0;
-        if (i === shots.length - 1) currentStreak = tempMake;
+        if (i === shots.length - 1) {
+currentStreak = tempMake;
+}
       } else {
         tempMiss++;
         tempMake = 0;
-        if (i === shots.length - 1) currentStreak = -tempMiss;
+        if (i === shots.length - 1) {
+currentStreak = -tempMiss;
+}
       }
       
       longestMake = Math.max(longestMake, tempMake);

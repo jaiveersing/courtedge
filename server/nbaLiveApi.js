@@ -151,7 +151,9 @@ const TEAM_NAMES = {
 export async function getAllTeams() {
   const cacheKey = 'teams_list';
   const cached = cache.get(cacheKey, ServerCache.DURATIONS.TEAMS);
-  if (cached) return cached;
+  if (cached) {
+return cached;
+}
 
   try {
     const data = await fetchAPISports('/teams', { 
@@ -182,7 +184,9 @@ export async function getAllTeams() {
 export async function getTeamRoster(teamId) {
   const cacheKey = `roster_${teamId}`;
   const cached = cache.get(cacheKey, ServerCache.DURATIONS.ROSTER);
-  if (cached) return cached;
+  if (cached) {
+return cached;
+}
 
   try {
     const data = await fetchAPISports('/teams', {
@@ -209,7 +213,9 @@ export async function getTeamRoster(teamId) {
 export async function getAllPlayers() {
   const cacheKey = 'all_players';
   const cached = cache.get(cacheKey, ServerCache.DURATIONS.PLAYERS_LIST);
-  if (cached) return cached;
+  if (cached) {
+return cached;
+}
 
   try {
     console.log('📡 Fetching NBA teams from API-Sports.io...');
@@ -235,7 +241,9 @@ export async function getAllPlayers() {
 export async function getPlayerStats(playerId) {
   const cacheKey = `player_stats_${playerId}`;
   const cached = cache.get(cacheKey, ServerCache.DURATIONS.PLAYER_STATS);
-  if (cached) return cached;
+  if (cached) {
+return cached;
+}
 
   try {
     // API-Sports.io free tier doesn't provide player stats
@@ -253,7 +261,9 @@ export async function getPlayerStats(playerId) {
 export async function getLiveScoreboard() {
   const cacheKey = 'scoreboard';
   const cached = cache.get(cacheKey, ServerCache.DURATIONS.SCOREBOARD);
-  if (cached) return cached;
+  if (cached) {
+return cached;
+}
 
   try {
     const today = new Date().toISOString().split('T')[0];
@@ -306,7 +316,9 @@ export async function getLiveScoreboard() {
 export async function getStandings() {
   const cacheKey = 'standings';
   const cached = cache.get(cacheKey, ServerCache.DURATIONS.STANDINGS);
-  if (cached) return cached;
+  if (cached) {
+return cached;
+}
 
   try {
     const data = await fetchAPISports('/standings', {
@@ -347,7 +359,9 @@ export async function getNBANews(limit = 20) {
  * Search players by name
  */
 export async function searchPlayers(query) {
-  if (!query || query.length < 2) return [];
+  if (!query || query.length < 2) {
+return [];
+}
 
   try {
     // First, try ESPN search API
@@ -377,7 +391,9 @@ export async function searchPlayers(query) {
 export async function getBoxScore(gameId) {
   const cacheKey = `boxscore_${gameId}`;
   const cached = cache.get(cacheKey, ServerCache.DURATIONS.BOXSCORE);
-  if (cached) return cached;
+  if (cached) {
+return cached;
+}
 
   try {
     const data = await fetchWithTimeout(`${ESPN_BASE}/summary?event=${gameId}`);

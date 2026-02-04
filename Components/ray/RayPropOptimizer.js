@@ -84,7 +84,9 @@ export class PortfolioOptimizer {
     for (let iter = 0; iter < 100; iter++) {
       const currentReturn = weights.reduce((sum, w, i) => sum + w * returns[i], 0);
       
-      if (Math.abs(currentReturn - targetReturn) < 0.001) break;
+      if (Math.abs(currentReturn - targetReturn) < 0.001) {
+break;
+}
       
       // Adjust weights toward target
       weights = weights.map((w, i) => {
@@ -241,7 +243,9 @@ export class ParlayOptimizer {
   static estimateCorrelation(leg1, leg2) {
     // Estimate correlation based on game/player relationships
     if (leg1.gameId === leg2.gameId) {
-      if (leg1.team === leg2.team) return 0.6; // Same team
+      if (leg1.team === leg2.team) {
+return 0.6;
+} // Same team
       return 0.4; // Opponents
     }
     return 0.1; // Different games
@@ -621,7 +625,9 @@ export class PropBetOptimizer {
     const alternates = [];
     
     for (let adjust = -3; adjust <= 3; adjust += 0.5) {
-      if (adjust === 0) continue;
+      if (adjust === 0) {
+continue;
+}
       
       const altLine = baseProps.line + adjust;
       const overProb = 1 - this.normalCDF((altLine - playerAvg) / playerStd);
@@ -699,8 +705,12 @@ export class PropBetOptimizer {
 
   static propsAreCorrelated(prop1, prop2) {
     // Check if props are correlated
-    if (prop1.player === prop2.player) return true; // Same player
-    if (prop1.type === prop2.type) return true; // Same stat type
+    if (prop1.player === prop2.player) {
+return true;
+} // Same player
+    if (prop1.type === prop2.type) {
+return true;
+} // Same stat type
     return false;
   }
 

@@ -48,7 +48,9 @@ const WinRateChart = ({ bets = [], height = 300 }) => {
   ].filter(d => d.value > 0);
 
   const CustomTooltip = ({ active, payload }) => {
-    if (!active || !payload || !payload.length) return null;
+    if (!active || !payload || !payload.length) {
+return null;
+}
 
     const data = payload[0];
     const percent = ((data.value / stats.total) * 100).toFixed(1);
@@ -67,7 +69,9 @@ const WinRateChart = ({ bets = [], height = 300 }) => {
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
-    if (percent < 0.05) return null; // Don't show label if slice is too small
+    if (percent < 0.05) {
+return null;
+} // Don't show label if slice is too small
 
     return (
       <text 
@@ -99,10 +103,18 @@ const WinRateChart = ({ bets = [], height = 300 }) => {
 
   // Determine performance level
   const getPerformanceLevel = () => {
-    if (stats.winRate >= 60) return { label: 'Elite', color: 'text-yellow-400', icon: Award };
-    if (stats.winRate >= 55) return { label: 'Excellent', color: 'text-green-400', icon: TrendingUp };
-    if (stats.winRate >= 52.4) return { label: 'Profitable', color: 'text-blue-400', icon: Target };
-    if (stats.winRate >= 50) return { label: 'Break Even', color: 'text-gray-400', icon: Target };
+    if (stats.winRate >= 60) {
+return { label: 'Elite', color: 'text-yellow-400', icon: Award };
+}
+    if (stats.winRate >= 55) {
+return { label: 'Excellent', color: 'text-green-400', icon: TrendingUp };
+}
+    if (stats.winRate >= 52.4) {
+return { label: 'Profitable', color: 'text-blue-400', icon: Target };
+}
+    if (stats.winRate >= 50) {
+return { label: 'Break Even', color: 'text-gray-400', icon: Target };
+}
     return { label: 'Needs Work', color: 'text-red-400', icon: Target };
   };
 

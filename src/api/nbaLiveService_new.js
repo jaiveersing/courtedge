@@ -56,7 +56,9 @@ const cache = {
 export async function getLiveScoreboard() {
   const cacheKey = 'scoreboard';
   const cached = cache.get(cacheKey, cache.DURATIONS.SCOREBOARD);
-  if (cached) return cached;
+  if (cached) {
+return cached;
+}
 
   try {
     const response = await fetch(`${API_BASE}/api/scoreboard`);
@@ -80,7 +82,9 @@ export async function getLiveScoreboard() {
 export async function getAllTeams() {
   const cacheKey = 'teams';
   const cached = cache.get(cacheKey, cache.DURATIONS.TEAMS);
-  if (cached) return cached;
+  if (cached) {
+return cached;
+}
 
   try {
     const response = await fetch(`${API_BASE}/api/teams`);
@@ -104,7 +108,9 @@ export async function getAllTeams() {
 export async function getTeamRoster(teamId) {
   const cacheKey = `roster_${teamId}`;
   const cached = cache.get(cacheKey, cache.DURATIONS.ROSTER);
-  if (cached) return cached;
+  if (cached) {
+return cached;
+}
 
   try {
     const response = await fetch(`${API_BASE}/api/roster/${teamId}`);
@@ -128,7 +134,9 @@ export async function getTeamRoster(teamId) {
 export async function getPlayerStats(playerId) {
   const cacheKey = `player_${playerId}`;
   const cached = cache.get(cacheKey, cache.DURATIONS.PLAYER_STATS);
-  if (cached) return cached;
+  if (cached) {
+return cached;
+}
 
   try {
     const response = await fetch(`${API_BASE}/api/players/${playerId}`);
@@ -152,7 +160,9 @@ export async function getPlayerStats(playerId) {
 export async function getGameBoxScore(gameId) {
   const cacheKey = `boxscore_${gameId}`;
   const cached = cache.get(cacheKey, cache.DURATIONS.BOXSCORE);
-  if (cached) return cached;
+  if (cached) {
+return cached;
+}
 
   try {
     const response = await fetch(`${API_BASE}/api/boxscore/${gameId}`);
@@ -176,7 +186,9 @@ export async function getGameBoxScore(gameId) {
 export async function getStandings() {
   const cacheKey = 'standings';
   const cached = cache.get(cacheKey, cache.DURATIONS.STANDINGS);
-  if (cached) return cached;
+  if (cached) {
+return cached;
+}
 
   try {
     const response = await fetch(`${API_BASE}/api/standings`);
@@ -200,7 +212,9 @@ export async function getStandings() {
 export async function getNBANews(limit = 20) {
   const cacheKey = 'news';
   const cached = cache.get(cacheKey, cache.DURATIONS.NEWS);
-  if (cached) return cached;
+  if (cached) {
+return cached;
+}
 
   try {
     const response = await fetch(`${API_BASE}/api/news?limit=${limit}`);
@@ -224,7 +238,9 @@ export async function getNBANews(limit = 20) {
 export async function getSchedule(dates) {
   const cacheKey = `schedule_${dates || 'default'}`;
   const cached = cache.get(cacheKey, cache.DURATIONS.SCHEDULE);
-  if (cached) return cached;
+  if (cached) {
+return cached;
+}
 
   try {
     const params = dates ? `?dates=${dates}` : '';
@@ -247,7 +263,9 @@ export async function getSchedule(dates) {
  * Search players by name
  */
 export async function searchPlayers(query) {
-  if (!query || query.length < 2) return [];
+  if (!query || query.length < 2) {
+return [];
+}
 
   try {
     const response = await fetch(`${API_BASE}/api/players/search?q=${encodeURIComponent(query)}`);
@@ -270,7 +288,9 @@ export async function searchPlayers(query) {
 export async function getPlayerGameLog(playerId, season) {
   const cacheKey = `gamelog_${playerId}_${season || 'current'}`;
   const cached = cache.get(cacheKey, cache.DURATIONS.PLAYER_STATS);
-  if (cached) return cached;
+  if (cached) {
+return cached;
+}
 
   try {
     const response = await fetch(`${API_BASE}/api/players/${playerId}/gamelog${season ? `?season=${season}` : ''}`);
@@ -299,17 +319,39 @@ export function clearCache() {
  * Class wrapper for backward compatibility
  */
 class NBALiveService {
-  getLiveScoreboard() { return getLiveScoreboard(); }
-  getAllTeams() { return getAllTeams(); }
-  getTeamRoster(teamId) { return getTeamRoster(teamId); }
-  getPlayerStats(playerId) { return getPlayerStats(playerId); }
-  getGameBoxScore(gameId) { return getGameBoxScore(gameId); }
-  getStandings() { return getStandings(); }
-  getNBANews(limit) { return getNBANews(limit); }
-  getSchedule(dates) { return getSchedule(dates); }
-  searchPlayers(query) { return searchPlayers(query); }
-  getPlayerGameLog(playerId, season) { return getPlayerGameLog(playerId, season); }
-  clearCache() { clearCache(); }
+  getLiveScoreboard() {
+ return getLiveScoreboard(); 
+}
+  getAllTeams() {
+ return getAllTeams(); 
+}
+  getTeamRoster(teamId) {
+ return getTeamRoster(teamId); 
+}
+  getPlayerStats(playerId) {
+ return getPlayerStats(playerId); 
+}
+  getGameBoxScore(gameId) {
+ return getGameBoxScore(gameId); 
+}
+  getStandings() {
+ return getStandings(); 
+}
+  getNBANews(limit) {
+ return getNBANews(limit); 
+}
+  getSchedule(dates) {
+ return getSchedule(dates); 
+}
+  searchPlayers(query) {
+ return searchPlayers(query); 
+}
+  getPlayerGameLog(playerId, season) {
+ return getPlayerGameLog(playerId, season); 
+}
+  clearCache() {
+ clearCache(); 
+}
 }
 
 const nbaLiveService = new NBALiveService();

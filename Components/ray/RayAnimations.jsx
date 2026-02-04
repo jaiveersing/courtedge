@@ -58,7 +58,9 @@ export const NeuralNetworkVisual = ({ isActive, size = 100, isDark }) => {
   }, [size]);
   
   useEffect(() => {
-    if (!isActive) return;
+    if (!isActive) {
+return;
+}
     
     const interval = setInterval(() => {
       setNodes(prev => prev.map(node => ({
@@ -165,7 +167,9 @@ export const ConfidenceRing = ({ value, size = 60, strokeWidth = 6, isDark, show
       const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
       setAnimatedValue(startValue + (value - startValue) * eased);
       
-      if (progress < 1) requestAnimationFrame(animate);
+      if (progress < 1) {
+requestAnimationFrame(animate);
+}
     };
     
     requestAnimationFrame(animate);
@@ -174,9 +178,15 @@ export const ConfidenceRing = ({ value, size = 60, strokeWidth = 6, isDark, show
   const strokeDashoffset = circumference - (animatedValue / 100) * circumference;
   
   const getColor = () => {
-    if (animatedValue >= 80) return isDark ? '#34d399' : '#10b981';
-    if (animatedValue >= 60) return isDark ? '#38bdf8' : '#0ea5e9';
-    if (animatedValue >= 40) return isDark ? '#fbbf24' : '#f59e0b';
+    if (animatedValue >= 80) {
+return isDark ? '#34d399' : '#10b981';
+}
+    if (animatedValue >= 60) {
+return isDark ? '#38bdf8' : '#0ea5e9';
+}
+    if (animatedValue >= 40) {
+return isDark ? '#fbbf24' : '#f59e0b';
+}
     return isDark ? '#f87171' : '#ef4444';
   };
   
@@ -235,16 +245,24 @@ export const EdgeMeter = ({ edge, maxEdge = 20, isDark }) => {
       const eased = 1 - Math.pow(1 - progress, 3);
       setAnimatedEdge(edge * eased);
       
-      if (progress < 1) requestAnimationFrame(animate);
+      if (progress < 1) {
+requestAnimationFrame(animate);
+}
     };
     
     requestAnimationFrame(animate);
   }, [edge]);
   
   const getColor = () => {
-    if (edge >= 15) return 'from-emerald-500 to-green-400';
-    if (edge >= 10) return 'from-blue-500 to-cyan-400';
-    if (edge >= 5) return 'from-amber-500 to-yellow-400';
+    if (edge >= 15) {
+return 'from-emerald-500 to-green-400';
+}
+    if (edge >= 10) {
+return 'from-blue-500 to-cyan-400';
+}
+    if (edge >= 5) {
+return 'from-amber-500 to-yellow-400';
+}
     return 'from-gray-500 to-gray-400';
   };
   
@@ -485,7 +503,9 @@ export const RadarScan = ({ isActive, size = 80, isDark }) => {
   const [angle, setAngle] = useState(0);
   
   useEffect(() => {
-    if (!isActive) return;
+    if (!isActive) {
+return;
+}
     
     const interval = setInterval(() => {
       setAngle(prev => (prev + 3) % 360);

@@ -15,7 +15,9 @@ import { Percent, TrendingUp, TrendingDown } from 'lucide-react';
 const ROIChart = ({ bets = [], groupBy = 'sport', height = 300 }) => {
   // Calculate ROI by category
   const roiData = useMemo(() => {
-    if (!bets.length) return [];
+    if (!bets.length) {
+return [];
+}
 
     const categories = {};
 
@@ -63,9 +65,15 @@ const ROIChart = ({ bets = [], groupBy = 'sport', height = 300 }) => {
       categories[category].totalProfit += profit;
       categories[category].bets++;
       
-      if (bet.result === 'win') categories[category].wins++;
-      if (bet.result === 'loss') categories[category].losses++;
-      if (bet.result === 'push') categories[category].pushes++;
+      if (bet.result === 'win') {
+categories[category].wins++;
+}
+      if (bet.result === 'loss') {
+categories[category].losses++;
+}
+      if (bet.result === 'push') {
+categories[category].pushes++;
+}
     });
 
     return Object.values(categories)
@@ -78,7 +86,9 @@ const ROIChart = ({ bets = [], groupBy = 'sport', height = 300 }) => {
   }, [bets, groupBy]);
 
   const CustomTooltip = ({ active, payload, label }) => {
-    if (!active || !payload || !payload.length) return null;
+    if (!active || !payload || !payload.length) {
+return null;
+}
 
     const data = payload[0].payload;
 

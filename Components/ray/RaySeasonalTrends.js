@@ -38,15 +38,25 @@ export class SeasonalPatternAnalyzer {
   }
 
   static rateMonthlyPerformance(monthData) {
-    if (!monthData) return 'Average';
+    if (!monthData) {
+return 'Average';
+}
     
     const ppg = monthData.ppg || 0;
     const fg = monthData.fg_pct || 0;
     
-    if (ppg > 25 && fg > 0.48) return 'Elite 🔥';
-    if (ppg > 22 && fg > 0.45) return 'Excellent ⭐';
-    if (ppg > 19 && fg > 0.42) return 'Good ✅';
-    if (ppg > 16) return 'Average ➡️';
+    if (ppg > 25 && fg > 0.48) {
+return 'Elite 🔥';
+}
+    if (ppg > 22 && fg > 0.45) {
+return 'Excellent ⭐';
+}
+    if (ppg > 19 && fg > 0.42) {
+return 'Good ✅';
+}
+    if (ppg > 16) {
+return 'Average ➡️';
+}
     return 'Below Average 📉';
   }
 
@@ -139,10 +149,18 @@ export class SeasonalPatternAnalyzer {
   }
 
   static interpretScoringTrend(change) {
-    if (change > 15) return 'Strong positive trend - rider hot hand';
-    if (change > 8) return 'Positive trend - increasing role/confidence';
-    if (change > -8) return 'Stable production throughout season';
-    if (change > -15) return 'Declining trend - fatigue or decreased role';
+    if (change > 15) {
+return 'Strong positive trend - rider hot hand';
+}
+    if (change > 8) {
+return 'Positive trend - increasing role/confidence';
+}
+    if (change > -8) {
+return 'Stable production throughout season';
+}
+    if (change > -15) {
+return 'Declining trend - fatigue or decreased role';
+}
     return 'Significant decline - injury concern or benching';
   }
 
@@ -255,8 +273,12 @@ export class SeasonalPatternAnalyzer {
     
     let adjustment = scoringChange * 0.3; // Weight scoring trend
     
-    if (direction === 'Improving') adjustment += 0.03;
-    if (direction === 'Declining') adjustment -= 0.03;
+    if (direction === 'Improving') {
+adjustment += 0.03;
+}
+    if (direction === 'Declining') {
+adjustment -= 0.03;
+}
     
     return adjustment;
   }
@@ -265,11 +287,17 @@ export class SeasonalPatternAnalyzer {
     let confidence = 60;
     
     const cv = parseFloat(trends.consistency.coefficientOfVariation);
-    if (cv < 12) confidence += 20;
-    else if (cv < 18) confidence += 10;
-    else confidence -= 10;
+    if (cv < 12) {
+confidence += 20;
+} else if (cv < 18) {
+confidence += 10;
+} else {
+confidence -= 10;
+}
     
-    if (trends.scoring.direction.includes('Stable')) confidence += 10;
+    if (trends.scoring.direction.includes('Stable')) {
+confidence += 10;
+}
     
     return {
       score: Math.min(100, confidence),
@@ -494,14 +522,22 @@ export class TravelScheduleAnalyzer {
     
     // Schedule density impact
     const gamesPerWeek = parseFloat(density.games_per_week);
-    if (gamesPerWeek > 4.5) riskScore += 30;
-    else if (gamesPerWeek > 3.8) riskScore += 20;
-    else if (gamesPerWeek > 3.2) riskScore += 10;
+    if (gamesPerWeek > 4.5) {
+riskScore += 30;
+} else if (gamesPerWeek > 3.8) {
+riskScore += 20;
+} else if (gamesPerWeek > 3.2) {
+riskScore += 10;
+}
     
     // Travel impact
-    if (travel.total_miles > 7000) riskScore += 30;
-    else if (travel.total_miles > 5000) riskScore += 20;
-    else if (travel.total_miles > 3000) riskScore += 10;
+    if (travel.total_miles > 7000) {
+riskScore += 30;
+} else if (travel.total_miles > 5000) {
+riskScore += 20;
+} else if (travel.total_miles > 3000) {
+riskScore += 10;
+}
     
     // Back-to-back impact
     riskScore += backToBacks.count * 10;
@@ -520,24 +556,42 @@ export class TravelScheduleAnalyzer {
   static identifyPrimaryConcern(density, travel, backToBacks) {
     const concerns = [];
     
-    if (parseFloat(density.games_per_week) > 4.2) concerns.push('Heavy game schedule');
-    if (travel.total_miles > 6000) concerns.push('Excessive travel');
-    if (backToBacks.count > 2) concerns.push('Multiple back-to-backs');
+    if (parseFloat(density.games_per_week) > 4.2) {
+concerns.push('Heavy game schedule');
+}
+    if (travel.total_miles > 6000) {
+concerns.push('Excessive travel');
+}
+    if (backToBacks.count > 2) {
+concerns.push('Multiple back-to-backs');
+}
     
     return concerns.length > 0 ? concerns[0] : 'No major concerns';
   }
 
   static describeFatigueImpact(score) {
-    if (score > 70) return 'Severe performance degradation expected across the board';
-    if (score > 50) return 'Significant decline in scoring, efficiency, and defense';
-    if (score > 30) return 'Moderate decline, especially in 4th quarters';
+    if (score > 70) {
+return 'Severe performance degradation expected across the board';
+}
+    if (score > 50) {
+return 'Significant decline in scoring, efficiency, and defense';
+}
+    if (score > 30) {
+return 'Moderate decline, especially in 4th quarters';
+}
     return 'Minimal expected impact on performance';
   }
 
   static getFatigueAdjustment(score) {
-    if (score > 70) return 'Reduce all player props by 15-20%, strong UNDER lean';
-    if (score > 50) return 'Reduce props by 10-15%, lean UNDER';
-    if (score > 30) return 'Slight reduction 5-10%, neutral to UNDER lean';
+    if (score > 70) {
+return 'Reduce all player props by 15-20%, strong UNDER lean';
+}
+    if (score > 50) {
+return 'Reduce props by 10-15%, lean UNDER';
+}
+    if (score > 30) {
+return 'Slight reduction 5-10%, neutral to UNDER lean';
+}
     return 'No significant adjustment needed';
   }
 
@@ -573,7 +627,7 @@ export class TravelScheduleAnalyzer {
     
     games.forEach(game => {
       let alertLevel = 'normal';
-      let reasons = [];
+      const reasons = [];
       
       if (game.isBackToBack && game.isAway) {
         alertLevel = 'high';
@@ -622,9 +676,15 @@ export class TravelScheduleAnalyzer {
   }
 
   static getAlertAction(level) {
-    if (level === 'extreme') return '🚨 STRONG FADE - All UNDERs';
-    if (level === 'high') return '⚠️ FADE - Lean UNDERs';
-    if (level === 'moderate') return '📊 CAUTION - Neutral to UNDER';
+    if (level === 'extreme') {
+return '🚨 STRONG FADE - All UNDERs';
+}
+    if (level === 'high') {
+return '⚠️ FADE - Lean UNDERs';
+}
+    if (level === 'moderate') {
+return '📊 CAUTION - Neutral to UNDER';
+}
     return '✅ Normal';
   }
 }

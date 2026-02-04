@@ -146,16 +146,29 @@ class AdvancedReasoningEngine {
     const positiveCount = positiveWords.filter(w => lowerText.includes(w)).length;
     const negativeCount = negativeWords.filter(w => lowerText.includes(w)).length;
     
-    if (positiveCount > negativeCount) entities.sentiment = 'positive';
-    else if (negativeCount > positiveCount) entities.sentiment = 'negative';
+    if (positiveCount > negativeCount) {
+entities.sentiment = 'positive';
+} else if (negativeCount > positiveCount) {
+entities.sentiment = 'negative';
+}
 
     // Confidence scoring
     let confidence = 0;
-    if (entities.players.length > 0) confidence += 0.3;
-    if (entities.stats.length > 0) confidence += 0.2;
-    if (entities.numbers.length > 0) confidence += 0.2;
-    if (entities.timeframes.length > 0) confidence += 0.15;
-    if (entities.teams.length > 0) confidence += 0.15;
+    if (entities.players.length > 0) {
+confidence += 0.3;
+}
+    if (entities.stats.length > 0) {
+confidence += 0.2;
+}
+    if (entities.numbers.length > 0) {
+confidence += 0.2;
+}
+    if (entities.timeframes.length > 0) {
+confidence += 0.15;
+}
+    if (entities.teams.length > 0) {
+confidence += 0.15;
+}
     entities.confidence = Math.min(confidence, 1.0);
 
     return entities;
@@ -167,8 +180,12 @@ class AdvancedReasoningEngine {
   }
 
   levenshtein(a, b) {
-    if (a.length === 0) return b.length;
-    if (b.length === 0) return a.length;
+    if (a.length === 0) {
+return b.length;
+}
+    if (b.length === 0) {
+return a.length;
+}
     const matrix = [];
     for (let i = 0; i <= b.length; i++) {
       matrix[i] = [i];
@@ -294,8 +311,12 @@ class AdvancedReasoningEngine {
       score *= rule.weight;
       
       // Context boost
-      if (context?.lastIntent === rule.name) score *= 1.15;
-      if (context?.currentPlayer && rule.name.includes('PLAYER')) score *= 1.1;
+      if (context?.lastIntent === rule.name) {
+score *= 1.15;
+}
+      if (context?.currentPlayer && rule.name.includes('PLAYER')) {
+score *= 1.1;
+}
       
       // 🎯 LOWER THRESHOLD - accept more matches (was 0.4, now 0.25)
       if (score > 0.25) {
@@ -516,12 +537,22 @@ class JarvisPersonality {
   assessPriority(intent, entities, context) {
     let priority = 0.5;
     const hour = new Date().getHours();
-    if (hour >= 17 && hour <= 23) priority += 0.1;
-    if (intent.includes('INJURY')) priority = 0.95;
+    if (hour >= 17 && hour <= 23) {
+priority += 0.1;
+}
+    if (intent.includes('INJURY')) {
+priority = 0.95;
+}
     
-    if (priority >= 0.9) return { level: 'CRITICAL', label: '🔴 CRITICAL' };
-    if (priority >= 0.75) return { level: 'HIGH', label: '🟠 HIGH PRIORITY' };
-    if (priority >= 0.5) return { level: 'MEDIUM', label: '🟡 MEDIUM' };
+    if (priority >= 0.9) {
+return { level: 'CRITICAL', label: '🔴 CRITICAL' };
+}
+    if (priority >= 0.75) {
+return { level: 'HIGH', label: '🟠 HIGH PRIORITY' };
+}
+    if (priority >= 0.5) {
+return { level: 'MEDIUM', label: '🟡 MEDIUM' };
+}
     return { level: 'LOW', label: '🟢 ROUTINE' };
   }
   
@@ -557,7 +588,9 @@ class JarvisPersonality {
   
   // Add wit
   addWit(context, confidence) {
-    if (Math.random() > 0.15) return null;
+    if (Math.random() > 0.15) {
+return null;
+}
     
     if (confidence < 0.4) {
       return "Though I must admit, sir, the data is rather... shall we say, 'optimistically sparse' on this matter.";
@@ -841,8 +874,12 @@ class ConversationMemory {
     const advancedCount = advancedTerms.filter(t => text.includes(t)).length;
     const intermediateCount = intermediateTerms.filter(t => text.includes(t)).length;
     
-    if (advancedCount >= 2) return 'advanced';
-    if (intermediateCount >= 2) return 'intermediate';
+    if (advancedCount >= 2) {
+return 'advanced';
+}
+    if (intermediateCount >= 2) {
+return 'intermediate';
+}
     return 'beginner';
   }
 
@@ -1517,7 +1554,9 @@ class RayConversationBrain {
   hasPlayerName(text) {
     // Check if text contains any player name
     for (const player of PLAYERS_DB) {
-      if (text.includes(player.name.toLowerCase())) return true;
+      if (text.includes(player.name.toLowerCase())) {
+return true;
+}
     }
     return false;
   }
@@ -1728,10 +1767,14 @@ class RayConversationBrain {
 
   handleStreaks(entities) {
     const player = entities.players[0] || this.memory.context.currentPlayer;
-    if (!player) return this.handleUnknown('streak analysis');
+    if (!player) {
+return this.handleUnknown('streak analysis');
+}
 
     const data = rayAnalytics.getStreakAnalysis(player);
-    if (!data) return { text: `Can't find streak data for ${player}.`, type: 'error' };
+    if (!data) {
+return { text: `Can't find streak data for ${player}.`, type: 'error' };
+}
 
     return {
       text: `🔥 **${player} Streak Analysis**\n\n${data.text}`,
@@ -1743,10 +1786,14 @@ class RayConversationBrain {
 
   handleConsistency(entities) {
     const player = entities.players[0] || this.memory.context.currentPlayer;
-    if (!player) return this.handleUnknown('consistency');
+    if (!player) {
+return this.handleUnknown('consistency');
+}
 
     const data = rayAnalytics.getConsistencyScore(player);
-    if (!data) return { text: `Can't analyze consistency for ${player}.`, type: 'error' };
+    if (!data) {
+return { text: `Can't analyze consistency for ${player}.`, type: 'error' };
+}
 
     return {
       text: `🎯 **${player} Consistency Report**\n\n${data.text}`,
@@ -1758,10 +1805,14 @@ class RayConversationBrain {
 
   handleCeilingFloor(entities) {
     const player = entities.players[0] || this.memory.context.currentPlayer;
-    if (!player) return this.handleUnknown('ceiling floor');
+    if (!player) {
+return this.handleUnknown('ceiling floor');
+}
 
     const data = rayAnalytics.getCeilingFloor(player);
-    if (!data) return { text: `Can't find ceiling/floor for ${player}.`, type: 'error' };
+    if (!data) {
+return { text: `Can't find ceiling/floor for ${player}.`, type: 'error' };
+}
 
     return {
       text: `📈 **${player} Ceiling & Floor**\n\n${data.text}`,
@@ -1773,10 +1824,14 @@ class RayConversationBrain {
 
   handleUsage(entities) {
     const player = entities.players[0] || this.memory.context.currentPlayer;
-    if (!player) return this.handleUnknown('usage');
+    if (!player) {
+return this.handleUnknown('usage');
+}
 
     const data = rayAnalytics.getUsageAnalysis(player);
-    if (!data) return { text: `Usage data unavailable for ${player}.`, type: 'error' };
+    if (!data) {
+return { text: `Usage data unavailable for ${player}.`, type: 'error' };
+}
 
     return {
       text: `⚡ **${player} Usage Analysis**\n\n${data.text}`,
@@ -1788,10 +1843,14 @@ class RayConversationBrain {
 
   handleEfficiency(entities) {
     const player = entities.players[0] || this.memory.context.currentPlayer;
-    if (!player) return this.handleUnknown('efficiency');
+    if (!player) {
+return this.handleUnknown('efficiency');
+}
 
     const data = rayAnalytics.getEfficiencyMetrics(player);
-    if (!data) return { text: `No efficiency data for ${player}.`, type: 'error' };
+    if (!data) {
+return { text: `No efficiency data for ${player}.`, type: 'error' };
+}
 
     return {
       text: `📊 **${player} Efficiency Metrics**\n\n${data.text}`,
@@ -1803,10 +1862,14 @@ class RayConversationBrain {
 
   handleBackToBack(entities) {
     const player = entities.players[0] || this.memory.context.currentPlayer;
-    if (!player) return this.handleUnknown('back to back');
+    if (!player) {
+return this.handleUnknown('back to back');
+}
 
     const data = rayAnalytics.getRestAnalysis(player);
-    if (!data) return { text: `No rest data for ${player}.`, type: 'error' };
+    if (!data) {
+return { text: `No rest data for ${player}.`, type: 'error' };
+}
 
     return {
       text: `👏 **${player} Rest & B2B Analysis**\n\n${data.text}`,
@@ -1818,10 +1881,14 @@ class RayConversationBrain {
 
   handleHomeSplits(entities) {
     const player = entities.players[0] || this.memory.context.currentPlayer;
-    if (!player) return this.handleUnknown('home/away');
+    if (!player) {
+return this.handleUnknown('home/away');
+}
 
     const data = rayAnalytics.getLocationSplits(player);
-    if (!data) return { text: `No home/away data for ${player}.`, type: 'error' };
+    if (!data) {
+return { text: `No home/away data for ${player}.`, type: 'error' };
+}
 
     return {
       text: `🏠 **${player} Home/Away Splits**\n\n${data.text}`,
@@ -1841,10 +1908,14 @@ class RayConversationBrain {
 
   handleAdvancedStats(entities) {
     const player = entities.players[0] || this.memory.context.currentPlayer;
-    if (!player) return this.handleUnknown('advanced stats');
+    if (!player) {
+return this.handleUnknown('advanced stats');
+}
 
     const data = rayAnalytics.getAdvancedMetrics(player);
-    if (!data) return { text: `No advanced stats for ${player}.`, type: 'error' };
+    if (!data) {
+return { text: `No advanced stats for ${player}.`, type: 'error' };
+}
 
     return {
       text: `🧠 **${player} Advanced Metrics**\n\n${data.text}`,
@@ -1985,7 +2056,9 @@ Just ask naturally — I understand context and follow-ups!`,
       text += `*I've identified the following high-probability plays:*\n`;
       for (const prop of analysis.bestProps.slice(0, 3)) {
         text += `• **${prop.prop}** — ${prop.hitRate}% historical success rate`;
-        if (prop.streak > 0) text += ` *(${prop.streak}-game streak)*`;
+        if (prop.streak > 0) {
+text += ` *(${prop.streak}-game streak)*`;
+}
         text += `\n`;
       }
       text += `\n`;
@@ -2160,12 +2233,19 @@ Just ask naturally — I understand context and follow-ups!`,
   handleRankings(entities, message) {
     // Check for specific stat
     let stat = null;
-    if (message.includes('scor') || message.includes('points')) stat = 'pts';
-    else if (message.includes('rebound')) stat = 'reb';
-    else if (message.includes('assist') || message.includes('passing')) stat = 'ast';
-    else if (message.includes('three') || message.includes('3')) stat = 'threes';
-    else if (message.includes('steal')) stat = 'stl';
-    else if (message.includes('block')) stat = 'blk';
+    if (message.includes('scor') || message.includes('points')) {
+stat = 'pts';
+} else if (message.includes('rebound')) {
+stat = 'reb';
+} else if (message.includes('assist') || message.includes('passing')) {
+stat = 'ast';
+} else if (message.includes('three') || message.includes('3')) {
+stat = 'threes';
+} else if (message.includes('steal')) {
+stat = 'stl';
+} else if (message.includes('block')) {
+stat = 'blk';
+}
 
     if (stat) {
       const rankings = rayComparisonEngine.rankBystat(stat, 'season', 10);
@@ -2347,7 +2427,9 @@ Just ask naturally — I understand context and follow-ups!`,
         let text = `## 🏥 ${player.name} Injury Status\n\n`;
         text += `**Status:** ${injury.status.toUpperCase()}\n`;
         text += `**Details:** ${injury.details}\n`;
-        if (injury.returnDate) text += `**Expected Return:** ${injury.returnDate}\n`;
+        if (injury.returnDate) {
+text += `**Expected Return:** ${injury.returnDate}\n`;
+}
 
         return {
           text,
@@ -2395,7 +2477,9 @@ Just ask naturally — I understand context and follow-ups!`,
     
     for (const player of entities.players) {
       const corr = rayPropIntelligence.findCorrelatedProps(player);
-      if (corr) correlations.push(corr);
+      if (corr) {
+correlations.push(corr);
+}
     }
 
     let text = `## 🎰 Parlay & Correlation Finder\n\n`;

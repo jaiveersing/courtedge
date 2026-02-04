@@ -119,7 +119,9 @@ const SearchAutocomplete = ({ placeholder = "Search players, teams, bets...", cl
 
   // Handle keyboard navigation
   const handleKeyDown = (e) => {
-    if (!isOpen || results.length === 0) return;
+    if (!isOpen || results.length === 0) {
+return;
+}
 
     switch (e.key) {
       case 'ArrowDown':

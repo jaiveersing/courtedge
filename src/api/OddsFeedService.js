@@ -162,19 +162,27 @@ class OddsFeedService {
    * Get best odds across all books
    */
   getBestOdds(game, betType = 'h2h', teamSide = 'home') {
-    if (!game || !game.bookmakers) return null;
+    if (!game || !game.bookmakers) {
+return null;
+}
 
     let bestOdds = null;
     let bestBook = null;
     let bestValue = -Infinity;
 
     Object.entries(game.bookmakers).forEach(([bookName, markets]) => {
-      if (!markets[betType]) return;
+      if (!markets[betType]) {
+return;
+}
 
       const outcomes = markets[betType].outcomes;
       const outcome = outcomes.find(o => {
-        if (teamSide === 'home') return o.name === game.homeTeam;
-        if (teamSide === 'away') return o.name === game.awayTeam;
+        if (teamSide === 'home') {
+return o.name === game.homeTeam;
+}
+        if (teamSide === 'away') {
+return o.name === game.awayTeam;
+}
         return o.name === teamSide;
       });
 
@@ -192,7 +200,9 @@ class OddsFeedService {
    * Find arbitrage opportunities
    */
   findArbitrage(game) {
-    if (!game || !game.bookmakers) return null;
+    if (!game || !game.bookmakers) {
+return null;
+}
 
     const opportunities = [];
 
@@ -260,13 +270,17 @@ class OddsFeedService {
    * Track line movements
    */
   trackLineMovement(game, previousGame) {
-    if (!previousGame) return null;
+    if (!previousGame) {
+return null;
+}
 
     const movements = [];
 
     Object.entries(game.bookmakers).forEach(([bookName, currentMarkets]) => {
       const previousMarkets = previousGame.bookmakers[bookName];
-      if (!previousMarkets) return;
+      if (!previousMarkets) {
+return;
+}
 
       ['h2h', 'spreads', 'totals'].forEach(marketType => {
         const current = currentMarkets[marketType];
@@ -328,7 +342,9 @@ class OddsFeedService {
    */
   getFromCache(key) {
     const item = this.cache.get(key);
-    if (!item) return null;
+    if (!item) {
+return null;
+}
     
     if (Date.now() - item.timestamp > this.cacheExpiry) {
       this.cache.delete(key);

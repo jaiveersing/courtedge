@@ -37,7 +37,9 @@ export class MomentumTracker {
     for (let i = recentPlays.length - 1; i >= 0; i--) {
       const play = recentPlays[i];
       
-      if (play.points === 0) continue; // Skip non-scoring plays
+      if (play.points === 0) {
+continue;
+} // Skip non-scoring plays
       
       if (currentTeamRun === null) {
         currentTeamRun = play.team;
@@ -62,10 +64,18 @@ export class MomentumTracker {
   }
 
   static classifyRunSignificance(points, length) {
-    if (points >= 15) return 'Massive Run 🔥';
-    if (points >= 10) return 'Significant Run ⚡';
-    if (points >= 7) return 'Notable Run 📈';
-    if (points >= 5) return 'Small Run ➕';
+    if (points >= 15) {
+return 'Massive Run 🔥';
+}
+    if (points >= 10) {
+return 'Significant Run ⚡';
+}
+    if (points >= 7) {
+return 'Notable Run 📈';
+}
+    if (points >= 5) {
+return 'Small Run ➕';
+}
     return 'Minimal';
   }
 
@@ -102,19 +112,33 @@ export class MomentumTracker {
   }
 
   static describeMomentum(balance) {
-    if (balance > 60) return 'Team A has STRONG momentum 🔥';
-    if (balance > 30) return 'Team A has momentum ⚡';
-    if (balance > 10) return 'Team A has slight edge 📈';
-    if (balance > -10) return 'Even momentum ⚖️';
-    if (balance > -30) return 'Team B has slight edge 📈';
-    if (balance > -60) return 'Team B has momentum ⚡';
+    if (balance > 60) {
+return 'Team A has STRONG momentum 🔥';
+}
+    if (balance > 30) {
+return 'Team A has momentum ⚡';
+}
+    if (balance > 10) {
+return 'Team A has slight edge 📈';
+}
+    if (balance > -10) {
+return 'Even momentum ⚖️';
+}
+    if (balance > -30) {
+return 'Team B has slight edge 📈';
+}
+    if (balance > -60) {
+return 'Team B has momentum ⚡';
+}
     return 'Team B has STRONG momentum 🔥';
   }
 
   static determineMomentumLeader(momentumScore) {
     const balance = parseFloat(momentumScore.balance);
     
-    if (Math.abs(balance) < 10) return 'Even';
+    if (Math.abs(balance) < 10) {
+return 'Even';
+}
     return balance > 0 ? 'Team A' : 'Team B';
   }
 
@@ -127,17 +151,26 @@ export class MomentumTracker {
     let swingProb = 0;
     
     // Strong momentum often leads to counterpunch
-    if (balance > 70) swingProb += 40;
-    else if (balance > 50) swingProb += 25;
+    if (balance > 70) {
+swingProb += 40;
+} else if (balance > 50) {
+swingProb += 25;
+}
     
     // End of quarters often see momentum shifts
-    if (timeRemaining < 120) swingProb += 15;
+    if (timeRemaining < 120) {
+swingProb += 15;
+}
     
     // Halftime adjustments
-    if (quarter === 3 && timeRemaining > 600) swingProb += 20;
+    if (quarter === 3 && timeRemaining > 600) {
+swingProb += 20;
+}
     
     // Timeout can disrupt momentum
-    if (gameState.recentTimeout) swingProb += 25;
+    if (gameState.recentTimeout) {
+swingProb += 25;
+}
     
     swingProb = Math.min(100, swingProb);
     
@@ -152,11 +185,21 @@ export class MomentumTracker {
   static getSwingFactors(balance, quarter, timeRemaining, gameState) {
     const factors = [];
     
-    if (balance > 70) factors.push('Extreme momentum (regression likely)');
-    if (timeRemaining < 120) factors.push('End of quarter approaching');
-    if (quarter === 3 && timeRemaining > 600) factors.push('Post-halftime adjustment period');
-    if (gameState.recentTimeout) factors.push('Recent timeout (coaching adjustment)');
-    if (gameState.foulTrouble) factors.push('Foul trouble affecting flow');
+    if (balance > 70) {
+factors.push('Extreme momentum (regression likely)');
+}
+    if (timeRemaining < 120) {
+factors.push('End of quarter approaching');
+}
+    if (quarter === 3 && timeRemaining > 600) {
+factors.push('Post-halftime adjustment period');
+}
+    if (gameState.recentTimeout) {
+factors.push('Recent timeout (coaching adjustment)');
+}
+    if (gameState.foulTrouble) {
+factors.push('Foul trouble affecting flow');
+}
     
     return factors.length > 0 ? factors : ['No major swing catalysts identified'];
   }
@@ -262,17 +305,29 @@ export class MomentumTracker {
       turnovers: factors.turnover_battle.impact
     };
     
-    if (ratings.scoring === 'Hot') return 'Hot shooting 🔥';
-    if (ratings.defense === 'Elite') return 'Elite defense 🛡️';
-    if (ratings.turnovers === 'Killing momentum') return 'Turnovers forcing 🎯';
+    if (ratings.scoring === 'Hot') {
+return 'Hot shooting 🔥';
+}
+    if (ratings.defense === 'Elite') {
+return 'Elite defense 🛡️';
+}
+    if (ratings.turnovers === 'Killing momentum') {
+return 'Turnovers forcing 🎯';
+}
     
     return 'Balanced attack';
   }
 
   static identifyWeakness(factors) {
-    if (factors.scoring_efficiency.rating === 'Cold') return 'Poor shooting';
-    if (factors.defensive_intensity.intensity === 'Poor') return 'Weak defense';
-    if (parseFloat(factors.turnover_battle.rate) > 18) return 'Too many turnovers';
+    if (factors.scoring_efficiency.rating === 'Cold') {
+return 'Poor shooting';
+}
+    if (factors.defensive_intensity.intensity === 'Poor') {
+return 'Weak defense';
+}
+    if (parseFloat(factors.turnover_battle.rate) > 18) {
+return 'Too many turnovers';
+}
     
     return 'No glaring weakness';
   }
@@ -440,18 +495,28 @@ export class LivePropAnalyzer {
     let fatigueScore = 0;
     
     // Minutes-based fatigue
-    if (minutesPlayed > 36) fatigueScore += 30;
-    else if (minutesPlayed > 32) fatigueScore += 15;
-    else if (minutesPlayed > 28) fatigueScore += 5;
+    if (minutesPlayed > 36) {
+fatigueScore += 30;
+} else if (minutesPlayed > 32) {
+fatigueScore += 15;
+} else if (minutesPlayed > 28) {
+fatigueScore += 5;
+}
     
     // Late game fatigue
-    if (quarter === 4) fatigueScore += 10;
+    if (quarter === 4) {
+fatigueScore += 10;
+}
     
     // Back-to-back games
-    if (gameState.backToBack) fatigueScore += 20;
+    if (gameState.backToBack) {
+fatigueScore += 20;
+}
     
     // Recent minutes load
-    if (player.recent_minutes_avg > 36) fatigueScore += 10;
+    if (player.recent_minutes_avg > 36) {
+fatigueScore += 10;
+}
     
     return {
       score: fatigueScore,
@@ -462,16 +527,28 @@ export class LivePropAnalyzer {
   }
 
   static describeFatigueImpact(score) {
-    if (score > 50) return 'Significant performance decline likely';
-    if (score > 30) return 'Moderate decline in efficiency expected';
-    if (score > 15) return 'Slight impact on late-game performance';
+    if (score > 50) {
+return 'Significant performance decline likely';
+}
+    if (score > 30) {
+return 'Moderate decline in efficiency expected';
+}
+    if (score > 15) {
+return 'Slight impact on late-game performance';
+}
     return 'Minimal fatigue impact';
   }
 
   static getFatigueRecommendation(score) {
-    if (score > 50) return '⚠️ Fade late-game props';
-    if (score > 30) return '📉 Reduce confidence in remaining prop projections';
-    if (score > 15) return '⚖️ Neutral - monitor closely';
+    if (score > 50) {
+return '⚠️ Fade late-game props';
+}
+    if (score > 30) {
+return '📉 Reduce confidence in remaining prop projections';
+}
+    if (score > 15) {
+return '⚖️ Neutral - monitor closely';
+}
     return '✅ No fatigue concerns';
   }
 
@@ -622,18 +699,28 @@ export class LivePropAnalyzer {
     let confidence = 70; // Base confidence
     
     // Reduce confidence for fatigue
-    if (fatigueImpact.level === 'High') confidence -= 25;
-    else if (fatigueImpact.level === 'Moderate') confidence -= 15;
-    else if (fatigueImpact.level === 'Mild') confidence -= 5;
+    if (fatigueImpact.level === 'High') {
+confidence -= 25;
+} else if (fatigueImpact.level === 'Moderate') {
+confidence -= 15;
+} else if (fatigueImpact.level === 'Mild') {
+confidence -= 5;
+}
     
     // Reduce confidence in blowouts
-    if (gameState.blowout) confidence -= 30;
+    if (gameState.blowout) {
+confidence -= 30;
+}
     
     // Increase confidence in close games (more predictable minutes)
-    if (gameState.close && gameState.quarter >= 3) confidence += 15;
+    if (gameState.close && gameState.quarter >= 3) {
+confidence += 15;
+}
     
     // Reduce confidence very late
-    if (gameState.quarter === 4 && gameState.timeRemaining < 180) confidence -= 20;
+    if (gameState.quarter === 4 && gameState.timeRemaining < 180) {
+confidence -= 20;
+}
     
     confidence = Math.max(0, Math.min(100, confidence));
     
@@ -734,8 +821,12 @@ export class LiveOddsTracker {
     let rlm = false;
     
     // If public is on favorite but line moves away from favorite = RLM
-    if (publicSide === 'favorite' && lineMove > 0) rlm = true;
-    if (publicSide === 'underdog' && lineMove < 0) rlm = true;
+    if (publicSide === 'favorite' && lineMove > 0) {
+rlm = true;
+}
+    if (publicSide === 'underdog' && lineMove < 0) {
+rlm = true;
+}
     
     return {
       detected: rlm,
@@ -949,13 +1040,19 @@ export class TimeoutImpactAnalyzer {
     let successProb = 0.50; // Base 50%
     
     // ATO plays are more successful
-    if (situation.ato_situation) successProb += 0.05;
+    if (situation.ato_situation) {
+successProb += 0.05;
+}
     
     // After stopping run, teams often respond
-    if (situation.opponentRun >= 8) successProb += 0.08;
+    if (situation.opponentRun >= 8) {
+successProb += 0.08;
+}
     
     // Late game pressure
-    if (situation.clutch) successProb += 0.03;
+    if (situation.clutch) {
+successProb += 0.03;
+}
     
     return {
       score_probability: (successProb * 100).toFixed(1) + '%',

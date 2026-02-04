@@ -359,7 +359,9 @@ export default function BetsPage() {
         streak = 1;
       } else if (bet.result === streakType) {
         streak++;
-      } else break;
+      } else {
+break;
+}
     }
     
     const bestWin = Math.max(...wins.map(b => b.profit), 0);
@@ -431,11 +433,15 @@ export default function BetsPage() {
   const betTypePerformance = useMemo(() => {
     const types = {};
     bets.filter(b => b.result !== 'pending').forEach(bet => {
-      if (!types[bet.betType]) types[bet.betType] = { wins: 0, total: 0, profit: 0, staked: 0 };
+      if (!types[bet.betType]) {
+types[bet.betType] = { wins: 0, total: 0, profit: 0, staked: 0 };
+}
       types[bet.betType].total++;
       types[bet.betType].staked += bet.stake;
       types[bet.betType].profit += bet.profit;
-      if (bet.result === 'win') types[bet.betType].wins++;
+      if (bet.result === 'win') {
+types[bet.betType].wins++;
+}
     });
     return Object.entries(types).map(([name, data]) => ({
       name, winRate: parseFloat(((data.wins / data.total) * 100).toFixed(1)),
@@ -447,11 +453,15 @@ export default function BetsPage() {
   const bookmakerPerformance = useMemo(() => {
     const books = {};
     bets.filter(b => b.result !== 'pending').forEach(bet => {
-      if (!books[bet.bookmaker]) books[bet.bookmaker] = { wins: 0, total: 0, profit: 0, staked: 0 };
+      if (!books[bet.bookmaker]) {
+books[bet.bookmaker] = { wins: 0, total: 0, profit: 0, staked: 0 };
+}
       books[bet.bookmaker].total++;
       books[bet.bookmaker].staked += bet.stake;
       books[bet.bookmaker].profit += bet.profit;
-      if (bet.result === 'win') books[bet.bookmaker].wins++;
+      if (bet.result === 'win') {
+books[bet.bookmaker].wins++;
+}
     });
     return Object.entries(books).map(([name, data]) => ({
       name, winRate: parseFloat(((data.wins / data.total) * 100).toFixed(1)),
@@ -469,10 +479,14 @@ export default function BetsPage() {
   const topPlayers = useMemo(() => {
     const players = {};
     bets.filter(b => b.result !== 'pending').forEach(bet => {
-      if (!players[bet.player]) players[bet.player] = { wins: 0, total: 0, profit: 0, team: bet.team };
+      if (!players[bet.player]) {
+players[bet.player] = { wins: 0, total: 0, profit: 0, team: bet.team };
+}
       players[bet.player].total++;
       players[bet.player].profit += bet.profit;
-      if (bet.result === 'win') players[bet.player].wins++;
+      if (bet.result === 'win') {
+players[bet.player].wins++;
+}
     });
     return Object.entries(players).map(([name, data]) => ({
       name, team: data.team, winRate: parseFloat(((data.wins / data.total) * 100).toFixed(1)),

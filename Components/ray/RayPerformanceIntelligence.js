@@ -97,27 +97,45 @@ export class ClutchPerformanceAnalyzer {
   static rateClutchScoring(clutchPPG, regularPPG) {
     const diff = clutchPPG - regularPPG;
     
-    if (diff > 3) return 'Elite Closer 🔥 (major scoring increase)';
-    if (diff > 1) return 'Clutch Scorer ⭐ (scoring increase)';
-    if (diff > -1) return 'Consistent 📊 (maintains scoring)';
-    if (diff > -3) return 'Slight Decline 📉 (minor drop-off)';
+    if (diff > 3) {
+return 'Elite Closer 🔥 (major scoring increase)';
+}
+    if (diff > 1) {
+return 'Clutch Scorer ⭐ (scoring increase)';
+}
+    if (diff > -1) {
+return 'Consistent 📊 (maintains scoring)';
+}
+    if (diff > -3) {
+return 'Slight Decline 📉 (minor drop-off)';
+}
     return 'Struggles in Clutch ⚠️ (significant decline)';
   }
 
   static rateClutchEfficiency(clutchFG, regularFG) {
     const diff = clutchFG - regularFG;
     
-    if (diff > 0.03) return 'More Efficient 🎯';
-    if (diff > -0.02) return 'Maintains Efficiency ✅';
-    if (diff > -0.05) return 'Slight Drop 📉';
+    if (diff > 0.03) {
+return 'More Efficient 🎯';
+}
+    if (diff > -0.02) {
+return 'Maintains Efficiency ✅';
+}
+    if (diff > -0.05) {
+return 'Slight Drop 📉';
+}
     return 'Struggles Under Pressure ⚠️';
   }
 
   static rateClutchShooting(clutch3PT, regular3PT) {
     const diff = clutch3PT - regular3PT;
     
-    if (diff > 0.04) return 'Rises Up 🔥';
-    if (diff > -0.03) return 'Steady ✅';
+    if (diff > 0.04) {
+return 'Rises Up 🔥';
+}
+    if (diff > -0.03) {
+return 'Steady ✅';
+}
     return 'Pressure Affected 📉';
   }
 
@@ -125,8 +143,12 @@ export class ClutchPerformanceAnalyzer {
     const clutchRatio = clutchAst / clutchTov;
     const regRatio = regAst / regTov;
     
-    if (clutchRatio > regRatio * 1.1 && clutchRatio > 2.0) return 'Elite Decision Maker 🧠';
-    if (clutchRatio >= regRatio * 0.9) return 'Reliable ✅';
+    if (clutchRatio > regRatio * 1.1 && clutchRatio > 2.0) {
+return 'Elite Decision Maker 🧠';
+}
+    if (clutchRatio >= regRatio * 0.9) {
+return 'Reliable ✅';
+}
     return 'Turnover Prone ⚠️';
   }
 
@@ -171,17 +193,27 @@ export class ClutchPerformanceAnalyzer {
     let score = 50;
     
     // FT shooting under pressure
-    if (ftRate > 0.85) score += 25;
-    else if (ftRate > 0.80) score += 15;
-    else score -= 10;
+    if (ftRate > 0.85) {
+score += 25;
+} else if (ftRate > 0.80) {
+score += 15;
+} else {
+score -= 10;
+}
     
     // Turnover control
-    if (tovRate < 2.5) score += 15;
-    else if (tovRate < 3.5) score += 5;
-    else score -= 15;
+    if (tovRate < 2.5) {
+score += 15;
+} else if (tovRate < 3.5) {
+score += 5;
+} else {
+score -= 15;
+}
     
     // Usage without crumbling
-    if (stats.usage_rate > 28 && stats.fg_pct > 0.42) score += 10;
+    if (stats.usage_rate > 28 && stats.fg_pct > 0.42) {
+score += 10;
+}
     
     return {
       score: Math.max(0, Math.min(100, score)),
@@ -219,21 +251,34 @@ export class ClutchPerformanceAnalyzer {
     
     // Scoring maintenance/improvement
     const scoringChange = parseFloat(comparison.scoring.percentage_change);
-    if (scoringChange > 10) score += 25;
-    else if (scoringChange > 0) score += 15;
-    else if (scoringChange > -10) score += 5;
-    else score -= 10;
+    if (scoringChange > 10) {
+score += 25;
+} else if (scoringChange > 0) {
+score += 15;
+} else if (scoringChange > -10) {
+score += 5;
+} else {
+score -= 10;
+}
     
     // Efficiency maintenance
     const effChange = parseFloat(comparison.efficiency.difference);
-    if (effChange > 2) score += 15;
-    else if (effChange > -2) score += 10;
-    else score -= 10;
+    if (effChange > 2) {
+score += 15;
+} else if (effChange > -2) {
+score += 10;
+} else {
+score -= 10;
+}
     
     // FT shooting (best pressure indicator)
-    if (clutchStats.ft_pct > 0.87) score += 15;
-    else if (clutchStats.ft_pct > 0.82) score += 5;
-    else score -= 10;
+    if (clutchStats.ft_pct > 0.87) {
+score += 15;
+} else if (clutchStats.ft_pct > 0.82) {
+score += 5;
+} else {
+score -= 10;
+}
     
     return {
       overall_score: Math.max(0, Math.min(100, score)),
@@ -467,10 +512,18 @@ export class DefensiveMatchupAnalyzer {
   static identifyDefensiveStrengths(defender) {
     const strengths = [];
     
-    if ((defender.dfg_pct || 0.45) < 0.44) strengths.push('Elite shot prevention');
-    if ((defender.stats?.blk || 0) > 1.0) strengths.push('Rim protection');
-    if ((defender.stats?.stl || 0) > 1.3) strengths.push('Ball pressure');
-    if ((defender.contests || 0) > 14) strengths.push('High contest rate');
+    if ((defender.dfg_pct || 0.45) < 0.44) {
+strengths.push('Elite shot prevention');
+}
+    if ((defender.stats?.blk || 0) > 1.0) {
+strengths.push('Rim protection');
+}
+    if ((defender.stats?.stl || 0) > 1.3) {
+strengths.push('Ball pressure');
+}
+    if ((defender.contests || 0) > 14) {
+strengths.push('High contest rate');
+}
     
     return strengths.length > 0 ? strengths : ['Sound fundamentals'];
   }
@@ -478,10 +531,18 @@ export class DefensiveMatchupAnalyzer {
   static identifyDefensiveWeaknesses(defender) {
     const weaknesses = [];
     
-    if ((defender.dfg_pct || 0.45) > 0.47) weaknesses.push('Allows high FG%');
-    if ((defender.stats?.pf || 0) > 3.5) weaknesses.push('Foul prone');
-    if (defender.speed_rating < 70) weaknesses.push('Lateral quickness');
-    if (defender.strength_rating < 65) weaknesses.push('Physical strength');
+    if ((defender.dfg_pct || 0.45) > 0.47) {
+weaknesses.push('Allows high FG%');
+}
+    if ((defender.stats?.pf || 0) > 3.5) {
+weaknesses.push('Foul prone');
+}
+    if (defender.speed_rating < 70) {
+weaknesses.push('Lateral quickness');
+}
+    if (defender.strength_rating < 65) {
+weaknesses.push('Physical strength');
+}
     
     return weaknesses.length > 0 ? weaknesses : ['None major'];
   }
@@ -489,10 +550,18 @@ export class DefensiveMatchupAnalyzer {
   static getDefensiveReputation(defender) {
     const rating = defender.def_rating || 108;
     
-    if (rating < 103) return { level: 'Elite 🏆', impact: 'Major offensive suppression' };
-    if (rating < 106) return { level: 'Excellent ⭐', impact: 'Significant defensive impact' };
-    if (rating < 109) return { level: 'Above Average ✅', impact: 'Solid defender' };
-    if (rating < 112) return { level: 'Average 📊', impact: 'Moderate impact' };
+    if (rating < 103) {
+return { level: 'Elite 🏆', impact: 'Major offensive suppression' };
+}
+    if (rating < 106) {
+return { level: 'Excellent ⭐', impact: 'Significant defensive impact' };
+}
+    if (rating < 109) {
+return { level: 'Above Average ✅', impact: 'Solid defender' };
+}
+    if (rating < 112) {
+return { level: 'Average 📊', impact: 'Moderate impact' };
+}
     return { level: 'Below Average ⚠️', impact: 'Exploitable defender' };
   }
 
@@ -554,10 +623,18 @@ export class DefensiveMatchupAnalyzer {
   }
 
   static assessOverallMatchup(advantage) {
-    if (advantage > 12) return '🎯 SMASH SPOT - Target all props OVER';
-    if (advantage > 6) return '✅ FAVORABLE - Lean props OVER';
-    if (advantage > -6) return '📊 NEUTRAL - Use other analysis';
-    if (advantage > -12) return '⚠️ TOUGH MATCHUP - Lean props UNDER';
+    if (advantage > 12) {
+return '🎯 SMASH SPOT - Target all props OVER';
+}
+    if (advantage > 6) {
+return '✅ FAVORABLE - Lean props OVER';
+}
+    if (advantage > -6) {
+return '📊 NEUTRAL - Use other analysis';
+}
+    if (advantage > -12) {
+return '⚠️ TOUGH MATCHUP - Lean props UNDER';
+}
     return '🚨 NIGHTMARE MATCHUP - Fade all props';
   }
 
@@ -587,9 +664,15 @@ export class DefensiveMatchupAnalyzer {
   static getHistoricalAdjustment(history, player) {
     const diff = history.avg_pts - (player.stats?.pts || 20);
     
-    if (Math.abs(diff) < 1.5) return 'No adjustment - typical performance';
-    if (diff > 3) return `+${diff.toFixed(1)} points - Target OVER`;
-    if (diff < -3) return `${diff.toFixed(1)} points - Target UNDER`;
+    if (Math.abs(diff) < 1.5) {
+return 'No adjustment - typical performance';
+}
+    if (diff > 3) {
+return `+${diff.toFixed(1)} points - Target OVER`;
+}
+    if (diff < -3) {
+return `${diff.toFixed(1)} points - Target UNDER`;
+}
     
     return `${diff > 0 ? '+' : ''}${diff.toFixed(1)} points - Slight ${diff > 0 ? 'OVER' : 'UNDER'} lean`;
   }

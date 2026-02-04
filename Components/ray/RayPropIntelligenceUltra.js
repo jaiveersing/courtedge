@@ -242,21 +242,43 @@ class RayPropIntelligenceUltra {
   }
 
   gradeEV(evPercent) {
-    if (evPercent > 10) return 'A+';
-    if (evPercent > 7) return 'A';
-    if (evPercent > 5) return 'B+';
-    if (evPercent > 3) return 'B';
-    if (evPercent > 1) return 'C';
-    if (evPercent > 0) return 'D';
+    if (evPercent > 10) {
+return 'A+';
+}
+    if (evPercent > 7) {
+return 'A';
+}
+    if (evPercent > 5) {
+return 'B+';
+}
+    if (evPercent > 3) {
+return 'B';
+}
+    if (evPercent > 1) {
+return 'C';
+}
+    if (evPercent > 0) {
+return 'D';
+}
     return 'F';
   }
 
   getEVRecommendation(evPercent, edge) {
-    if (evPercent > 8 && edge > 8) return '🔥 SMASH - Strong edge detected';
-    if (evPercent > 5 && edge > 5) return '✅ STRONG BET - Clear value';
-    if (evPercent > 2 && edge > 2) return '👍 VALUE BET - Worth taking';
-    if (evPercent > 0 && edge > 0) return '🤔 LEAN - Small edge';
-    if (evPercent > -2) return '⚖️ PASS - No clear value';
+    if (evPercent > 8 && edge > 8) {
+return '🔥 SMASH - Strong edge detected';
+}
+    if (evPercent > 5 && edge > 5) {
+return '✅ STRONG BET - Clear value';
+}
+    if (evPercent > 2 && edge > 2) {
+return '👍 VALUE BET - Worth taking';
+}
+    if (evPercent > 0 && edge > 0) {
+return '🤔 LEAN - Small edge';
+}
+    if (evPercent > -2) {
+return '⚖️ PASS - No clear value';
+}
     return '❌ AVOID - Negative expectation';
   }
 
@@ -295,7 +317,9 @@ class RayPropIntelligenceUltra {
   calculateRiskOfRuin(winProb, odds, betFraction) {
     // Simplified risk of ruin calculation
     const edge = winProb - this.oddsToImpliedProb(odds);
-    if (edge <= 0) return 1; // 100% risk if no edge
+    if (edge <= 0) {
+return 1;
+} // 100% risk if no edge
     
     const variance = winProb * (1 - winProb);
     const ror = Math.exp(-2 * edge * (1 / betFraction) / variance);
@@ -303,18 +327,34 @@ class RayPropIntelligenceUltra {
   }
 
   assessRiskLevel(kellyPct) {
-    if (kellyPct > 10) return { level: 'EXTREME', color: 'red', emoji: '🚨' };
-    if (kellyPct > 5) return { level: 'HIGH', color: 'orange', emoji: '⚠️' };
-    if (kellyPct > 2) return { level: 'MODERATE', color: 'yellow', emoji: '🔔' };
-    if (kellyPct > 0.5) return { level: 'LOW', color: 'green', emoji: '✅' };
+    if (kellyPct > 10) {
+return { level: 'EXTREME', color: 'red', emoji: '🚨' };
+}
+    if (kellyPct > 5) {
+return { level: 'HIGH', color: 'orange', emoji: '⚠️' };
+}
+    if (kellyPct > 2) {
+return { level: 'MODERATE', color: 'yellow', emoji: '🔔' };
+}
+    if (kellyPct > 0.5) {
+return { level: 'LOW', color: 'green', emoji: '✅' };
+}
     return { level: 'MINIMAL', color: 'blue', emoji: '💤' };
   }
 
   getKellyRecommendation(fullKelly, suggestedBet) {
-    if (fullKelly <= 0) return '🚫 NO BET - Negative expectation';
-    if (suggestedBet < 5) return '⏭️ SKIP - Edge too small to bet';
-    if (suggestedBet < 25) return `💵 SMALL - Bet $${suggestedBet.toFixed(0)}`;
-    if (suggestedBet < 75) return `💰 STANDARD - Bet $${suggestedBet.toFixed(0)}`;
+    if (fullKelly <= 0) {
+return '🚫 NO BET - Negative expectation';
+}
+    if (suggestedBet < 5) {
+return '⏭️ SKIP - Edge too small to bet';
+}
+    if (suggestedBet < 25) {
+return `💵 SMALL - Bet $${suggestedBet.toFixed(0)}`;
+}
+    if (suggestedBet < 75) {
+return `💰 STANDARD - Bet $${suggestedBet.toFixed(0)}`;
+}
     return `🔥 MAX VALUE - Bet $${suggestedBet.toFixed(0)}`;
   }
 
@@ -324,7 +364,9 @@ class RayPropIntelligenceUltra {
 
   detectSharpMoney(playerName, propType) {
     const movement = this.lineMovements[playerName]?.[propType];
-    if (!movement) return { detected: false, signal: null };
+    if (!movement) {
+return { detected: false, signal: null };
+}
 
     const signals = [];
     let sharpScore = 0;
@@ -380,9 +422,15 @@ class RayPropIntelligenceUltra {
   }
 
   getSharpRecommendation(score, side) {
-    if (score > 60) return `🎯 FOLLOW SHARPS - Strong signal on ${side?.toUpperCase() || 'CURRENT SIDE'}`;
-    if (score > 40) return `📊 LEAN WITH SHARPS - Moderate signal on ${side?.toUpperCase() || 'CURRENT SIDE'}`;
-    if (score > 20) return `🔍 MONITOR - Some sharp activity detected`;
+    if (score > 60) {
+return `🎯 FOLLOW SHARPS - Strong signal on ${side?.toUpperCase() || 'CURRENT SIDE'}`;
+}
+    if (score > 40) {
+return `📊 LEAN WITH SHARPS - Moderate signal on ${side?.toUpperCase() || 'CURRENT SIDE'}`;
+}
+    if (score > 20) {
+return `🔍 MONITOR - Some sharp activity detected`;
+}
     return `📈 NO CLEAR SIGNAL - Await more information`;
   }
 
@@ -427,7 +475,9 @@ class RayPropIntelligenceUltra {
     const reverseKey = `${stat2}-${stat1}`;
     
     const matrix = this.correlationMatrix[relationship];
-    if (!matrix) return { correlation: 0, usable: false };
+    if (!matrix) {
+return { correlation: 0, usable: false };
+}
 
     let correlation = matrix[key] || matrix[reverseKey] || 0;
 
@@ -436,7 +486,9 @@ class RayPropIntelligenceUltra {
       // Same player boosts
       if (stat1 === 'pts' && stat2 === 'threes') {
         const playerData = PLAYERS_DB[player1] || EXTENDED_PLAYERS[player1];
-        if (playerData?.season?.threePct > 38) correlation += 0.15; // Good 3pt shooters
+        if (playerData?.season?.threePct > 38) {
+correlation += 0.15;
+} // Good 3pt shooters
       }
     }
 
@@ -452,9 +504,15 @@ class RayPropIntelligenceUltra {
   }
 
   getCorrelationRecommendation(corr, stat1, stat2) {
-    if (corr > 0.5) return `🔗 Strong positive - ${stat1.toUpperCase()} OVER pairs well with ${stat2.toUpperCase()} OVER`;
-    if (corr > 0.3) return `📊 Moderate link - Consider pairing ${stat1.toUpperCase()} and ${stat2.toUpperCase()} same direction`;
-    if (corr < -0.3) return `⚠️ Negative correlation - Avoid pairing ${stat1.toUpperCase()} and ${stat2.toUpperCase()} same direction`;
+    if (corr > 0.5) {
+return `🔗 Strong positive - ${stat1.toUpperCase()} OVER pairs well with ${stat2.toUpperCase()} OVER`;
+}
+    if (corr > 0.3) {
+return `📊 Moderate link - Consider pairing ${stat1.toUpperCase()} and ${stat2.toUpperCase()} same direction`;
+}
+    if (corr < -0.3) {
+return `⚠️ Negative correlation - Avoid pairing ${stat1.toUpperCase()} and ${stat2.toUpperCase()} same direction`;
+}
     return `➡️ Low correlation - Props are relatively independent`;
   }
 
@@ -463,7 +521,9 @@ class RayPropIntelligenceUltra {
   // ═══════════════════════════════════════════════════════════════════════════════════════════════════════
 
   buildSmartParlay(legs, bankroll = 1000) {
-    if (legs.length < 2) return { error: 'Need at least 2 legs for a parlay' };
+    if (legs.length < 2) {
+return { error: 'Need at least 2 legs for a parlay' };
+}
 
     // Calculate combined probability
     let combinedProb = 1;
@@ -474,10 +534,14 @@ class RayPropIntelligenceUltra {
     for (let i = 0; i < legs.length; i++) {
       const leg = legs[i];
       const player = PLAYERS_DB[leg.player] || EXTENDED_PLAYERS[leg.player];
-      if (!player) continue;
+      if (!player) {
+continue;
+}
 
       const prop = this.propLines[leg.player]?.[leg.stat];
-      if (!prop) continue;
+      if (!prop) {
+continue;
+}
 
       const odds = leg.direction === 'over' ? prop.overOdds : prop.underOdds;
       const winProb = this.estimateWinProbability(leg.player, leg.stat, leg.direction);
@@ -531,11 +595,21 @@ class RayPropIntelligenceUltra {
   }
 
   getParlayRecommendation(prob, evPct, legCount) {
-    if (legCount > 4) return '⚠️ HIGH RISK - Consider reducing legs';
-    if (evPct > 10 && prob > 20) return '🔥 STRONG PARLAY - Clear value across legs';
-    if (evPct > 5 && prob > 25) return '✅ GOOD VALUE - Solid parlay opportunity';
-    if (evPct > 0 && prob > 30) return '👍 PLAYABLE - Worth considering';
-    if (evPct > -5) return '🤔 MARGINAL - Proceed with caution';
+    if (legCount > 4) {
+return '⚠️ HIGH RISK - Consider reducing legs';
+}
+    if (evPct > 10 && prob > 20) {
+return '🔥 STRONG PARLAY - Clear value across legs';
+}
+    if (evPct > 5 && prob > 25) {
+return '✅ GOOD VALUE - Solid parlay opportunity';
+}
+    if (evPct > 0 && prob > 30) {
+return '👍 PLAYABLE - Worth considering';
+}
+    if (evPct > -5) {
+return '🤔 MARGINAL - Proceed with caution';
+}
     return '❌ AVOID - Negative overall expectation';
   }
 
@@ -545,7 +619,9 @@ class RayPropIntelligenceUltra {
 
   analyzeFullProp(playerName, propType, customLine = null) {
     const player = PLAYERS_DB[playerName] || EXTENDED_PLAYERS[playerName];
-    if (!player) return { error: `Player "${playerName}" not found` };
+    if (!player) {
+return { error: `Player "${playerName}" not found` };
+}
 
     const lines = this.propLines[playerName];
     if (!lines || !lines[propType]) {
@@ -621,7 +697,9 @@ class RayPropIntelligenceUltra {
 
   estimateWinProbability(playerName, propType, direction, customLine = null) {
     const player = PLAYERS_DB[playerName] || EXTENDED_PLAYERS[playerName];
-    if (!player) return 0.5;
+    if (!player) {
+return 0.5;
+}
 
     const prop = this.propLines[playerName]?.[propType];
     const line = customLine || prop?.line || player.season?.[propType] || 0;
@@ -665,7 +743,9 @@ class RayPropIntelligenceUltra {
 
   findBestLine(playerName, propType) {
     const prop = this.propLines[playerName]?.[propType];
-    if (!prop?.books) return null;
+    if (!prop?.books) {
+return null;
+}
 
     const bestOver = Object.entries(prop.books)
       .map(([book, line]) => ({ book, line }))
@@ -716,10 +796,18 @@ class RayPropIntelligenceUltra {
     const recentImprovement = last5 - last10;
     const overallImprovement = last5 - season;
 
-    if (recentImprovement > 2 && overallImprovement > 0) return '🚀 HOT';
-    if (recentImprovement > 0 && overallImprovement > 0) return '📈 RISING';
-    if (recentImprovement < -2 && overallImprovement < 0) return '❄️ COLD';
-    if (recentImprovement < 0 && overallImprovement < 0) return '📉 FALLING';
+    if (recentImprovement > 2 && overallImprovement > 0) {
+return '🚀 HOT';
+}
+    if (recentImprovement > 0 && overallImprovement > 0) {
+return '📈 RISING';
+}
+    if (recentImprovement < -2 && overallImprovement < 0) {
+return '❄️ COLD';
+}
+    if (recentImprovement < 0 && overallImprovement < 0) {
+return '📉 FALLING';
+}
     return '➡️ STABLE';
   }
 
@@ -852,7 +940,9 @@ class RayPropIntelligenceUltra {
       
       for (const propType of Object.keys(props)) {
         const analysis = this.analyzeFullProp(playerName, propType);
-        if (analysis.error) continue;
+        if (analysis.error) {
+continue;
+}
 
         const bestEV = Math.max(analysis.ev.over.evPercent, analysis.ev.under.evPercent);
         const direction = analysis.ev.over.evPercent > analysis.ev.under.evPercent ? 'OVER' : 'UNDER';
@@ -876,7 +966,9 @@ class RayPropIntelligenceUltra {
 
   getAllProps(playerName) {
     const props = this.propLines[playerName];
-    if (!props) return null;
+    if (!props) {
+return null;
+}
 
     const analyses = {};
     for (const propType of Object.keys(props)) {

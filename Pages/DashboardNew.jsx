@@ -182,7 +182,9 @@ const AnimatedNumber = ({ value, duration = 1500, suffix = '', prefix = '', deci
   useEffect(() => {
     startTimeRef.current = null;
     const animate = (timestamp) => {
-      if (!startTimeRef.current) startTimeRef.current = timestamp;
+      if (!startTimeRef.current) {
+startTimeRef.current = timestamp;
+}
       const progress = Math.min((timestamp - startTimeRef.current) / duration, 1);
       const easeOutQuart = 1 - Math.pow(1 - progress, 4);
       setDisplayValue(easeOutQuart * value);
@@ -192,7 +194,9 @@ const AnimatedNumber = ({ value, duration = 1500, suffix = '', prefix = '', deci
     };
     rafRef.current = requestAnimationFrame(animate);
     return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (rafRef.current) {
+cancelAnimationFrame(rafRef.current);
+}
     };
   }, [value, duration]);
 
@@ -312,7 +316,9 @@ const MiniSparkline = ({ data, color = '#3b82f6', height = 40, width = 120 }) =>
 
 // 🔥 Streak Flame Component
 const StreakFlame = ({ streak, size = 20 }) => {
-  if (streak < 2) return null;
+  if (streak < 2) {
+return null;
+}
   const intensity = Math.min(streak, 10);
   return (
     <div className="flex items-center gap-1">
@@ -577,7 +583,9 @@ export default function Dashboard() {
 
   // Live update simulation
   useEffect(() => {
-    if (!isLive) return;
+    if (!isLive) {
+return;
+}
     const interval = setInterval(() => {
       setLastUpdate(new Date());
     }, 30000);

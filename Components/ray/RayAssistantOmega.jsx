@@ -26,18 +26,44 @@ let rayUltimateEngine, rayPropIntelligenceUltra, rayLiveDataUltra;
 let rayConversationBrain, rayAnalytics, rayPropIntelligence, rayComparisonEngine;
 let PLAYERS_DB = {}, TEAMS_DB = {};
 
-try { rayUltimateEngine = require('./RayUltimateEngine').default; } catch(e) { rayUltimateEngine = null; }
-try { rayPropIntelligenceUltra = require('./RayPropIntelligenceUltra').default; } catch(e) { rayPropIntelligenceUltra = null; }
-try { rayLiveDataUltra = require('./RayLiveDataServiceUltra').default; } catch(e) { rayLiveDataUltra = null; }
+try {
+ rayUltimateEngine = require('./RayUltimateEngine').default; 
+} catch(e) {
+ rayUltimateEngine = null; 
+}
+try {
+ rayPropIntelligenceUltra = require('./RayPropIntelligenceUltra').default; 
+} catch(e) {
+ rayPropIntelligenceUltra = null; 
+}
+try {
+ rayLiveDataUltra = require('./RayLiveDataServiceUltra').default; 
+} catch(e) {
+ rayLiveDataUltra = null; 
+}
 try { 
   const analytics = require('./RayAnalyticsEngine');
   rayAnalytics = analytics.default;
   PLAYERS_DB = analytics.PLAYERS_DB || {};
   TEAMS_DB = analytics.TEAMS_DB || {};
-} catch(e) { rayAnalytics = null; }
-try { rayConversationBrain = require('./RayConversationBrain').default; } catch(e) { rayConversationBrain = null; }
-try { rayPropIntelligence = require('./RayPropIntelligence').default; } catch(e) { rayPropIntelligence = null; }
-try { rayComparisonEngine = require('./RayComparisonEngine').default; } catch(e) { rayComparisonEngine = null; }
+} catch(e) {
+ rayAnalytics = null; 
+}
+try {
+ rayConversationBrain = require('./RayConversationBrain').default; 
+} catch(e) {
+ rayConversationBrain = null; 
+}
+try {
+ rayPropIntelligence = require('./RayPropIntelligence').default; 
+} catch(e) {
+ rayPropIntelligence = null; 
+}
+try {
+ rayComparisonEngine = require('./RayComparisonEngine').default; 
+} catch(e) {
+ rayComparisonEngine = null; 
+}
 
 // ═══════════════════════════════════════════════════════════════════════════════════════════════════════════
 // 🎯 CONFIGURATION
@@ -131,11 +157,15 @@ class SpeechEngine {
   }
 
   init() {
-    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+    if (typeof window === 'undefined' || !window.speechSynthesis) {
+return;
+}
     
     const loadVoices = () => {
       const voices = window.speechSynthesis.getVoices();
-      if (voices.length === 0) return;
+      if (voices.length === 0) {
+return;
+}
       
       // Priority: Google > Microsoft > Apple > Default
       const priorities = [
@@ -166,13 +196,17 @@ class SpeechEngine {
     
     // Keep synthesis alive (Chrome bug workaround)
     setInterval(() => {
-      if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+      if (window.speechSynthesis.paused) {
+window.speechSynthesis.resume();
+}
     }, 5000);
   }
 
   // Clean text for perfect natural speech
   clean(text) {
-    if (!text) return '';
+    if (!text) {
+return '';
+}
     
     return text
       // Remove markdown
@@ -245,10 +279,14 @@ class SpeechEngine {
   }
 
   speak(text, options = {}) {
-    if (!this.enabled || !text || typeof window === 'undefined') return;
+    if (!this.enabled || !text || typeof window === 'undefined') {
+return;
+}
     
     const cleanText = this.clean(text);
-    if (!cleanText) return;
+    if (!cleanText) {
+return;
+}
     
     // Limit length for natural listening
     const finalText = cleanText.length > 400 
@@ -258,7 +296,9 @@ class SpeechEngine {
     window.speechSynthesis.cancel();
     
     const utterance = new SpeechSynthesisUtterance(finalText);
-    if (this.voice) utterance.voice = this.voice;
+    if (this.voice) {
+utterance.voice = this.voice;
+}
     utterance.rate = options.rate || 1.05;
     utterance.pitch = options.pitch || 1.0;
     utterance.volume = options.volume || 1.0;
@@ -279,7 +319,9 @@ class SpeechEngine {
 
   toggle() {
     this.enabled = !this.enabled;
-    if (!this.enabled) this.stop();
+    if (!this.enabled) {
+this.stop();
+}
     return this.enabled;
   }
 }
@@ -298,7 +340,9 @@ class AIBrain {
   findPlayer(text) {
     const lower = text.toLowerCase();
     for (const [alias, name] of Object.entries(PLAYER_ALIASES)) {
-      if (lower.includes(alias)) return name;
+      if (lower.includes(alias)) {
+return name;
+}
     }
     return null;
   }
@@ -306,14 +350,18 @@ class AIBrain {
   findRoute(text) {
     const lower = text.toLowerCase();
     for (const [keyword, path] of Object.entries(ROUTES)) {
-      if (lower.includes(keyword)) return { keyword, path };
+      if (lower.includes(keyword)) {
+return { keyword, path };
+}
     }
     return null;
   }
 
   async process(input, navigate) {
     const text = input.trim();
-    if (!text) return null;
+    if (!text) {
+return null;
+}
     
     // Check cache first
     const cacheKey = text.toLowerCase();
@@ -1041,14 +1089,22 @@ const styles = `
 const formatTime = (date) => {
   const now = Date.now();
   const diff = Math.floor((now - date.getTime()) / 1000);
-  if (diff < 10) return 'now';
-  if (diff < 60) return `${diff}s`;
-  if (diff < 3600) return `${Math.floor(diff / 60)}m`;
+  if (diff < 10) {
+return 'now';
+}
+  if (diff < 60) {
+return `${diff}s`;
+}
+  if (diff < 3600) {
+return `${Math.floor(diff / 60)}m`;
+}
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 };
 
 const parseMarkdown = (text) => {
-  if (!text) return '';
+  if (!text) {
+return '';
+}
   return text
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/## (.+?)(?:\n|$)/g, '<h2>$1</h2>')
@@ -1077,7 +1133,9 @@ const useVoiceRecognition = (onResult, onError) => {
   const timeoutRef = useRef(null);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined') {
+return;
+}
     
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -1140,19 +1198,27 @@ const useVoiceRecognition = (onResult, onError) => {
     recognition.onend = () => {
       setIsListening(false);
       setInterim('');
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (timeoutRef.current) {
+clearTimeout(timeoutRef.current);
+}
     };
 
     recognitionRef.current = recognition;
 
     return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      try { recognition.stop(); } catch (e) { /* ignore */ }
+      if (timeoutRef.current) {
+clearTimeout(timeoutRef.current);
+}
+      try {
+ recognition.stop(); 
+} catch (e) { /* ignore */ }
     };
   }, [onResult, onError]);
 
   const toggle = useCallback(() => {
-    if (!recognitionRef.current) return;
+    if (!recognitionRef.current) {
+return;
+}
     
     if (isListening) {
       recognitionRef.current.stop();
@@ -1167,7 +1233,9 @@ const useVoiceRecognition = (onResult, onError) => {
 
   const stop = useCallback(() => {
     if (recognitionRef.current) {
-      try { recognitionRef.current.stop(); } catch (e) { /* ignore */ }
+      try {
+ recognitionRef.current.stop(); 
+} catch (e) { /* ignore */ }
     }
   }, []);
 
@@ -1287,7 +1355,9 @@ function RayAssistant({ isOpen, onClose, onToggle }) {
   // Process message
   const processMessage = useCallback(async (text) => {
     const trimmed = text?.trim();
-    if (!trimmed || processingRef.current) return;
+    if (!trimmed || processingRef.current) {
+return;
+}
     
     processingRef.current = true;
     setInput('');
@@ -1355,7 +1425,9 @@ function RayAssistant({ isOpen, onClose, onToggle }) {
   // Handle submit
   const handleSubmit = useCallback((textOverride) => {
     const text = textOverride || input;
-    if (!text.trim() || processingRef.current) return;
+    if (!text.trim() || processingRef.current) {
+return;
+}
     processMessage(text);
   }, [input, processMessage]);
 
@@ -1457,7 +1529,9 @@ function RayAssistant({ isOpen, onClose, onToggle }) {
           <button className="ray-chip" onClick={() => processMessage('Sharp money plays')}>
             <DollarSign size={12} /> Sharp
           </button>
-          <button className="ray-chip" onClick={() => { navigate('/bets'); speechEngine.speak('Going to bets'); }}>
+          <button className="ray-chip" onClick={() => {
+ navigate('/bets'); speechEngine.speak('Going to bets'); 
+}}>
             <BarChart3 size={12} /> Bets
           </button>
         </div>

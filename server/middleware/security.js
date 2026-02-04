@@ -71,7 +71,9 @@ export const mlRateLimiter = rateLimit({
 export const corsOptions = {
   origin: function (origin, callback) {
     // Allow requests with no origin (mobile apps, Postman, etc.)
-    if (!origin) return callback(null, true);
+    if (!origin) {
+return callback(null, true);
+}
     
     const allowedOrigins = [
       'http://localhost:5173',

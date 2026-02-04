@@ -148,7 +148,9 @@ export class PerformanceChartGenerator {
 
   static normalizeScore(value, maxValue, inverse = false) {
     let normalized = (value / maxValue) * 100;
-    if (inverse) normalized = 100 - normalized;
+    if (inverse) {
+normalized = 100 - normalized;
+}
     return Math.min(100, Math.max(0, normalized));
   }
 
@@ -220,7 +222,9 @@ export class HeatMapGenerator {
       
       if (gridX >= 0 && gridX < 50 && gridY >= 0 && gridY < 50) {
         courtGrid[gridY][gridX].attempts++;
-        if (shot.made) courtGrid[gridY][gridX].makes++;
+        if (shot.made) {
+courtGrid[gridY][gridX].makes++;
+}
       }
     });
     
@@ -250,7 +254,9 @@ export class HeatMapGenerator {
   static createHeatMapVisualization(grid) {
     return grid.map(row => 
       row.map(cell => {
-        if (cell.attempts === 0) return { color: '#e0e0e0', intensity: 0 };
+        if (cell.attempts === 0) {
+return { color: '#e0e0e0', intensity: 0 };
+}
         
         cell.fg_pct = cell.makes / cell.attempts;
         cell.heat = cell.fg_pct * Math.min(1, cell.attempts / 10);
@@ -265,11 +271,21 @@ export class HeatMapGenerator {
   }
 
   static getHeatColor(heat) {
-    if (heat >= 0.6) return '#00ff00';
-    if (heat >= 0.5) return '#90ee90';
-    if (heat >= 0.4) return '#ffff00';
-    if (heat >= 0.3) return '#ffa500';
-    if (heat >= 0.2) return '#ff6347';
+    if (heat >= 0.6) {
+return '#00ff00';
+}
+    if (heat >= 0.5) {
+return '#90ee90';
+}
+    if (heat >= 0.4) {
+return '#ffff00';
+}
+    if (heat >= 0.3) {
+return '#ffa500';
+}
+    if (heat >= 0.2) {
+return '#ff6347';
+}
     return '#ff0000';
   }
 
@@ -530,8 +546,12 @@ export class NetworkGraphGenerator {
   }
 
   static getCorrelationColor(value) {
-    if (value > 0.7) return 'rgba(255, 0, 0, 0.8)';
-    if (value > 0.5) return 'rgba(255, 165, 0, 0.8)';
+    if (value > 0.7) {
+return 'rgba(255, 0, 0, 0.8)';
+}
+    if (value > 0.5) {
+return 'rgba(255, 165, 0, 0.8)';
+}
     return 'rgba(100, 100, 100, 0.5)';
   }
 
@@ -648,9 +668,15 @@ export class NetworkGraphGenerator {
 
   static calculateBetCorrelation(bet1, bet2) {
     // Simple correlation: same game = 1.0, same team = 0.5, same day = 0.3
-    if (bet1.gameId === bet2.gameId) return 1.0;
-    if (bet1.team === bet2.team) return 0.5;
-    if (bet1.date === bet2.date) return 0.3;
+    if (bet1.gameId === bet2.gameId) {
+return 1.0;
+}
+    if (bet1.team === bet2.team) {
+return 0.5;
+}
+    if (bet1.date === bet2.date) {
+return 0.3;
+}
     return 0;
   }
 }
@@ -692,7 +718,9 @@ export class StatisticalChartGenerator {
     const upper = Math.ceil(index);
     const weight = index % 1;
     
-    if (lower === upper) return sortedArray[lower];
+    if (lower === upper) {
+return sortedArray[lower];
+}
     return sortedArray[lower] * (1 - weight) + sortedArray[upper] * weight;
   }
 

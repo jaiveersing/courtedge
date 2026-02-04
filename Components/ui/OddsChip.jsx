@@ -1,8 +1,12 @@
 export function OddsChip({ odds, sportsbook, className = '' }) {
   const formatOdds = (odds) => {
-    if (!odds) return 'N/A';
+    if (!odds) {
+return 'N/A';
+}
     const num = parseFloat(odds);
-    if (num > 0) return `+${num}`;
+    if (num > 0) {
+return `+${num}`;
+}
     return num.toString();
   };
 

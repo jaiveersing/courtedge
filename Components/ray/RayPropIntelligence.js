@@ -241,10 +241,14 @@ class RayPropIntelligence {
   // ─────────────────────────────────────────────────────────────────────────────
   analyzeProp(playerName, propType) {
     const player = rayAnalytics.findPlayer(playerName);
-    if (!player) return null;
+    if (!player) {
+return null;
+}
 
     const lines = this.propLines[player.name];
-    if (!lines || !lines[propType]) return null;
+    if (!lines || !lines[propType]) {
+return null;
+}
 
     const prop = lines[propType];
     const movement = this.lineMovements[player.name]?.[propType];
@@ -277,7 +281,7 @@ class RayPropIntelligence {
     // Determine recommendation
     let recommendation = 'NO PLAY';
     let confidence = 'Low';
-    let reasoning = [];
+    const reasoning = [];
 
     if (parseFloat(overEV.edge) > 5) {
       recommendation = `OVER ${prop.line}`;
@@ -340,7 +344,9 @@ class RayPropIntelligence {
 
     for (const [playerName, lines] of Object.entries(this.propLines)) {
       const player = PLAYERS_DB[playerName];
-      if (!player) continue;
+      if (!player) {
+continue;
+}
 
       for (const [propType, propData] of Object.entries(lines)) {
         const hitRates = player.propHitRates || {};
@@ -424,7 +430,9 @@ class RayPropIntelligence {
   // Build a parlay
   // ─────────────────────────────────────────────────────────────────────────────
   buildParlay(legs, stake = 10) {
-    if (legs.length < 2) return null;
+    if (legs.length < 2) {
+return null;
+}
 
     let totalDecimalOdds = 1;
     let combinedProb = 1;
@@ -432,7 +440,9 @@ class RayPropIntelligence {
 
     for (const leg of legs) {
       const analysis = this.analyzeProp(leg.player, leg.prop);
-      if (!analysis) continue;
+      if (!analysis) {
+continue;
+}
 
       const isOver = leg.side === 'over';
       const odds = isOver ? analysis.overOdds : analysis.underOdds;
@@ -483,7 +493,9 @@ class RayPropIntelligence {
   // ─────────────────────────────────────────────────────────────────────────────
   findCorrelatedProps(playerName) {
     const player = rayAnalytics.findPlayer(playerName);
-    if (!player) return null;
+    if (!player) {
+return null;
+}
 
     const correlations = [];
     const log = player.gameLog || [];
@@ -492,9 +504,15 @@ class RayPropIntelligence {
     let highPtsHighReb = 0, highPtsHighAst = 0, winHighPts = 0;
     
     for (const game of log) {
-      if (game.pts > player.season.pts && game.reb > player.season.reb) highPtsHighReb++;
-      if (game.pts > player.season.pts && game.ast > player.season.ast) highPtsHighAst++;
-      if (game.result === 'W' && game.pts > player.season.pts) winHighPts++;
+      if (game.pts > player.season.pts && game.reb > player.season.reb) {
+highPtsHighReb++;
+}
+      if (game.pts > player.season.pts && game.ast > player.season.ast) {
+highPtsHighAst++;
+}
+      if (game.result === 'W' && game.pts > player.season.pts) {
+winHighPts++;
+}
     }
 
     const n = log.length || 1;
