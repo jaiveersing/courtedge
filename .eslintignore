@@ -1,0 +1,8 @@
+node_modules/
+dist/
+build/
+coverage/
+.venv/
+ml_service/
+*.min.js
+*.d.ts

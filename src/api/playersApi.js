@@ -1,11 +1,20 @@
-// NBA Players API Client - Frontend API calls
-import nbaPlayersDatabase from '../data/nbaPlayersDatabase';
+// ═══════════════════════════════════════════════════════════════════════════════════
+// 🏀 NBA PLAYERS API CLIENT - LIVE DATA FROM ESPN & OTHER SOURCES
+// ═══════════════════════════════════════════════════════════════════════════════════
+// Fetches REAL-TIME data from backend which proxies ESPN/NBA APIs
+// NO MORE STATIC DATA - Everything is live!
+// ═══════════════════════════════════════════════════════════════════════════════════
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 class PlayersAPI {
+  
+  // ═══════════════════════════════════════════════════════════════════════════════════
+  // CORE PLAYER METHODS
+  // ═══════════════════════════════════════════════════════════════════════════════════
+
   /**
-   * Get all players with optional filters
+   * Get all players with optional filters (LIVE DATA)
    */
   static async getPlayers(filters = {}) {
     try {
@@ -17,293 +26,130 @@ class PlayersAPI {
       });
 
       const response = await fetch(`${API_BASE_URL}/players?${queryParams}`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      
       const data = await response.json();
       // Ensure we always return an array
       if (Array.isArray(data)) return data;
       if (data?.data && Array.isArray(data.data)) return data.data;
       if (data?.players && Array.isArray(data.players)) return data.players;
-      return this.getPlayersLocalArray(filters);
+      return [];
     } catch (error) {
-      console.error('Error fetching players:', error);
-      // Fallback to local data - return array directly
-      return this.getPlayersLocalArray(filters);
+      console.error('Error fetching players from live API:', error);
+      return [];
     }
   }
 
   /**
-   * Get players as array (for Workstation)
-   */
-  static getPlayersLocalArray(filters = {}) {
-    let players = [...nbaPlayersDatabase];
-
-    if (filters.team) {
-      players = players.filter(p => p.team?.toLowerCase() === filters.team.toLowerCase());
-    }
-
-    if (filters.position) {
-      players = players.filter(p => p.position === filters.position.toUpperCase());
-    }
-
-    if (filters.search) {
-      const search = filters.search.toLowerCase();
-      players = players.filter(p =>
-        p.name?.toLowerCase().includes(search) ||
-        p.teamName?.toLowerCase().includes(search)
-      );
-    }
-
-    if (filters.minPpg) {
-      players = players.filter(p => p.ppg >= parseFloat(filters.minPpg));
-    }
-
-    if (filters.sortBy) {
-      const order = filters.sortOrder === 'asc' ? 1 : -1;
-      players.sort((a, b) => order * ((a[filters.sortBy] || 0) - (b[filters.sortBy] || 0)));
-    }
-
-    return players;
-  }
-
-  /**
-   * Local fallback - filter players without API (with pagination)
-   */
-  static getPlayersLocal(filters = {}) {
-    let players = [...nbaPlayersDatabase];
-
-    if (filters.team) {
-      players = players.filter(p => p.team.toLowerCase() === filters.team.toLowerCase());
-    }
-
-    if (filters.position) {
-      players = players.filter(p => p.position === filters.position.toUpperCase());
-    }
-
-    if (filters.search) {
-      const search = filters.search.toLowerCase();
-      players = players.filter(p =>
-        p.name.toLowerCase().includes(search) ||
-        p.teamName.toLowerCase().includes(search)
-      );
-    }
-
-    if (filters.minPpg) {
-      players = players.filter(p => p.ppg >= parseFloat(filters.minPpg));
-    }
-
-    if (filters.sortBy) {
-      const order = filters.sortOrder === 'asc' ? 1 : -1;
-      players.sort((a, b) => order * (a[filters.sortBy] - b[filters.sortBy]));
-    }
-
-    // Pagination
-    const page = parseInt(filters.page) || 1;
-    const limit = parseInt(filters.limit) || 20;
-    const start = (page - 1) * limit;
-    const end = start + limit;
-
-    return {
-      success: true,
-      data: players.slice(start, end),
-      pagination: {
-        total: players.length,
-        page,
-        limit,
-        totalPages: Math.ceil(players.length / limit)
-      }
-    };
-  }
-
-  /**
-   * Get a single player by ID
+   * Get a single player by ID (LIVE DATA with full stats)
    */
   static async getPlayerById(id) {
     try {
       const response = await fetch(`${API_BASE_URL}/players/${id}`);
-      const data = await response.json();
-      return data;
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return await response.json();
     } catch (error) {
       console.error('Error fetching player:', error);
-      const player = nbaPlayersDatabase.find(p => p.id === parseInt(id));
-      return { success: !!player, data: player };
+      return { success: false, error: error.message };
     }
   }
 
   /**
-   * Get all players for a team
+   * Get all players for a team (LIVE from ESPN)
    */
   static async getTeamPlayers(teamCode) {
     try {
       const response = await fetch(`${API_BASE_URL}/players/team/${teamCode}`);
-      const data = await response.json();
-      return data;
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return await response.json();
     } catch (error) {
       console.error('Error fetching team players:', error);
-      const players = nbaPlayersDatabase
-        .filter(p => p.team === teamCode.toUpperCase())
-        .sort((a, b) => b.ppg - a.ppg);
-      return { success: true, data: players, team: teamCode, count: players.length };
+      return { success: false, error: error.message, data: [] };
     }
   }
 
   /**
-   * Search players by name
+   * Search players by name (LIVE API search)
    */
   static async searchPlayers(query) {
     try {
       const response = await fetch(`${API_BASE_URL}/players/search/${encodeURIComponent(query)}`);
-      const data = await response.json();
-      return data;
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return await response.json();
     } catch (error) {
       console.error('Error searching players:', error);
-      const results = nbaPlayersDatabase.filter(p =>
-        p.name.toLowerCase().includes(query.toLowerCase())
-      );
-      return { success: true, data: results, count: results.length };
+      return { success: false, data: [], count: 0 };
     }
   }
 
   /**
-   * Get statistical leaders
+   * Get statistical leaders (LIVE DATA)
    */
   static async getLeaders(stat = 'ppg', limit = 10) {
     try {
       const response = await fetch(`${API_BASE_URL}/players/stats/leaders?stat=${stat}&limit=${limit}`);
-      const data = await response.json();
-      return data;
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return await response.json();
     } catch (error) {
       console.error('Error fetching leaders:', error);
-      const leaders = [...nbaPlayersDatabase]
-        .sort((a, b) => b[stat] - a[stat])
-        .slice(0, limit)
-        .map(p => ({
-          id: p.id,
-          name: p.name,
-          team: p.team,
-          position: p.position,
-          value: p[stat],
-          ppg: p.ppg,
-          rpg: p.rpg,
-          apg: p.apg
-        }));
-      return { success: true, data: leaders, stat, count: leaders.length };
+      return { success: false, data: [], stat, count: 0 };
     }
   }
 
   /**
-   * Compare multiple players
+   * Compare multiple players (LIVE stats comparison)
    */
   static async comparePlayers(playerIds) {
     try {
       const ids = Array.isArray(playerIds) ? playerIds.join(',') : playerIds;
       const response = await fetch(`${API_BASE_URL}/players/stats/compare?ids=${ids}`);
-      const data = await response.json();
-      return data;
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return await response.json();
     } catch (error) {
       console.error('Error comparing players:', error);
-      const ids = Array.isArray(playerIds) ? playerIds : playerIds.split(',').map(id => parseInt(id));
-      const players = nbaPlayersDatabase.filter(p => ids.includes(p.id));
-      const comparison = {
-        players,
-        averages: {
-          ppg: players.reduce((sum, p) => sum + p.ppg, 0) / players.length,
-          rpg: players.reduce((sum, p) => sum + p.rpg, 0) / players.length,
-          apg: players.reduce((sum, p) => sum + p.apg, 0) / players.length,
-          per: players.reduce((sum, p) => sum + p.per, 0) / players.length
-        }
-      };
-      return { success: true, data: comparison, count: players.length };
+      return { success: false, error: error.message };
     }
   }
 
   /**
-   * Get team statistics
+   * Get team statistics (LIVE DATA)
    */
   static async getTeamStats(teamCode) {
     try {
       const response = await fetch(`${API_BASE_URL}/players/stats/team-stats/${teamCode}`);
-      const data = await response.json();
-      return data;
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return await response.json();
     } catch (error) {
       console.error('Error fetching team stats:', error);
-      const teamPlayers = nbaPlayersDatabase.filter(p => p.team === teamCode.toUpperCase());
-      if (teamPlayers.length === 0) {
-        return { success: false, error: 'Team not found' };
-      }
-
-      const teamStats = {
-        team: teamCode,
-        teamName: teamPlayers[0].teamName,
-        playerCount: teamPlayers.length,
-        totalPpg: teamPlayers.reduce((sum, p) => sum + p.ppg, 0),
-        totalRpg: teamPlayers.reduce((sum, p) => sum + p.rpg, 0),
-        totalApg: teamPlayers.reduce((sum, p) => sum + p.apg, 0),
-        avgPer: teamPlayers.reduce((sum, p) => sum + p.per, 0) / teamPlayers.length,
-        avgFgPct: teamPlayers.reduce((sum, p) => sum + p.fgPct, 0) / teamPlayers.length,
-        topScorer: teamPlayers.reduce((max, p) => p.ppg > max.ppg ? p : max),
-        topRebounder: teamPlayers.reduce((max, p) => p.rpg > max.rpg ? p : max),
-        topAssister: teamPlayers.reduce((max, p) => p.apg > max.apg ? p : max)
-      };
-
-      return { success: true, data: teamStats };
+      return { success: false, error: error.message };
     }
   }
 
   /**
-   * Get all teams
+   * Get all teams (LIVE from ESPN)
    */
   static async getTeams() {
     try {
       const response = await fetch(`${API_BASE_URL}/teams`);
-      const data = await response.json();
-      return data;
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return await response.json();
     } catch (error) {
       console.error('Error fetching teams:', error);
-      const teams = {};
-      nbaPlayersDatabase.forEach(player => {
-        if (!teams[player.team]) {
-          teams[player.team] = {
-            code: player.team,
-            name: player.teamName,
-            playerCount: 0,
-            totalPpg: 0
-          };
-        }
-        teams[player.team].playerCount++;
-        teams[player.team].totalPpg += player.ppg;
-      });
-      const teamsList = Object.values(teams).sort((a, b) => a.name.localeCompare(b.name));
-      return { success: true, data: teamsList, count: teamsList.length };
+      return { success: false, data: [], count: 0 };
     }
   }
 
   /**
-   * Get position averages
+   * Get position averages (LIVE calculation)
    */
   static async getPositionAverages() {
     try {
       const response = await fetch(`${API_BASE_URL}/players/stats/position-averages`);
-      const data = await response.json();
-      return data;
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return await response.json();
     } catch (error) {
       console.error('Error fetching position averages:', error);
-      const positions = ['PG', 'SG', 'SF', 'PF', 'C'];
-      const positionStats = {};
-
-      positions.forEach(pos => {
-        const players = nbaPlayersDatabase.filter(p => p.position === pos);
-        if (players.length > 0) {
-          positionStats[pos] = {
-            position: pos,
-            count: players.length,
-            avgPpg: players.reduce((sum, p) => sum + p.ppg, 0) / players.length,
-            avgRpg: players.reduce((sum, p) => sum + p.rpg, 0) / players.length,
-            avgApg: players.reduce((sum, p) => sum + p.apg, 0) / players.length,
-            avgPer: players.reduce((sum, p) => sum + p.per, 0) / players.length
-          };
-        }
-      });
-
-      return { success: true, data: positionStats };
+      return { success: false, data: {} };
     }
   }
 
@@ -317,71 +163,158 @@ class PlayersAPI {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ filters, sortBy, sortOrder })
       });
-      const data = await response.json();
-      return data;
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return await response.json();
     } catch (error) {
       console.error('Error with advanced filter:', error);
-      let results = [...nbaPlayersDatabase];
+      return { success: false, data: [], count: 0 };
+    }
+  }
 
-      filters.forEach(filter => {
-        const { field, operator, value } = filter;
-        switch (operator) {
-          case 'gt':
-            results = results.filter(p => p[field] > value);
-            break;
-          case 'gte':
-            results = results.filter(p => p[field] >= value);
-            break;
-          case 'lt':
-            results = results.filter(p => p[field] < value);
-            break;
-          case 'lte':
-            results = results.filter(p => p[field] <= value);
-            break;
-          case 'eq':
-            results = results.filter(p => p[field] === value);
-            break;
-        }
-      });
+  // ═══════════════════════════════════════════════════════════════════════════════════
+  // 🔴 LIVE DATA METHODS - Real-time NBA data
+  // ═══════════════════════════════════════════════════════════════════════════════════
 
-      if (sortBy) {
-        const order = sortOrder === 'asc' ? 1 : -1;
-        results.sort((a, b) => order * (a[sortBy] - b[sortBy]));
-      }
-
-      return { success: true, data: results, count: results.length };
+  /**
+   * Get live NBA scoreboard (REAL-TIME SCORES)
+   */
+  static async getLiveScoreboard() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/scoreboard`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching live scoreboard:', error);
+      return { success: false, data: { games: [] } };
     }
   }
 
   /**
-   * Get random players
+   * Get NBA standings (LIVE)
    */
-  static getRandomPlayers(count = 5) {
-    const shuffled = [...nbaPlayersDatabase].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, count);
+  static async getStandings() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/standings`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching standings:', error);
+      return { success: false, data: [] };
+    }
+  }
+
+  /**
+   * Get NBA news (LIVE)
+   */
+  static async getNews(limit = 20) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/news?limit=${limit}`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching news:', error);
+      return { success: false, data: [] };
+    }
+  }
+
+  /**
+   * Get game box score (LIVE)
+   */
+  static async getBoxScore(gameId) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/boxscore/${gameId}`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching box score:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════════════
+  // UTILITY METHODS
+  // ═══════════════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Get cache status (for debugging)
+   */
+  static async getCacheStatus() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/cache/status`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching cache status:', error);
+      return { success: false };
+    }
+  }
+
+  /**
+   * Clear all caches (force fresh data)
+   */
+  static async clearCache() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/cache/clear`, { method: 'POST' });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('Error clearing cache:', error);
+      return { success: false };
+    }
+  }
+
+  /**
+   * Get top performers across multiple stats
+   * Fetches live data and sorts by various categories
+   */
+  static async getTopPerformers(minGames = 20) {
+    try {
+      // Fetch all players
+      const players = await this.getPlayers({ limit: 500 });
+      const eligible = players.filter(p => (p.gamesPlayed || 0) >= minGames);
+
+      return {
+        scoring: [...eligible].sort((a, b) => (b.ppg || 0) - (a.ppg || 0)).slice(0, 10),
+        rebounding: [...eligible].sort((a, b) => (b.rpg || 0) - (a.rpg || 0)).slice(0, 10),
+        assists: [...eligible].sort((a, b) => (b.apg || 0) - (a.apg || 0)).slice(0, 10),
+        efficiency: [...eligible].sort((a, b) => (b.per || 0) - (a.per || 0)).slice(0, 10),
+        shooting: [...eligible].sort((a, b) => (b.ts_pct || 0) - (a.ts_pct || 0)).slice(0, 10),
+        defense: [...eligible].sort((a, b) => ((b.spg || 0) + (b.bpg || 0)) - ((a.spg || 0) + (a.bpg || 0))).slice(0, 10)
+      };
+    } catch (error) {
+      console.error('Error fetching top performers:', error);
+      return { scoring: [], rebounding: [], assists: [], efficiency: [], shooting: [], defense: [] };
+    }
+  }
+
+  /**
+   * Get random players from current roster
+   */
+  static async getRandomPlayers(count = 5) {
+    try {
+      const players = await this.getPlayers({ limit: 100 });
+      const shuffled = [...players].sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, count);
+    } catch (error) {
+      console.error('Error fetching random players:', error);
+      return [];
+    }
   }
 
   /**
    * Get players by multiple IDs
    */
-  static getPlayersByIds(ids) {
-    return nbaPlayersDatabase.filter(p => ids.includes(p.id));
-  }
-
-  /**
-   * Get top performers across multiple stats
-   */
-  static getTopPerformers(minGames = 50) {
-    const eligible = nbaPlayersDatabase.filter(p => p.gamesPlayed >= minGames);
-
-    return {
-      scoring: eligible.sort((a, b) => b.ppg - a.ppg).slice(0, 10),
-      rebounding: eligible.sort((a, b) => b.rpg - a.rpg).slice(0, 10),
-      assists: eligible.sort((a, b) => b.apg - a.apg).slice(0, 10),
-      efficiency: eligible.sort((a, b) => b.per - a.per).slice(0, 10),
-      shooting: eligible.sort((a, b) => b.ts_pct - a.ts_pct).slice(0, 10),
-      defense: eligible.sort((a, b) => (b.spg + b.bpg) - (a.spg + a.bpg)).slice(0, 10)
-    };
+  static async getPlayersByIds(ids) {
+    try {
+      const playerPromises = ids.map(id => this.getPlayerById(id));
+      const results = await Promise.allSettled(playerPromises);
+      return results
+        .filter(r => r.status === 'fulfilled' && r.value?.success)
+        .map(r => r.value.data);
+    } catch (error) {
+      console.error('Error fetching players by IDs:', error);
+      return [];
+    }
   }
 }
 

@@ -1,6 +1,6 @@
 // Mock data generator for development/demo without Base44 API
 // Generates realistic betting, prediction, player, and game data
-import espnApi from './espnApi';
+import nbaLiveService from './nbaLiveService';
 
 const NBA_TEAMS = [
   'LAL', 'BOS', 'GSW', 'MIA', 'DEN', 'PHX', 'DAL', 'BKN', 'MEM', 'SAC',
@@ -35,22 +35,22 @@ let realGamesCache = null;
 export async function loadRealNBAData() {
   if (!realPlayersCache) {
     try {
-      console.log('🏀 Loading real NBA player data from ESPN...');
-      realPlayersCache = await espnApi.getAllPlayersWithStats();
-      console.log(`✅ Loaded ${realPlayersCache.length} real NBA players from ESPN`);
+      console.log('🏀 Loading real NBA player data...');
+      realPlayersCache = await nbaLiveService.getAllPlayers();
+      console.log(`✅ Loaded ${realPlayersCache.length} real NBA players`);
     } catch (error) {
-      console.error('Error loading NBA players from ESPN:', error);
+      console.error('Error loading NBA players:', error);
       realPlayersCache = [];
     }
   }
   
   if (!realGamesCache) {
     try {
-      console.log('🏀 Loading live NBA games from ESPN...');
-      realGamesCache = await espnApi.getLiveGames();
-      console.log(`✅ Loaded ${realGamesCache.length} games from ESPN`);
+      console.log('🏀 Loading live NBA games...');
+      realGamesCache = await nbaLiveService.getLiveScoreboard();
+      console.log(`✅ Loaded ${realGamesCache?.length || 0} games`);
     } catch (error) {
-      console.error('Error loading NBA games from ESPN:', error);
+      console.error('Error loading NBA games:', error);
       realGamesCache = [];
     }
   }

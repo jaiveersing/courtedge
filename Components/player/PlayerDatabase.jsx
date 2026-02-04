@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Search, Filter, TrendingUp, TrendingDown, Users, Award, Activity } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Input } from '../ui/input';
@@ -15,28 +15,85 @@ const PlayerDatabase = () => {
   const [sortOrder, setSortOrder] = useState('desc');
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState('table');
+  
+  // Live data state
+  const [players, setPlayers] = useState([]);
+  const [teams, setTeams] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [scoringLeaders, setScoringLeaders] = useState([]);
+  const [reboundLeaders, setReboundLeaders] = useState([]);
+  const [assistLeaders, setAssistLeaders] = useState([]);
 
   const playersPerPage = 20;
 
-  // Get filtered and sorted players
-  const filteredPlayers = useMemo(() => {
-    const filters = {
-      search: searchQuery,
-      team: selectedTeam !== 'all' ? selectedTeam : undefined,
-      position: selectedPosition !== 'all' ? selectedPosition : undefined,
-      sortBy,
-      sortOrder,
-      page: currentPage,
-      limit: playersPerPage
+  // Fetch live players data
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        console.log('🔍 Fetching NBA data...');
+        const [playersData, teamsData, scoringData, reboundData, assistData] = await Promise.all([
+          PlayersAPI.getPlayers({ limit: 500 }),
+          PlayersAPI.getTeams(),
+          PlayersAPI.getLeaders('ppg', 5),
+          PlayersAPI.getLeaders('rpg', 5),
+          PlayersAPI.getLeaders('apg', 5)
+        ]);
+        
+        console.log('✅ Players data:', playersData);
+        console.log('✅ Teams data:', teamsData);
+        console.log('✅ Scoring leaders:', scoringData);
+        
+        setPlayers(Array.isArray(playersData) ? playersData : []);
+        setTeams(teamsData?.data || []);
+        setScoringLeaders(scoringData?.data || []);
+        setReboundLeaders(reboundData?.data || []);
+        setAssistLeaders(assistData?.data || []);
+        
+        console.log(`📊 Set ${playersData?.length || 0} players`);
+      } catch (error) {
+        console.error('Error fetching live data:', error);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    return PlayersAPI.getPlayersLocal(filters);
-  }, [searchQuery, selectedTeam, selectedPosition, sortBy, sortOrder, currentPage]);
-
-  const teams = useMemo(() => {
-    const result = PlayersAPI.getTeams();
-    return result.success ? result.data : [];
+    fetchData();
   }, []);
+
+  // Filter and sort players locally
+  const filteredPlayers = useMemo(() => {
+    let filtered = [...players];
+
+    // Search filter
+    if (searchQuery) {
+      filtered = filtered.filter(p => 
+        p.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.team?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Team filter
+    if (selectedTeam !== 'all') {
+      filtered = filtered.filter(p => p.team === selectedTeam);
+    }
+
+    // Position filter
+    if (selectedPosition !== 'all') {
+      filtered = filtered.filter(p => p.position === selectedPosition);
+    }
+
+    // Sort
+    filtered.sort((a, b) => {
+      const aVal = a[sortBy] || 0;
+      const bVal = b[sortBy] || 0;
+      return sortOrder === 'desc' ? bVal - aVal : aVal - bVal;
+    });
+
+    // Paginate
+    const start = (currentPage - 1) * playersPerPage;
+    return filtered.slice(start, start + playersPerPage);
+  }, [players, searchQuery, selectedTeam, selectedPosition, sortBy, sortOrder, currentPage]);
 
   const positions = ['PG', 'SG', 'SF', 'PF', 'C'];
 
@@ -56,9 +113,6 @@ const PlayerDatabase = () => {
   };
 
   const StatLeaders = () => {
-    const scoringLeaders = PlayersAPI.getLeaders('ppg', 5);
-    const reboundLeaders = PlayersAPI.getLeaders('rpg', 5);
-    const assistLeaders = PlayersAPI.getLeaders('apg', 5);
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -70,7 +124,7 @@ const PlayerDatabase = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            {scoringLeaders.data?.map((player, idx) => (
+            {scoringLeaders?.map((player, idx) => (
               <div key={player.id} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
                   <span className="text-slate-400 w-4">{idx + 1}.</span>
@@ -91,7 +145,7 @@ const PlayerDatabase = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            {reboundLeaders.data?.map((player, idx) => (
+            {reboundLeaders?.map((player, idx) => (
               <div key={player.id} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
                   <span className="text-slate-400 w-4">{idx + 1}.</span>
@@ -112,7 +166,7 @@ const PlayerDatabase = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            {assistLeaders.data?.map((player, idx) => (
+            {assistLeaders?.map((player, idx) => (
               <div key={player.id} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
                   <span className="text-slate-400 w-4">{idx + 1}.</span>
@@ -165,7 +219,7 @@ const PlayerDatabase = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredPlayers.data?.map((player) => (
+          {filteredPlayers?.map((player) => (
             <tr key={player.id} className="border-b border-slate-800 hover:bg-slate-800/50 transition-colors">
               <td className="p-3">
                 <div>
@@ -194,7 +248,7 @@ const PlayerDatabase = () => {
 
   const PlayerCardView = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      {filteredPlayers.data?.map((player) => (
+      {filteredPlayers?.map((player) => (
         <Card key={player.id} className="hover:border-slate-600 transition-colors">
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between">
@@ -252,11 +306,20 @@ const PlayerDatabase = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">NBA Player Database</h1>
-          <p className="text-slate-400 mt-1">100 players • 2025-26 Season Stats</p>
+          <p className="text-slate-400 mt-1">{players.length} players • 2025-26 Season Stats • Live Data</p>
         </div>
       </div>
 
-      <StatLeaders />
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+            <p className="text-slate-400">Loading live NBA data...</p>
+          </div>
+        </div>
+      ) : (
+        <>
+          <StatLeaders />
 
       <Card>
         <CardContent className="pt-6">
@@ -325,7 +388,7 @@ const PlayerDatabase = () => {
             {/* Results Count */}
             <div className="flex items-center justify-between text-sm text-slate-400">
               <div>
-                Showing {((currentPage - 1) * playersPerPage) + 1} - {Math.min(currentPage * playersPerPage, filteredPlayers.pagination?.total || 0)} of {filteredPlayers.pagination?.total || 0} players
+                Showing {filteredPlayers.length} players
               </div>
               <div className="flex items-center gap-2">
                 <Filter className="w-4 h-4" />
@@ -335,42 +398,11 @@ const PlayerDatabase = () => {
 
             {/* Player List */}
             {viewMode === 'table' ? <PlayerTableView /> : <PlayerCardView />}
-
-            {/* Pagination */}
-            {filteredPlayers.pagination?.totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 mt-6">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                >
-                  Previous
-                </Button>
-                {Array.from({ length: filteredPlayers.pagination.totalPages }, (_, i) => i + 1).map(page => (
-                  <Button
-                    key={page}
-                    variant={currentPage === page ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setCurrentPage(page)}
-                    className="w-10"
-                  >
-                    {page}
-                  </Button>
-                ))}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(p => Math.min(filteredPlayers.pagination.totalPages, p + 1))}
-                  disabled={currentPage === filteredPlayers.pagination.totalPages}
-                >
-                  Next
-                </Button>
-              </div>
-            )}
           </div>
         </CardContent>
       </Card>
+        </>
+      )}
     </div>
   );
 };

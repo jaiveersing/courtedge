@@ -5,12 +5,42 @@ import path from 'path';
 import dotenv from 'dotenv';
 import { initializeWebSocket } from './websocket.js';
 import nbaPlayersRouter from './nbaPlayers.js';
+import {
+  securityHeaders,
+  apiRateLimiter,
+  mlRateLimiter,
+  corsOptions,
+  requestLogger,
+  errorHandler,
+  sanitizeInput
+} from './middleware/security.js';
+
+// Create simple console logger
+const log = {
+  info: (...args) => console.log('[INFO]', ...args),
+  error: (...args) => console.error('[ERROR]', ...args),
+  warn: (...args) => console.warn('[WARN]', ...args),
+  debug: (...args) => console.log('[DEBUG]', ...args)
+};
 
 dotenv.config();
 
 const app = express();
-app.use(cors());
+
+// ═══════════════════════════════════════════════════════════════════════════════════
+// SECURITY MIDDLEWARE - Applied before routes
+// ═══════════════════════════════════════════════════════════════════════════════════
+app.use(securityHeaders);
+app.use(requestLogger);
+app.use(sanitizeInput);
+app.use(cors(corsOptions));
 app.use(express.json());
+
+// ═══════════════════════════════════════════════════════════════════════════════════
+// RATE LIMITING
+// ═══════════════════════════════════════════════════════════════════════════════════
+app.use('/api', apiRateLimiter);
+app.use('/api/ml', mlRateLimiter);
 
 // Mount NBA Players API routes
 app.use('/api', nbaPlayersRouter);
@@ -23,10 +53,13 @@ const APP_ID = process.env.SERVER_BASE44_APP_ID;
 const API_KEY = process.env.SERVER_BASE44_API_KEY;
 
 if (!APP_ID || !API_KEY) {
-  console.warn('Warning: SERVER_BASE44_APP_ID or SERVER_BASE44_API_KEY not set. Proxy endpoints will fail until configured.');
+  log.warn('Base44 API credentials not configured', { 
+    hasAppId: !!APP_ID, 
+    hasApiKey: !!API_KEY 
+  });
 }
 
-console.log(`ML Service URL: ${ML_SERVICE_URL}`);
+log.info('Server configuration loaded', { mlServiceUrl: ML_SERVICE_URL });
 
 function base44Url(pathSuffix){
   return `${BASE44_BASE}/${APP_ID}${pathSuffix}`;
@@ -86,7 +119,7 @@ app.get('/api/ml/health', async (req, res) => {
     const data = await response.json();
     res.json(data);
   } catch (err) {
-    console.error('ML service health check failed:', err);
+    log.error('ML service health check failed', err);
     res.status(503).json({ 
       error: 'ML service unavailable',
       message: err.message 
@@ -110,7 +143,7 @@ app.post('/api/ml/predict/player_prop', async (req, res) => {
     const data = await response.json();
     res.json(data);
   } catch (err) {
-    console.error('ML prediction error:', err);
+    log.error('ML player prop prediction failed', err);
     res.status(503).json({ 
       error: 'ML service unavailable',
       message: err.message 
@@ -129,7 +162,7 @@ app.post('/api/ml/predict/game_outcome', async (req, res) => {
     const data = await response.json();
     res.json(data);
   } catch (err) {
-    console.error('ML game prediction error:', err);
+    log.error('ML game prediction failed', err);
     res.status(503).json({ error: 'ML service unavailable' });
   }
 });
@@ -145,7 +178,7 @@ app.post('/api/ml/predict/live_game', async (req, res) => {
     const data = await response.json();
     res.json(data);
   } catch (err) {
-    console.error('ML live prediction error:', err);
+    log.error('ML live prediction failed', err);
     res.status(503).json({ error: 'ML service unavailable' });
   }
 });
@@ -159,7 +192,7 @@ app.get('/api/ml/sharp_money', async (req, res) => {
     const data = await response.json();
     res.json(data);
   } catch (err) {
-    console.error('ML sharp money error:', err);
+    log.error('ML sharp money detection failed', err);
     res.status(503).json({ error: 'ML service unavailable' });
   }
 });
@@ -175,7 +208,7 @@ app.post('/api/ml/optimize/bankroll', async (req, res) => {
     const data = await response.json();
     res.json(data);
   } catch (err) {
-    console.error('ML bankroll optimization error:', err);
+    log.error('ML bankroll optimization failed', err);
     res.status(503).json({ error: 'ML service unavailable' });
   }
 });
@@ -191,14 +224,19 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
+// ═══════════════════════════════════════════════════════════════════════════════════
+// ERROR HANDLER - Must be last middleware
+// ═══════════════════════════════════════════════════════════════════════════════════
+app.use(errorHandler);
+
 app.listen(PORT, ()=>{
-  console.log(`Server running on port ${PORT}`);
+  log.info('Server started', { port: PORT, mlServiceUrl: ML_SERVICE_URL });
   
   // Initialize WebSocket server
   try {
     initializeWebSocket(8080);
-    console.log(`WebSocket server running on port 8080`);
+    log.info('WebSocket server initialized', { port: 8080 });
   } catch (err) {
-    console.error('WebSocket initialization error:', err);
+    log.error('WebSocket initialization failed', err);
   }
 });

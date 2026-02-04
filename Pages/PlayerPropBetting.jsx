@@ -5,6 +5,7 @@ import { Button } from '@/Components/ui/button';
 import { Badge } from '@/Components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/ui/tabs';
 import mlService from '@/src/api/mlService';
+import nbaLiveService from '@/src/api/nbaLiveService';
 import { 
   TrendingUp, 
   TrendingDown,
@@ -22,7 +23,6 @@ import {
   Activity
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
-import nbaApi from '@/src/api/nbaApi';
 
 const TrendCard = ({ trend, index }) => {
   const getIcon = (type) => {
@@ -356,7 +356,7 @@ export default function PlayerPropBettingPage() {
     setLoading(true);
     try {
       // Load player data
-      const players = await nbaApi.getAllPlayers();
+      const players = await nbaLiveService.getAllPlayers();
       const playerData = players.find(p => p.id === parseInt(playerId));
       
       if (playerData) {

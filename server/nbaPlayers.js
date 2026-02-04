@@ -1,8 +1,45 @@
-// NBA Players API - Server-side routes and controllers
+// ═══════════════════════════════════════════════════════════════════════════════════
+// 🏀 NBA PLAYERS API - LIVE DATA FROM API-SPORTS.IO
+// ═══════════════════════════════════════════════════════════════════════════════════
+// Fetches REAL-TIME data from API-Sports.io Basketball API
+// ═══════════════════════════════════════════════════════════════════════════════════
+
 import express from 'express';
-import nbaPlayersDatabase from '../src/data/nbaPlayersDatabase.js';
+import nbaLiveApi from './nbaLiveApi.js';
 
 const router = express.Router();
+
+// Cache for player data with stats (populated from multiple API calls)
+let playersWithStats = [];
+let lastPlayersFetch = 0;
+const PLAYERS_CACHE_DURATION = 15 * 60 * 1000; // 15 minutes
+
+/**
+ * Helper: Get all players with full statistics
+ * Fetches from API-Sports.io and caches results
+ */
+async function getPlayersWithFullStats() {
+  const now = Date.now();
+  if (playersWithStats.length > 0 && now - lastPlayersFetch < PLAYERS_CACHE_DURATION) {
+    return playersWithStats;
+  }
+
+  console.log('📡 Fetching fresh player data from API-Sports.io...');
+  
+  try {
+    // Get all players from API
+    const allPlayers = await nbaLiveApi.getAllPlayers();
+    
+    playersWithStats = allPlayers;
+    lastPlayersFetch = now;
+    
+    console.log(`✅ Loaded ${playersWithStats.length} players from live API`);
+    return playersWithStats;
+  } catch (error) {
+    console.error('❌ Failed to fetch players:', error.message);
+    return playersWithStats; // Return cached data if available
+  }
+}
 
 /**
  * GET /api/players
@@ -19,9 +56,10 @@ const router = express.Router();
  *   - page: Page number (default 1)
  *   - limit: Items per page (default 20)
  */
-router.get('/players', (req, res) => {
+router.get('/players', async (req, res) => {
   try {
-    let filteredPlayers = [...nbaPlayersDatabase];
+    const allPlayers = await getPlayersWithFullStats();
+    let filteredPlayers = [...allPlayers];
 
     // Apply filters
     const { team, position, minPpg, minRpg, minApg, minPer, search, sortBy, sortOrder, page, limit } = req.query;
@@ -96,18 +134,27 @@ router.get('/players', (req, res) => {
 
 /**
  * GET /api/players/:id
- * Get a single player by ID
+ * Get a single player by ID with full stats
  */
-router.get('/players/:id', (req, res) => {
+router.get('/players/:id', async (req, res) => {
   try {
     const playerId = parseInt(req.params.id);
-    const player = nbaPlayersDatabase.find(p => p.id === playerId);
+    
+    // Try to get player stats from API
+    const detailedPlayer = await nbaLiveApi.getPlayerStats(playerId);
+    if (detailedPlayer && !detailedPlayer.error) {
+      return res.json({ success: true, data: detailedPlayer, source: 'live' });
+    }
+
+    // Fallback: find in cached roster data
+    const allPlayers = await getPlayersWithFullStats();
+    const player = allPlayers.find(p => p.id === playerId);
 
     if (!player) {
       return res.status(404).json({ success: false, error: 'Player not found' });
     }
 
-    res.json({ success: true, data: player });
+    res.json({ success: true, data: player, source: 'cache' });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -117,23 +164,30 @@ router.get('/players/:id', (req, res) => {
  * GET /api/players/team/:teamCode
  * Get all players for a specific team
  */
-router.get('/players/team/:teamCode', (req, res) => {
+router.get('/players/team/:teamCode', async (req, res) => {
   try {
     const teamCode = req.params.teamCode.toUpperCase();
-    const teamPlayers = nbaPlayersDatabase.filter(p => p.team === teamCode);
+    const teamId = nbaLiveApi.TEAM_IDS[teamCode];
+
+    if (!teamId) {
+      return res.status(404).json({ success: false, error: 'Team not found' });
+    }
+
+    // Fetch team roster
+    const roster = await nbaLiveApi.getTeamRoster(teamId);
+    const teamPlayers = roster.athletes || [];
 
     if (teamPlayers.length === 0) {
       return res.status(404).json({ success: false, error: 'Team not found or no players' });
     }
 
-    // Sort by PPG descending
-    teamPlayers.sort((a, b) => b.ppg - a.ppg);
-
     res.json({
       success: true,
       data: teamPlayers,
       team: teamCode,
-      count: teamPlayers.length
+      teamName: roster.teamName,
+      count: teamPlayers.length,
+      source: 'live'
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -144,10 +198,11 @@ router.get('/players/team/:teamCode', (req, res) => {
  * GET /api/players/position/:position
  * Get all players for a specific position
  */
-router.get('/players/position/:position', (req, res) => {
+router.get('/players/position/:position', async (req, res) => {
   try {
     const position = req.params.position.toUpperCase();
-    const positionPlayers = nbaPlayersDatabase.filter(p => p.position === position);
+    const allPlayers = await getPlayersWithFullStats();
+    const positionPlayers = allPlayers.filter(p => p.position === position);
 
     if (positionPlayers.length === 0) {
       return res.status(404).json({ success: false, error: 'Invalid position or no players' });
@@ -169,20 +224,19 @@ router.get('/players/position/:position', (req, res) => {
 
 /**
  * GET /api/players/search/:query
- * Search players by name
+ * Search players by name (live API)
  */
-router.get('/players/search/:query', (req, res) => {
+router.get('/players/search/:query', async (req, res) => {
   try {
-    const query = req.params.query.toLowerCase();
-    const results = nbaPlayersDatabase.filter(p =>
-      p.name.toLowerCase().includes(query)
-    );
+    const query = req.params.query;
+    const results = await nbaLiveApi.searchPlayers(query);
 
     res.json({
       success: true,
       data: results,
       count: results.length,
-      query: req.params.query
+      query: query,
+      source: 'live'
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -196,16 +250,18 @@ router.get('/players/search/:query', (req, res) => {
  *   - stat: ppg, rpg, apg, spg, bpg, per, ts_pct, etc.
  *   - limit: Number of players to return (default 10)
  */
-router.get('/players/stats/leaders', (req, res) => {
+router.get('/players/stats/leaders', async (req, res) => {
   try {
     const { stat = 'ppg', limit = 10 } = req.query;
     const limitNum = parseInt(limit);
+    
+    const allPlayers = await getPlayersWithFullStats();
 
-    if (!nbaPlayersDatabase[0].hasOwnProperty(stat)) {
-      return res.status(400).json({ success: false, error: 'Invalid stat category' });
+    if (allPlayers.length === 0 || !allPlayers[0].hasOwnProperty(stat)) {
+      return res.status(400).json({ success: false, error: 'Invalid stat category or no data' });
     }
 
-    const leaders = [...nbaPlayersDatabase]
+    const leaders = [...allPlayers]
       .sort((a, b) => b[stat] - a[stat])
       .slice(0, limitNum)
       .map(p => ({
@@ -236,7 +292,7 @@ router.get('/players/stats/leaders', (req, res) => {
  * Query params:
  *   - ids: Comma-separated player IDs (e.g., 1,2,3)
  */
-router.get('/players/stats/compare', (req, res) => {
+router.get('/players/stats/compare', async (req, res) => {
   try {
     const { ids } = req.query;
 
@@ -245,7 +301,14 @@ router.get('/players/stats/compare', (req, res) => {
     }
 
     const playerIds = ids.split(',').map(id => parseInt(id.trim()));
-    const players = nbaPlayersDatabase.filter(p => playerIds.includes(p.id));
+    
+    // Fetch detailed stats for each player
+    const playerPromises = playerIds.map(id => nbaLiveApi.getPlayerStats(id));
+    const results = await Promise.allSettled(playerPromises);
+    
+    const players = results
+      .filter(r => r.status === 'fulfilled' && r.value)
+      .map(r => r.value);
 
     if (players.length === 0) {
       return res.status(404).json({ success: false, error: 'No players found' });
@@ -255,17 +318,18 @@ router.get('/players/stats/compare', (req, res) => {
     const comparison = {
       players: players,
       averages: {
-        ppg: players.reduce((sum, p) => sum + p.ppg, 0) / players.length,
-        rpg: players.reduce((sum, p) => sum + p.rpg, 0) / players.length,
-        apg: players.reduce((sum, p) => sum + p.apg, 0) / players.length,
-        per: players.reduce((sum, p) => sum + p.per, 0) / players.length
+        ppg: players.reduce((sum, p) => sum + (p.ppg || 0), 0) / players.length,
+        rpg: players.reduce((sum, p) => sum + (p.rpg || 0), 0) / players.length,
+        apg: players.reduce((sum, p) => sum + (p.apg || 0), 0) / players.length,
+        per: players.reduce((sum, p) => sum + (p.per || 15), 0) / players.length
       }
     };
 
     res.json({
       success: true,
       data: comparison,
-      count: players.length
+      count: players.length,
+      source: 'live'
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -276,10 +340,17 @@ router.get('/players/stats/compare', (req, res) => {
  * GET /api/players/stats/team-stats/:teamCode
  * Get aggregate team statistics
  */
-router.get('/players/stats/team-stats/:teamCode', (req, res) => {
+router.get('/players/stats/team-stats/:teamCode', async (req, res) => {
   try {
     const teamCode = req.params.teamCode.toUpperCase();
-    const teamPlayers = nbaPlayersDatabase.filter(p => p.team === teamCode);
+    const teamId = nbaLiveApi.TEAM_IDS[teamCode];
+
+    if (!teamId) {
+      return res.status(404).json({ success: false, error: 'Team not found' });
+    }
+
+    const roster = await nbaLiveApi.getTeamRoster(teamId);
+    const teamPlayers = roster.athletes || [];
 
     if (teamPlayers.length === 0) {
       return res.status(404).json({ success: false, error: 'Team not found' });
@@ -287,22 +358,21 @@ router.get('/players/stats/team-stats/:teamCode', (req, res) => {
 
     const teamStats = {
       team: teamCode,
-      teamName: teamPlayers[0].teamName,
+      teamName: roster.teamName || nbaLiveApi.TEAM_NAMES[teamCode],
       playerCount: teamPlayers.length,
-      totalPpg: teamPlayers.reduce((sum, p) => sum + p.ppg, 0),
-      totalRpg: teamPlayers.reduce((sum, p) => sum + p.rpg, 0),
-      totalApg: teamPlayers.reduce((sum, p) => sum + p.apg, 0),
-      avgPer: teamPlayers.reduce((sum, p) => sum + p.per, 0) / teamPlayers.length,
-      avgFgPct: teamPlayers.reduce((sum, p) => sum + p.fgPct, 0) / teamPlayers.length,
-      avgFg3Pct: teamPlayers.reduce((sum, p) => sum + p.fg3Pct, 0) / teamPlayers.length,
-      topScorer: teamPlayers.reduce((max, p) => p.ppg > max.ppg ? p : max),
-      topRebounder: teamPlayers.reduce((max, p) => p.rpg > max.rpg ? p : max),
-      topAssister: teamPlayers.reduce((max, p) => p.apg > max.apg ? p : max)
+      totalPpg: teamPlayers.reduce((sum, p) => sum + (p.ppg || 0), 0),
+      totalRpg: teamPlayers.reduce((sum, p) => sum + (p.rpg || 0), 0),
+      totalApg: teamPlayers.reduce((sum, p) => sum + (p.apg || 0), 0),
+      avgPer: teamPlayers.reduce((sum, p) => sum + (p.per || 15), 0) / teamPlayers.length,
+      avgFgPct: teamPlayers.reduce((sum, p) => sum + (p.fgPct || 0), 0) / teamPlayers.length,
+      avgFg3Pct: teamPlayers.reduce((sum, p) => sum + (p.fg3Pct || 0), 0) / teamPlayers.length,
+      players: teamPlayers
     };
 
     res.json({
       success: true,
-      data: teamStats
+      data: teamStats,
+      source: 'live'
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -310,32 +380,18 @@ router.get('/players/stats/team-stats/:teamCode', (req, res) => {
 });
 
 /**
- * GET /api/players/teams
- * Get list of all teams with player counts
+ * GET /api/teams
+ * Get list of all teams
  */
-router.get('/teams', (req, res) => {
+router.get('/teams', async (req, res) => {
   try {
-    const teams = {};
-
-    nbaPlayersDatabase.forEach(player => {
-      if (!teams[player.team]) {
-        teams[player.team] = {
-          code: player.team,
-          name: player.teamName,
-          playerCount: 0,
-          totalPpg: 0
-        };
-      }
-      teams[player.team].playerCount++;
-      teams[player.team].totalPpg += player.ppg;
-    });
-
-    const teamsList = Object.values(teams).sort((a, b) => a.name.localeCompare(b.name));
+    const teams = await nbaLiveApi.getAllTeams();
 
     res.json({
       success: true,
-      data: teamsList,
-      count: teamsList.length
+      data: teams,
+      count: teams.length,
+      source: 'live'
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -346,23 +402,24 @@ router.get('/teams', (req, res) => {
  * GET /api/players/stats/position-averages
  * Get average stats by position
  */
-router.get('/players/stats/position-averages', (req, res) => {
+router.get('/players/stats/position-averages', async (req, res) => {
   try {
+    const allPlayers = await getPlayersWithFullStats();
     const positions = ['PG', 'SG', 'SF', 'PF', 'C'];
     const positionStats = {};
 
     positions.forEach(pos => {
-      const players = nbaPlayersDatabase.filter(p => p.position === pos);
+      const players = allPlayers.filter(p => p.position === pos);
       if (players.length > 0) {
         positionStats[pos] = {
           position: pos,
           count: players.length,
-          avgPpg: players.reduce((sum, p) => sum + p.ppg, 0) / players.length,
-          avgRpg: players.reduce((sum, p) => sum + p.rpg, 0) / players.length,
-          avgApg: players.reduce((sum, p) => sum + p.apg, 0) / players.length,
-          avgPer: players.reduce((sum, p) => sum + p.per, 0) / players.length,
-          avgFgPct: players.reduce((sum, p) => sum + p.fgPct, 0) / players.length,
-          avgFg3Pct: players.reduce((sum, p) => sum + p.fg3Pct, 0) / players.length
+          avgPpg: players.reduce((sum, p) => sum + (p.ppg || 0), 0) / players.length,
+          avgRpg: players.reduce((sum, p) => sum + (p.rpg || 0), 0) / players.length,
+          avgApg: players.reduce((sum, p) => sum + (p.apg || 0), 0) / players.length,
+          avgPer: players.reduce((sum, p) => sum + (p.per || 15), 0) / players.length,
+          avgFgPct: players.reduce((sum, p) => sum + (p.fgPct || 0), 0) / players.length,
+          avgFg3Pct: players.reduce((sum, p) => sum + (p.fg3Pct || 0), 0) / players.length
         };
       }
     });
@@ -383,17 +440,19 @@ router.get('/players/stats/position-averages', (req, res) => {
  *   - minGames: Minimum games played (default 40)
  *   - limit: Number of players to return (default 20)
  */
-router.get('/players/advanced/efficiency', (req, res) => {
+router.get('/players/advanced/efficiency', async (req, res) => {
   try {
     const { minGames = 40, limit = 20 } = req.query;
     const minGamesNum = parseInt(minGames);
     const limitNum = parseInt(limit);
+    
+    const allPlayers = await getPlayersWithFullStats();
 
-    const efficientPlayers = nbaPlayersDatabase
-      .filter(p => p.gamesPlayed >= minGamesNum)
+    const efficientPlayers = allPlayers
+      .filter(p => (p.gamesPlayed || 0) >= minGamesNum)
       .map(p => ({
         ...p,
-        efficiencyScore: (p.per * p.ts_pct * 100) / p.tpg // Custom efficiency metric
+        efficiencyScore: ((p.per || 15) * (p.ts_pct || 0.5) * 100) / Math.max(p.tpg || 1, 1)
       }))
       .sort((a, b) => b.efficiencyScore - a.efficiencyScore)
       .slice(0, limitNum);
@@ -416,10 +475,11 @@ router.get('/players/advanced/efficiency', (req, res) => {
  *   - sortBy: Field to sort by
  *   - sortOrder: asc or desc
  */
-router.post('/players/filter', (req, res) => {
+router.post('/players/filter', async (req, res) => {
   try {
     const { filters = [], sortBy, sortOrder = 'desc' } = req.body;
-    let results = [...nbaPlayersDatabase];
+    const allPlayers = await getPlayersWithFullStats();
+    let results = [...allPlayers];
 
     // Apply each filter
     filters.forEach(filter => {
@@ -469,11 +529,113 @@ router.post('/players/filter', (req, res) => {
       success: true,
       data: results,
       count: results.length,
-      filtersApplied: filters.length
+      filtersApplied: filters.length,
+      source: 'live'
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════════
+// 🔴 LIVE DATA ROUTES - Real-time NBA Data
+// ═══════════════════════════════════════════════════════════════════════════════════
+
+/**
+ * GET /api/scoreboard
+ * Get live NBA scoreboard with today's games
+ */
+router.get('/scoreboard', async (req, res) => {
+  try {
+    const scoreboard = await nbaLiveApi.getLiveScoreboard();
+    res.json({
+      success: true,
+      data: scoreboard,
+      source: 'api-sports'
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * GET /api/standings
+ * Get current NBA standings
+ */
+router.get('/standings', async (req, res) => {
+  try {
+    const standings = await nbaLiveApi.getStandings();
+    res.json({
+      success: true,
+      data: standings,
+      source: 'api-sports'
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * GET /api/news
+ * Get latest NBA news
+ */
+router.get('/news', async (req, res) => {
+  try {
+    const { limit = 20 } = req.query;
+    const news = await nbaLiveApi.getNBANews(parseInt(limit));
+    res.json({
+      success: true,
+      data: news,
+      count: news.length,
+      source: 'api-sports'
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * GET /api/boxscore/:gameId
+ * Get box score for a specific game
+ */
+router.get('/boxscore/:gameId', async (req, res) => {
+  try {
+    const { gameId } = req.params;
+    const boxscore = await nbaLiveApi.getBoxScore(gameId);
+    res.json({
+      success: true,
+      data: boxscore,
+      source: 'api-sports'
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * GET /api/cache/status
+ * Get cache status for debugging
+ */
+router.get('/cache/status', (req, res) => {
+  res.json({
+    success: true,
+    cache: nbaLiveApi.getCacheStats(),
+    playersCache: {
+      count: playersWithStats.length,
+      lastFetch: new Date(lastPlayersFetch).toISOString()
+    }
+  });
+});
+
+/**
+ * POST /api/cache/clear
+ * Clear all caches
+ */
+router.post('/cache/clear', (req, res) => {
+  nbaLiveApi.clearCache();
+  playersWithStats = [];
+  lastPlayersFetch = 0;
+  res.json({ success: true, message: 'All caches cleared' });
 });
 
 export default router;

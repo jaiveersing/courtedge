@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTheme } from '@/src/contexts/ThemeContext';
 import { PlayerSeasonStats, Bet } from '@/Entities/all';
-import espnApi from '@/src/api/espnApi';
+import PlayersAPI from '@/src/api/playersApi';
 import { Input } from '@/Components/ui/input';
 import { 
   Search, BarChart2, User, TrendingUp, TrendingDown, Zap, DollarSign, Target, 
@@ -141,73 +141,55 @@ export default function AnalyticsPage() {
     return sampleBets.sort((a, b) => new Date(b.date) - new Date(a.date));
   };
 
-  // Generate mock player data
-  const generateMockPlayerData = () => {
-    const players = [
-      { name: 'Joel Embiid', team: 'PHI', position: 'C', ppg: 35.3, rpg: 11.3, apg: 5.7, spg: 1.2, bpg: 1.7, fg: 52.7 },
-      { name: 'Luka Dončić', team: 'DAL', position: 'PG', ppg: 32.4, rpg: 8.6, apg: 9.1, spg: 1.4, bpg: 0.5, fg: 48.7 },
-      { name: 'Giannis Antetokounmpo', team: 'MIL', position: 'PF', ppg: 31.2, rpg: 11.3, apg: 5.7, spg: 1.2, bpg: 1.1, fg: 61.2 },
-      { name: 'Shai Gilgeous-Alexander', team: 'OKC', position: 'SG', ppg: 30.8, rpg: 5.5, apg: 6.3, spg: 2.1, bpg: 1.2, fg: 54.2 },
-      { name: 'Jayson Tatum', team: 'BOS', position: 'SF', ppg: 30.1, rpg: 8.8, apg: 4.6, spg: 1.0, bpg: 0.7, fg: 47.1 },
-      { name: 'LeBron James', team: 'LAL', position: 'SF', ppg: 28.5, rpg: 8.3, apg: 6.8, spg: 0.9, bpg: 0.6, fg: 51.3 },
-      { name: 'Stephen Curry', team: 'GSW', position: 'PG', ppg: 27.4, rpg: 4.5, apg: 5.1, spg: 0.7, bpg: 0.4, fg: 45.0 },
-      { name: 'Kevin Durant', team: 'PHX', position: 'PF', ppg: 27.1, rpg: 6.6, apg: 5.0, spg: 0.8, bpg: 1.2, fg: 52.3 },
-      { name: 'Nikola Jokic', team: 'DEN', position: 'C', ppg: 26.4, rpg: 12.4, apg: 9.0, spg: 1.3, bpg: 0.7, fg: 58.3 },
-      { name: 'Anthony Edwards', team: 'MIN', position: 'SG', ppg: 26.0, rpg: 5.4, apg: 5.3, spg: 1.5, bpg: 0.6, fg: 46.1 },
-      { name: 'Donovan Mitchell', team: 'CLE', position: 'SG', ppg: 25.8, rpg: 4.0, apg: 4.5, spg: 1.8, bpg: 0.3, fg: 46.2 },
-      { name: 'Devin Booker', team: 'PHX', position: 'SG', ppg: 25.6, rpg: 4.5, apg: 6.9, spg: 0.9, bpg: 0.3, fg: 49.2 },
-      { name: 'Damian Lillard', team: 'MIL', position: 'PG', ppg: 24.3, rpg: 4.4, apg: 7.0, spg: 1.0, bpg: 0.3, fg: 42.4 },
-      { name: 'Kyrie Irving', team: 'DAL', position: 'PG', ppg: 24.0, rpg: 5.0, apg: 5.2, spg: 1.3, bpg: 0.5, fg: 49.7 },
-      { name: 'Trae Young', team: 'ATL', position: 'PG', ppg: 23.6, rpg: 2.8, apg: 10.8, spg: 1.0, bpg: 0.1, fg: 43.0 },
-      { name: 'Anthony Davis', team: 'LAL', position: 'PF', ppg: 23.5, rpg: 12.6, apg: 3.5, spg: 1.2, bpg: 2.3, fg: 55.6 },
-      { name: 'Ja Morant', team: 'MEM', position: 'PG', ppg: 22.5, rpg: 5.6, apg: 8.1, spg: 0.8, bpg: 0.3, fg: 47.3 },
-      { name: 'Tyrese Haliburton', team: 'IND', position: 'PG', ppg: 21.5, rpg: 3.9, apg: 10.4, spg: 1.2, bpg: 0.6, fg: 47.7 }
-    ];
-
-    return players.map((p, idx) => ({
-      id: `player_${idx + 1}`,
-      player_name: p.name,
-      team_abbreviation: p.team,
-      position: p.position,
-      season: '2023-24',
-      games_played: Math.floor(Math.random() * 25 + 55),
-      minutes_per_game: parseFloat((Math.random() * 6 + 32).toFixed(1)),
-      points_per_game: p.ppg,
-      rebounds_per_game: p.rpg,
-      assists_per_game: p.apg,
-      steals_per_game: p.spg,
-      blocks_per_game: p.bpg,
-      turnovers_per_game: parseFloat((Math.random() * 2 + 2).toFixed(1)),
-      field_goal_percentage: p.fg / 100,
-      three_point_percentage: parseFloat((Math.random() * 0.12 + 0.33).toFixed(3)),
-      free_throw_percentage: parseFloat((Math.random() * 0.12 + 0.78).toFixed(3)),
-      player_image_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=random&size=128`
-    }));
-  };
+  // Player data is now fetched from live API - no mock generation needed
 
   // Initialize bets on mount
   useEffect(() => {
     setBets(generateSampleBets());
   }, []);
 
-  // Fetch player stats
+  // Fetch player stats (LIVE DATA from API)
   useEffect(() => {
     const fetchStats = async () => {
       setIsLoading(true);
       try {
-        let data = await espnApi.getAllPlayersWithStats();
-        if (!data || data.length === 0) {
-          data = await PlayerSeasonStats.list('-points_per_game');
+        // Fetch live data from our backend API
+        const players = await PlayersAPI.getPlayers({ limit: 100 });
+        
+        // Transform to expected format
+        const data = players.map((p, idx) => ({
+          id: p.id || `player_${idx + 1}`,
+          player_name: p.name || p.fullName || p.displayName,
+          team_abbreviation: p.team || p.teamAbbr,
+          position: p.position,
+          season: '2024-25',
+          games_played: p.gamesPlayed || 0,
+          minutes_per_game: p.minutesPerGame || 0,
+          points_per_game: p.ppg || 0,
+          rebounds_per_game: p.rpg || 0,
+          assists_per_game: p.apg || 0,
+          steals_per_game: p.spg || 0,
+          blocks_per_game: p.bpg || 0,
+          turnovers_per_game: p.tpg || 0,
+          field_goal_percentage: (p.fgPct || 0) / 100,
+          three_point_percentage: (p.fg3Pct || 0) / 100,
+          free_throw_percentage: (p.ftPct || 0) / 100,
+          player_image_url: p.headshot || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name || 'Player')}&background=random&size=128`
+        }));
+        
+        if (data.length > 0) {
+          setAllStats(data);
+          setStats(data.filter(player => player.season === seasonFilter));
+        } else {
+          // Try entity fallback
+          const entityData = await PlayerSeasonStats.list('-points_per_game');
+          setAllStats(entityData || []);
+          setStats((entityData || []).filter(player => player.season === seasonFilter));
         }
-        if (!data || data.length === 0) {
-          data = generateMockPlayerData();
-        }
-        setAllStats(data);
-        setStats(data.filter(player => player.season === seasonFilter));
       } catch (error) {
-        const mockData = generateMockPlayerData();
-        setAllStats(mockData);
-        setStats(mockData);
+        console.error('Error fetching player stats:', error);
+        setAllStats([]);
+        setStats([]);
       }
       setIsLoading(false);
     };

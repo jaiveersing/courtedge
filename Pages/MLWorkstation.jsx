@@ -29,7 +29,7 @@ import {
   PolarGrid, PolarAngleAxis, PolarRadiusAxis, Cell,
   ReferenceLine, Scatter, ScatterChart, ZAxis, PieChart as RechartsPie, Pie
 } from 'recharts';
-import nbaPlayersDatabase from '../src/data/nbaPlayersDatabase';
+import PlayersAPI from '../src/api/playersApi';
 
 // ==================== DESIGN SYSTEM ====================
 const useDesignSystem = () => {
@@ -485,17 +485,34 @@ export default function MLWorkstation() {
   const [models, setModels] = useState([]);
   const [insights, setInsights] = useState([]);
   const [historicalData, setHistoricalData] = useState([]);
+  const [players, setPlayers] = useState([]);
+  const [isLoadingPlayers, setIsLoadingPlayers] = useState(true);
   
-  // Sample players from database
-  const players = useMemo(() => nbaPlayersDatabase.slice(0, 50), []);
+  // Fetch players from LIVE API
+  useEffect(() => {
+    const fetchPlayers = async () => {
+      setIsLoadingPlayers(true);
+      try {
+        const livePlayers = await PlayersAPI.getPlayers({ limit: 100 });
+        if (livePlayers && livePlayers.length > 0) {
+          setPlayers(livePlayers);
+        }
+      } catch (error) {
+        console.error('Error fetching players:', error);
+        setPlayers([]);
+      }
+      setIsLoadingPlayers(false);
+    };
+    fetchPlayers();
+  }, []);
   
   // Filter players based on search
   const filteredPlayers = useMemo(() => {
     if (!searchQuery) return [];
     const query = searchQuery.toLowerCase();
     return players.filter(p => 
-      p.name.toLowerCase().includes(query) || 
-      p.team.toLowerCase().includes(query)
+      (p.name || p.fullName || '').toLowerCase().includes(query) || 
+      (p.team || '').toLowerCase().includes(query)
     ).slice(0, 8);
   }, [searchQuery, players]);
 

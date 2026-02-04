@@ -1,0 +1,102 @@
+name: CD - Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop' || github.event.inputs.environment == 'staging'
+    environment:
+      name: staging
+      url: https://staging.courtedge.app
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Deploy ML Service to Render
+        uses: johnbeynon/render-deploy-action@v0.0.8
+        with:
+          service-id: ${{ secrets.RENDER_ML_SERVICE_ID }}
+          api-key: ${{ secrets.RENDER_API_KEY }}
+          
+      - name: Deploy Frontend to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: ./
+          
+      - name: Deploy Backend to Railway
+        run: |
+          npm install -g @railway/cli
+          railway up --service backend
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'production'
+    environment:
+      name: production
+      url: https://courtedge.app
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Create deployment
+        uses: chrnorm/deployment-action@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          environment: production
+          
+      - name: Build Docker images
+        run: |
+          docker build -t courtedge-ml:${{ github.sha }} -f ml_service/Dockerfile ml_service/
+          docker build -t courtedge-backend:${{ github.sha }} -f Dockerfile.backend .
+          docker build -t courtedge-frontend:${{ github.sha }} -f Dockerfile.frontend .
+          
+      - name: Push to Container Registry
+        run: |
+          echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          docker tag courtedge-ml:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/courtedge-ml:latest
+          docker tag courtedge-backend:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/courtedge-backend:latest
+          docker tag courtedge-frontend:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/courtedge-frontend:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/courtedge-ml:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/courtedge-backend:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/courtedge-frontend:latest
+          
+      - name: Deploy to Kubernetes
+        uses: azure/k8s-deploy@v4
+        with:
+          manifests: |
+            k8s/deployment.yml
+            k8s/service.yml
+          images: |
+            ${{ secrets.DOCKER_USERNAME }}/courtedge-ml:latest
+            ${{ secrets.DOCKER_USERNAME }}/courtedge-backend:latest
+            ${{ secrets.DOCKER_USERNAME }}/courtedge-frontend:latest
+          kubeconfig: ${{ secrets.KUBE_CONFIG }}
+          
+      - name: Notify deployment status
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: 'Production deployment ${{ job.status }}'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}

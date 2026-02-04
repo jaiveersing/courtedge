@@ -974,15 +974,70 @@ export const PLAYER_ALIASES = {
 // ═══════════════════════════════════════════════════════════════════════════════
 // 📊 ANALYTICS FUNCTIONS
 // ═══════════════════════════════════════════════════════════════════════════════
+
+// Import live data wrapper if available
+let liveDataService = null;
+try {
+  // Dynamic import for live data
+  import('./RayLiveDataWrapper.js').then(module => {
+    liveDataService = module.default;
+    console.log('🔴 RayAnalyticsEngine: Live data service connected');
+  }).catch(() => {
+    console.log('📊 RayAnalyticsEngine: Using static data (live service not available)');
+  });
+} catch (e) {
+  // Fall back to static data
+}
+
 class RayAnalyticsEngine {
   constructor() {
     this.players = PLAYERS_DB;
     this.teams = TEAMS_DB;
     this.aliases = PLAYER_ALIASES;
+    this.liveDataEnabled = false;
+    this.livePlayersCache = new Map();
+    this.lastLiveFetch = 0;
+  }
+
+  // Enable live data fetching
+  async enableLiveData() {
+    this.liveDataEnabled = true;
+    console.log('🔴 RayAnalyticsEngine: Live data mode enabled');
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Find player by name or alias
+  // Find player by name or alias (with optional live data merge)
+  // ─────────────────────────────────────────────────────────────────────────────
+  async findPlayerLive(query) {
+    const staticPlayer = this.findPlayer(query);
+    
+    // Try to get live data
+    if (liveDataService) {
+      try {
+        const livePlayer = await liveDataService.getPlayerData(query);
+        if (livePlayer) {
+          // Merge live stats with static advanced metrics
+          return {
+            ...staticPlayer,
+            ...livePlayer,
+            source: 'live',
+            // Keep static advanced data that API doesn't provide
+            splits: staticPlayer?.splits || livePlayer?.splits,
+            vsTeam: staticPlayer?.vsTeam || livePlayer?.vsTeam,
+            propHitRates: staticPlayer?.propHitRates || livePlayer?.propHitRates,
+            correlations: staticPlayer?.correlations
+          };
+        }
+      } catch (error) {
+        console.warn('Live data fetch failed, using static:', error.message);
+      }
+    }
+    
+    return staticPlayer;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Find player by name or alias (sync version for backward compatibility)
   // ─────────────────────────────────────────────────────────────────────────────
   findPlayer(query) {
     const lower = query.toLowerCase().trim();
